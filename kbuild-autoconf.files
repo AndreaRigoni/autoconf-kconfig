@@ -1,3 +1,5 @@
+example/configure.ac
+example/Makefile.am
 kconfig/lxdialog/check-lxdialog.sh
 kconfig/lxdialog/checklist.c
 kconfig/lxdialog/dialog.h
@@ -17,7 +19,10 @@ kconfig/kxgettext.c
 kconfig/list.h
 kconfig/lkc.h
 kconfig/lkc_proto.h
+kconfig/Makefile
 kconfig/Makefile.am
+kconfig/Makefile.in
+kconfig/Makefile.orginal
 kconfig/mconf.c
 kconfig/menu.c
 kconfig/merge_config.sh
@@ -34,12 +39,11 @@ kconfig/zconf.l
 kconfig/zconf.lex.c
 kconfig/zconf.tab.c
 kconfig/zconf.y
+m4/ax_with_curses.m4
+m4/ax_with_curses_extra.m4
 aclocal.m4
 configure.ac
 Makefile
 Makefile.am
 Makefile.in
 README.md
-m4/ax_with_curses.m4
-m4/ax_with_curses_extra.m4
-kconfig/Makefile.orginal

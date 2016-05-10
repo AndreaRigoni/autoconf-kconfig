@@ -24,6 +24,15 @@ AM_CONDITIONAL([ENABLE_NCONF],
                   -a x"${ax_cv_menu}" = x"yes" \
                   -a x"${ax_cv_form}" = x"yes"])
 
+AC_CONFIG_COMMANDS([compile-kconfig],
+                   [AS_ECHO(["this is the command trigger to compile Kconfig"])
+                    $SHELL -c "make all V=0"],
+                   [])
+
+
+AS_VAR_SET([KCONFIG_NCONF],[`pwd`/kconfig/nconf])
+AC_SUBST([KCONFIG_NCONF])
+
 AC_CONFIG_FILES( 
                  Makefile
                  kconfig/Makefile
