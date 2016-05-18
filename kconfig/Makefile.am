@@ -9,7 +9,7 @@ conf_SOURCES  = conf.c
 conf_LDADD    = zconf.tab.o
 
 # NCONF
-if ENABLE_NCONF
+if HAVE_NCONF
  bin_PROGRAMS += nconf
  nconf_SOURCES = nconf.c nconf.gui.c
  nconf_LDADD = zconf.tab.o @MENU_LIB@ @PANEL_LIB@ @CURSES_LIB@
