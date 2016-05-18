@@ -1,6 +1,7 @@
 
 AC_INIT([kbuild autoconf], 1.0)
 AM_INIT_AUTOMAKE
+AC_CONFIG_MACRO_DIRS([m4])
 
 AC_PROG_CC
 
