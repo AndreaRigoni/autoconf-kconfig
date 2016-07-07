@@ -45,3 +45,11 @@ AC_DEFUN([AX_KCONFIG],[
   [ test -f .config ] && source ./.config
   AS_VAR_SET([subdirs],[$subdirs_SAVE])
 ])
+
+
+AC_DEFUN([AX_KCONFIG_VAR],[
+  m4_pushdef([_var_],[$1])
+  AS_VAR_SET_IF(_var_,,AS_VAR_SET(_var_,${[CONFIG_]_var_[]}))
+dnl  AC_SUBST(_var_)
+  m4_popdef([_var_])
+])
