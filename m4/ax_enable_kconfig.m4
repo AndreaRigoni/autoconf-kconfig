@@ -28,9 +28,15 @@ AC_DEFUN([AX_KCONFIG],[
                [AS_VAR_SET([enable_kconfig],[$enableval])])],             
     [AS_VAR_SET_IF([ENABLE_KCONFIG],
                    [AS_VAR_SET([enable_kconfig],[${ENABLE_KCONFIG}])],
-                   [AS_VAR_SET([enable_kconfig],[no])])]  
+                   [AS_VAR_SET([enable_kconfig],[no])])]
   )
   
+  AS_VAR_SET_IF([ENABLE_KCONFIG],
+               [AS_VAR_SET([enable_kconfig],[${ENABLE_KCONFIG}])],
+               [])
+
+  AS_IF([test -t AS_ORIGINAL_STDIN_FD -o -p /dev/stdin],
+  AS_ECHO([interactive console])
   AS_CASE([${enable_kconfig}],
 
           # conf
@@ -39,7 +45,7 @@ AC_DEFUN([AX_KCONFIG],[
           
           # nconf
           [nconf],
-          [$SHELL -c "${KCONFIG_NCONF} ${srcdir}/Kconfig" <&AS_ORIGINAL_STDIN_FD])
+          [$SHELL -c "${KCONFIG_NCONF} ${srcdir}/Kconfig" <&AS_ORIGINAL_STDIN_FD]))
           
 
   [ test -f .config ] && source ./.config
