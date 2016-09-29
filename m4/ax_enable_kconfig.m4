@@ -41,11 +41,11 @@ AC_DEFUN([AX_KCONFIG],[
 
           # conf
           [conf],
-          [$SHELL -c "${KCONFIG_CONF} ${srcdir}/Kconfig" <&AS_ORIGINAL_STDIN_FD],
+	  [$SHELL -c "SRCTREE=${srcdir} ${KCONFIG_CONF} Kconfig" <&AS_ORIGINAL_STDIN_FD],
           
           # nconf
           [nconf],
-          [$SHELL -c "${KCONFIG_NCONF} ${srcdir}/Kconfig" <&AS_ORIGINAL_STDIN_FD]))
+	  [$SHELL -c "SRCTREE=${srcdir} ${KCONFIG_NCONF} Kconfig" <&AS_ORIGINAL_STDIN_FD]))
           
 
   [ test -f .config ] && source ./.config
@@ -58,4 +58,12 @@ AC_DEFUN([AX_KCONFIG_VAR],[
   AS_VAR_SET_IF(_var_,,AS_VAR_SET(_var_,${[CONFIG_]_var_[]}))
 dnl  AC_SUBST(_var_)
   m4_popdef([_var_])
+])
+
+AC_DEFUN([AX_KCONFIG_CONDITIONAL],[
+m4_pushdef([_var_],[$1])
+AS_VAR_SET_IF(_var_,,AS_VAR_SET(_var_,${[CONFIG_]_var_[]}))
+AM_CONDITIONAL(_var_, test x"${_var_}" = x"y")
+dnl  AC_SUBST(_var_)
+m4_popdef([_var_])
 ])
