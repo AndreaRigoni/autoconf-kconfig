@@ -53,17 +53,120 @@ AC_DEFUN([AX_KCONFIG],[
 ])
 
 
+AC_DEFUN_LOCAL([KCONFIG],[AX_KCONFIG_EXPAND_YN],[
+  AS_CASE([$$1],
+	  [y],AS_VAR_SET([$1],[yes]),
+	  [n],AS_VAR_SET([$1],[no]))
+])
+
+
+AC_DEFUN_LOCAL([KCONFIG],[AC_ARG_ENABLE],
+[AC_PROVIDE_IFELSE([AC_PRESERVE_HELP_ORDER],
+[],
+[m4_divert_once([HELP_ENABLE], [[
+Optional Features:
+  --disable-option-checking  ignore unrecognized --enable/--with options
+  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]]])])dnl
+m4_divert_once([HELP_ENABLE], [$2])
+m4_pushdef([_tl_],m4_translit([$1],[-],[_]))
+m4_append_uniq([_AC_USER_OPTS], _tl_,[
+])
+AS_IF([test "${[]_tl_+set}" = set], [_tl_val=_tl_; $3], [$4])
+m4_popdef([_tl_])
+])# AC_ARG_ENABLE
+
+
+
+# AX_KCONFIG_VAR(VAR)
+# ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_VAR],[
   m4_pushdef([_var_],[$1])
   AS_VAR_SET_IF(_var_,,AS_VAR_SET(_var_,${[CONFIG_]_var_[]}))
-dnl  AC_SUBST(_var_)
+  dnl  AC_SUBST(_var_)
   m4_popdef([_var_])
 ])
 
+# AX_KCONFIG_CONDITIONAL(VAR)
+# ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_CONDITIONAL],[
-m4_pushdef([_var_],[$1])
-AS_VAR_SET_IF(_var_,,AS_VAR_SET(_var_,${[CONFIG_]_var_[]}))
-AM_CONDITIONAL(_var_, test x"${_var_}" = x"y")
-dnl  AC_SUBST(_var_)
-m4_popdef([_var_])
+  AC_PUSH_LOCAL([KCONFIG])
+  m4_pushdef([_var_],[$1])
+  AS_VAR_SET_IF(_var_,,[AS_VAR_SET(_var_,${[CONFIG_]_var_[]})]
+		       [AX_KCONFIG_EXPAND_YN(_var_)])
+  AM_CONDITIONAL(_var_, test x"${_var_}" = x"yes")
+  dnl  AC_SUBST(_var_)
+  m4_popdef([_var_])
+  AC_POP_LOCAL([KCONFIG])
 ])
+
+
+# AX_KCONFIG_VAR_WITH(FEATURE, HELP, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
+# ------------------------------------------------------------------------
+AC_DEFUN([AX_KCONFIG_VAR_WITH],[
+  AC_PUSH_LOCAL([KCONFIG])
+  m4_pushdef([_var_],[$1])
+  m4_pushdef([_txt_],[m4_tolower(m4_translit(_var_, [_], [-]))])
+  AS_VAR_SET_IF(_var_,,[AS_VAR_SET(_var_,${[CONFIG_]_var_[]})]
+		       [AX_KCONFIG_EXPAND_YN(_var_)])
+  AC_ARG_ENABLE(_txt_,
+		[AS_HELP_STRING([--]_txt_,[$2])],
+		[AS_VAR_SET(_var_,${m4_translit(_txt_,[-],[_])})])
+  dnl  AC_SUBST(_var_)
+  m4_popdef([_txt_])
+  m4_popdef([_var_])
+  AC_POP_LOCAL([KCONFIG])
+])
+
+
+# AX_KCONFIG_VAR_ENABLE(FEATURE, HELP, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
+# ------------------------------------------------------------------------
+AC_DEFUN([AX_KCONFIG_VAR_ENABLE],[
+  AC_PUSH_LOCAL([KCONFIG])
+  m4_pushdef([_var_],[$1])
+  m4_pushdef([_txt_],[m4_tolower(m4_translit(_var_,[_],[-]))])
+  AS_VAR_SET_IF(_var_,,[AS_VAR_SET(_var_,${[CONFIG_]_var_[]})]
+		       [AX_KCONFIG_EXPAND_YN(_var_)])
+  AC_ARG_ENABLE(_txt_,
+		[AS_HELP_STRING([--]_txt_,[$2])],
+		[AS_VAR_SET(_var_,${m4_translit(_txt_,[-],[_])})])
+  dnl  AC_SUBST(_var_)
+  m4_popdef([_txt_])
+  m4_popdef([_var_])
+  AC_POP_LOCAL([KCONFIG])
+])
+
+
+# AX_KCONFIG_CHOICE(VERBATIM_VAL, ENABLE_VAL1, VAL1, ENABLE_VAL2, VAL2, ...)
+# ------------------------------------------------------------------------
+AC_DEFUN([AX_KCONFIG_CHOICE],[
+  AX_KCONFIG_CONDITIONAL([$2])
+  AS_VAR_IF([$2],[yes], AS_VAR_SET([$1],[$3]))
+  m4_if($#,0, ,m4_eval($# > 3),[1],[AX_KCONFIG_CHOICE($1,m4_shift3($@))], )
+])
+
+# AX_KCONFIG_WITH_CHOICE(VERBATIM_VAL, HELP_STRING,
+#                        ENABLE_VAL1, VAL1, ENABLE_VAL2, VAL2, ...)
+# ------------------------------------------------------------------------
+AC_DEFUN([AX_KCONFIG_WITH_CHOICE],[
+  AX_KCONFIG_VAR_WITH([$1],[$2])
+  AX_KCONFIG_CHOICE($1,m4_shift2($@))
+])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
