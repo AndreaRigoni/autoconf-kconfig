@@ -28,9 +28,12 @@ AC_DEFUN([AX_KCONFIG],[
 	       [AS_VAR_SET([enable_kconfig],[$enableval])])],
     [AS_VAR_SET_IF([ENABLE_KCONFIG],
 		   [AS_VAR_SET([enable_kconfig],[${ENABLE_KCONFIG}])],
-		   [AS_VAR_SET([enable_kconfig],[no])])]
+		   [AS_IF([test -f .config],,AS_VAR_SET([enable_kconfig],[default]))]
+dnl		   [AS_VAR_SET([enable_kconfig],[no])]
+		   )]
   )
 
+  dnl this is needed by dockerbuild to disable kconfig (fix it)
   AS_VAR_SET_IF([ENABLE_KCONFIG],
 		[AS_VAR_SET([enable_kconfig],[${ENABLE_KCONFIG}])],
 		[])
@@ -45,8 +48,12 @@ AC_DEFUN([AX_KCONFIG],[
 
 	  # nconf
 	  [nconf],
-	  [$SHELL -c "srctree=${srcdir} ${KCONFIG_NCONF} Kconfig" <&AS_ORIGINAL_STDIN_FD]))
+	  [$SHELL -c "srctree=${srcdir} ${KCONFIG_NCONF} Kconfig" <&AS_ORIGINAL_STDIN_FD],
 
+	  # create default .config
+	  [default],
+	  [$SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --alldefconfig Kconfig" <&AS_ORIGINAL_STDIN_FD]
+	 ))
 
   [ test -f .config ] && source ./.config
   AS_VAR_SET([subdirs],[$subdirs_SAVE])
@@ -58,24 +65,6 @@ AC_DEFUN_LOCAL([KCONFIG],[AX_KCONFIG_EXPAND_YN],[
 	  [y],AS_VAR_SET([$1],[yes]),
 	  [n],AS_VAR_SET([$1],[no]))
 ])
-
-
-AC_DEFUN_LOCAL([KCONFIG],[AC_ARG_ENABLE],
-[AC_PROVIDE_IFELSE([AC_PRESERVE_HELP_ORDER],
-[],
-[m4_divert_once([HELP_ENABLE], [[
-Optional Features:
-  --disable-option-checking  ignore unrecognized --enable/--with options
-  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
-  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]]])])dnl
-m4_divert_once([HELP_ENABLE], [$2])
-m4_pushdef([_tl_],m4_translit([$1],[-],[_]))
-m4_append_uniq([_AC_USER_OPTS], _tl_,[
-])
-AS_IF([test "${[]_tl_+set}" = set], [_tl_val=_tl_; $3], [$4])
-m4_popdef([_tl_])
-])# AC_ARG_ENABLE
-
 
 
 # AX_KCONFIG_VAR(VAR)
@@ -103,17 +92,16 @@ AC_DEFUN([AX_KCONFIG_CONDITIONAL],[
 
 # AX_KCONFIG_VAR_WITH(FEATURE, HELP, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
 # ------------------------------------------------------------------------
+
+dnl m4_patsubst([with_PROVA_PROVA],[^with_],[])
 AC_DEFUN([AX_KCONFIG_VAR_WITH],[
   AC_PUSH_LOCAL([KCONFIG])
-  m4_pushdef([_var_],[$1])
-  m4_pushdef([_txt_],[m4_tolower(m4_translit(_var_, [_], [-]))])
-  AS_VAR_SET_IF(_var_,,[AS_VAR_SET(_var_,${[CONFIG_]_var_[]})]
-		       [AX_KCONFIG_EXPAND_YN(_var_)])
-  AC_ARG_ENABLE(_txt_,
-		[AS_HELP_STRING([--]_txt_,[$2])],
-		[AS_VAR_SET(_var_,${m4_translit(_txt_,[-],[_])})])
-  dnl  AC_SUBST(_var_)
-  m4_popdef([_txt_])
+  m4_pushdef([_var_],m4_patsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^with_],[]))
+  AS_VAR_SET_IF([$1],,[AS_VAR_SET([$1],${[CONFIG_$1]})]
+		      [AX_KCONFIG_EXPAND_YN([$1])])
+  AC_ARG_WITH(_var_,
+	      [AS_HELP_STRING(--with-[]m4_translit(_var_,[_],[-]),[$2])],
+	      [AS_VAR_SET([$1],${with_[]_var_})])
   m4_popdef([_var_])
   AC_POP_LOCAL([KCONFIG])
 ])
@@ -123,18 +111,16 @@ AC_DEFUN([AX_KCONFIG_VAR_WITH],[
 # ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_VAR_ENABLE],[
   AC_PUSH_LOCAL([KCONFIG])
-  m4_pushdef([_var_],[$1])
-  m4_pushdef([_txt_],[m4_tolower(m4_translit(_var_,[_],[-]))])
-  AS_VAR_SET_IF(_var_,,[AS_VAR_SET(_var_,${[CONFIG_]_var_[]})]
-		       [AX_KCONFIG_EXPAND_YN(_var_)])
-  AC_ARG_ENABLE(_txt_,
-		[AS_HELP_STRING([--]_txt_,[$2])],
-		[AS_VAR_SET(_var_,${m4_translit(_txt_,[-],[_])})])
-  dnl  AC_SUBST(_var_)
-  m4_popdef([_txt_])
+  m4_pushdef([_var_],m4_patsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^enable_],[]))
+  AS_VAR_SET_IF([$1],,[AS_VAR_SET([$1],${[CONFIG_$1]})]
+		      [AX_KCONFIG_EXPAND_YN([$1])])
+  AC_ARG_ENABLE(_var_,
+		[AS_HELP_STRING(--enable-[]m4_translit(_var_,[_],[-]),[$2])],
+		[AS_VAR_SET([$1],${enable_[]_var_})])
   m4_popdef([_var_])
   AC_POP_LOCAL([KCONFIG])
 ])
+
 
 
 # AX_KCONFIG_CHOICE(VERBATIM_VAL, ENABLE_VAL1, VAL1, ENABLE_VAL2, VAL2, ...)
@@ -158,8 +144,23 @@ AC_DEFUN([AX_KCONFIG_WITH_CHOICE],[
 
 
 
-
-
+dnl No more needed .. local definition of ac_arg_enable
+dnl -------
+dnl AC_DEFUN_LOCAL([KCONFIG],[AC_ARG_ENABLE],
+dnl [AC_PROVIDE_IFELSE([AC_PRESERVE_HELP_ORDER],
+dnl [],
+dnl [m4_divert_once([HELP_ENABLE], [[
+dnl Optional Features:
+dnl  --disable-option-checking  ignore unrecognized --enable/--with options
+dnl  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+dnl  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]]])])dnl
+dnl m4_divert_once([HELP_ENABLE], [$2])
+dnl m4_pushdef([_tl_],m4_translit([$1],[-],[_]))
+dnl m4_append_uniq([_AC_USER_OPTS], _tl_,[
+dnl ])
+dnl AS_IF([test "${[]_tl_+set}" = set], [_tl_val=_tl_; $3], [$4])
+dnl m4_popdef([_tl_])
+dnl ])# AC_ARG_ENABLE
 
 
 
