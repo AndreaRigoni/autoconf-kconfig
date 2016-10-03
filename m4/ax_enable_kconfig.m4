@@ -92,11 +92,9 @@ AC_DEFUN([AX_KCONFIG_CONDITIONAL],[
 
 # AX_KCONFIG_VAR_WITH(FEATURE, HELP, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
 # ------------------------------------------------------------------------
-
-dnl m4_patsubst([with_PROVA_PROVA],[^with_],[])
 AC_DEFUN([AX_KCONFIG_VAR_WITH],[
   AC_PUSH_LOCAL([KCONFIG])
-  m4_pushdef([_var_],m4_patsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^with_],[]))
+  m4_pushdef([_var_],m4_bpatsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^with_],[]))
   AS_VAR_SET_IF([$1],,[AS_VAR_SET([$1],${[CONFIG_$1]})]
 		      [AX_KCONFIG_EXPAND_YN([$1])])
   AC_ARG_WITH(_var_,
@@ -111,7 +109,7 @@ AC_DEFUN([AX_KCONFIG_VAR_WITH],[
 # ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_VAR_ENABLE],[
   AC_PUSH_LOCAL([KCONFIG])
-  m4_pushdef([_var_],m4_patsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^enable_],[]))
+  m4_pushdef([_var_],m4_bpatsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^enable_],[]))
   AS_VAR_SET_IF([$1],,[AS_VAR_SET([$1],${[CONFIG_$1]})]
 		      [AX_KCONFIG_EXPAND_YN([$1])])
   AC_ARG_ENABLE(_var_,
