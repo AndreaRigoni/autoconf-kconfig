@@ -7,7 +7,6 @@ AC_DEFUN([AX_GETVAR_SUBDIR],[
   m4_popdef([subvar])
 ])
 
-
 # AX_KCONFIG
 # ----------
 # [kconfig-subdir]
@@ -52,7 +51,12 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 
 	  # create default .config
 	  [default],
-	  [$SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --alldefconfig Kconfig" <&AS_ORIGINAL_STDIN_FD]
+	  [$SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --alldefconfig Kconfig" <&AS_ORIGINAL_STDIN_FD],
+
+	  # update
+	  [update],
+	  [$SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --savedefconfig .defconfig Kconfig" <&AS_ORIGINAL_STDIN_FD]
+
 	 ))
 
   [ test -f .config ] && source ./.config
@@ -67,12 +71,16 @@ AC_DEFUN_LOCAL([KCONFIG],[AX_KCONFIG_EXPAND_YN],[
 ])
 
 
+
 # AX_KCONFIG_VAR(VAR)
 # ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_VAR],[
+  AC_PUSH_LOCAL([KCONFIG])
   m4_pushdef([_var_],[$1])
   AS_VAR_SET_IF(_var_,,AS_VAR_SET(_var_,${[CONFIG_]_var_[]}))
+  m4_append_uniq([_KCONF_VARS],_var_,[ ])
   dnl  AC_SUBST(_var_)
+  AC_POP_LOCAL([KCONFIG])
   m4_popdef([_var_])
 ])
 
@@ -83,6 +91,7 @@ AC_DEFUN([AX_KCONFIG_CONDITIONAL],[
   m4_pushdef([_var_],[$1])
   AS_VAR_SET_IF(_var_,,[AS_VAR_SET(_var_,${[CONFIG_]_var_[]})]
 		       [AX_KCONFIG_EXPAND_YN(_var_)])
+  m4_append_uniq([_KCONF_VARS],_var_,[ ])
   AM_CONDITIONAL(_var_, test x"${_var_}" = x"yes")
   dnl  AC_SUBST(_var_)
   m4_popdef([_var_])
@@ -97,6 +106,7 @@ AC_DEFUN([AX_KCONFIG_VAR_WITH],[
   m4_pushdef([_var_],m4_bpatsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^with_],[]))
   AS_VAR_SET_IF([$1],,[AS_VAR_SET([$1],${[CONFIG_$1]})]
 		      [AX_KCONFIG_EXPAND_YN([$1])])
+  m4_append_uniq([_KCONF_VARS],[$1],[ ])
   AC_ARG_WITH(_var_,
 	      [AS_HELP_STRING(--with-[]m4_translit(_var_,[_],[-]),[$2])],
 	      [AS_VAR_SET([$1],${with_[]_var_})])
@@ -112,6 +122,7 @@ AC_DEFUN([AX_KCONFIG_VAR_ENABLE],[
   m4_pushdef([_var_],m4_bpatsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^enable_],[]))
   AS_VAR_SET_IF([$1],,[AS_VAR_SET([$1],${[CONFIG_$1]})]
 		      [AX_KCONFIG_EXPAND_YN([$1])])
+  m4_append_uniq([_KCONF_VARS],[$1],[ ])
   AC_ARG_ENABLE(_var_,
 		[AS_HELP_STRING(--enable-[]m4_translit(_var_,[_],[-]),[$2])],
 		[AS_VAR_SET([$1],${enable_[]_var_})])
