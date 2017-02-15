@@ -4,17 +4,33 @@
 #
 mainmenu "Linux/$ARCH $KERNELVERSION Kernel Configuration"
 
+comment "Project Options (add here)"
+
 config EXAMPLE_BOOL_VAR
 	bool "Set a example bool variable"
+	---help---
+	      This is an example bool variable define within the kconfig
+	      autoconf addon.
 
-config SRCARCH
-	string "get value for SRCARCH"
-	#option env="SRCARCH"
-
-config JAVA_DIR
-	string "get value for JAVA_DIR"
-	# option env="PATH"
+config EXAMPLE_STRING_VAR
+	string "get value for EXAMPLE_STRING_VAR"
+	---help---
+	      This is an example string variable define within the kconfig
+	      autoconf addon.
 	
+comment "Build Options "
+
+# //////////////////////////////////////////////////////////////////////////// #
+# //  TOOLCHAIN  ///////////////////////////////////////////////////////////// #
+# //////////////////////////////////////////////////////////////////////////// #
+
+  source conf/scripts/toolchain.kconfig
 
 
-#source "prova/Kconfig"
+# //////////////////////////////////////////////////////////////////////////// #
+# //  DOCKER  //////////////////////////////////////////////////////////////// #
+# //////////////////////////////////////////////////////////////////////////// #
+
+  source conf/scripts/docker.kconfig
+
+

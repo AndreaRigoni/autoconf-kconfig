@@ -12,12 +12,10 @@ if ENABLE_CUSTOM_TOOLCHAIN
 
   config TOOLCHAIN_DIR
 	 string  "toolchain root path"
-	 # default "${builddir}/toolchain" if TOOLCHAIN_BIN
+	 default "${builddir}/toolchain"
 
   config CROSS_COMPILE
 	 string "toolchain prefix of build executables"
 	 default "arm-linux-gnueabihf-"
 
 endif # ENABLE_CUSTOM_TOOLCHAIN
-
-
