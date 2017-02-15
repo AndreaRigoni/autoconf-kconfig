@@ -75,19 +75,16 @@ AC_DEFUN([AX_KCONFIG_EXPAND_YN],[
 # AX_KCONFIG_VAR(VAR)
 # ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_VAR],[
-  AC_PUSH_LOCAL([KCONFIG])
   m4_pushdef([_var_],[$1])
   AS_VAR_SET_IF(_var_,,AS_VAR_SET(_var_,${[CONFIG_]_var_[]}))
   m4_append_uniq([_KCONF_VARS],_var_,[ ])
   dnl  AC_SUBST(_var_)
-  AC_POP_LOCAL([KCONFIG])
   m4_popdef([_var_])
 ])
 
 # AX_KCONFIG_CONDITIONAL(VAR)
 # ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_CONDITIONAL],[
-  AC_PUSH_LOCAL([KCONFIG])
   m4_pushdef([_var_],[$1])
   AS_VAR_SET_IF(_var_,,[AS_VAR_SET(_var_,${[CONFIG_]_var_[]})]
 		       [AX_KCONFIG_EXPAND_YN(_var_)])
@@ -95,14 +92,12 @@ AC_DEFUN([AX_KCONFIG_CONDITIONAL],[
   AM_CONDITIONAL(_var_, test x"${_var_}" = x"yes")
   dnl  AC_SUBST(_var_)
   m4_popdef([_var_])
-  AC_POP_LOCAL([KCONFIG])
 ])
 
 
 # AX_KCONFIG_VAR_WITH(FEATURE, HELP, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
 # ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_VAR_WITH],[
-  AC_PUSH_LOCAL([KCONFIG])
   m4_pushdef([_var_],m4_bpatsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^with_],[]))
   AS_VAR_SET_IF([$1],,[AS_VAR_SET([$1],${[CONFIG_$1]})]
 		      [AX_KCONFIG_EXPAND_YN([$1])])
@@ -111,14 +106,12 @@ AC_DEFUN([AX_KCONFIG_VAR_WITH],[
 	      [AS_HELP_STRING(--with-[]m4_translit(_var_,[_],[-]),[$2])],
 	      [AS_VAR_SET([$1],${with_[]_var_})])
   m4_popdef([_var_])
-  AC_POP_LOCAL([KCONFIG])
 ])
 
 
 # AX_KCONFIG_VAR_ENABLE(FEATURE, HELP, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
 # ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_VAR_ENABLE],[
-  AC_PUSH_LOCAL([KCONFIG])
   m4_pushdef([_var_],m4_bpatsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^enable_],[]))
   AS_VAR_SET_IF([$1],,[AS_VAR_SET([$1],${[CONFIG_$1]})]
 		      [AX_KCONFIG_EXPAND_YN([$1])])
@@ -127,7 +120,6 @@ AC_DEFUN([AX_KCONFIG_VAR_ENABLE],[
 		[AS_HELP_STRING(--enable-[]m4_translit(_var_,[_],[-]),[$2])],
 		[AS_VAR_SET([$1],${enable_[]_var_})])
   m4_popdef([_var_])
-  AC_POP_LOCAL([KCONFIG])
 ])
 
 
