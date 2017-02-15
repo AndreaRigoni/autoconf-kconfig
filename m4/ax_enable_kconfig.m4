@@ -64,7 +64,7 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 ])
 
 
-AC_DEFUN_LOCAL([KCONFIG],[AX_KCONFIG_EXPAND_YN],[
+AC_DEFUN([AX_KCONFIG_EXPAND_YN],[
   AS_CASE([$$1],
 	  [y],AS_VAR_SET([$1],[yes]),
 	  [n],AS_VAR_SET([$1],[no]))
