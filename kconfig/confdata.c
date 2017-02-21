@@ -621,10 +621,62 @@ static struct conf_printer tristate_printer_cb =
 	.print_comment = kconfig_print_comment,
 };
 
+
+// ANDREA ADD //
+static void strip(char *str)
+{
+    char *p = str;
+    int l;
+
+    while ((isspace(*p)))
+        p++;
+    l = strlen(p);
+    if (p != str)
+        memmove(str, p, l + 1);
+    if (!l)
+        return;
+    p = str + l - 1;
+    while ((isspace(*p)))
+        *p-- = 0;
+}
+
+// ANDREA ADD //
+static void conf_update_symbol(struct symbol *sym)
+{
+    if(!sym) return;
+    const char *str;
+    char sym_name[400] = "";
+    strcat(sym_name,CONFIG_);
+    strcat(sym_name,sym->name);
+    const char *env = getenv(sym_name);
+    if(env) {
+        printf("updating %s -> [%s]\n",sym_name,env);
+    } else return;
+
+    switch (sym->type) {
+    case S_OTHER:
+    case S_UNKNOWN:
+        break;
+    case S_STRING:
+        str = sym_get_string_value(sym);
+        if(env) {
+            sym_set_string_value(sym,env);
+            sym_set_changed(sym);
+        }
+        break;
+    default:
+        //str = sym_get_string_value(sym);
+        if(env) sym_set_string_value(sym,env);
+    }
+}
+
+
 static void conf_write_symbol(FILE *fp, struct symbol *sym,
 			      struct conf_printer *printer, void *printer_arg)
 {
 	const char *str;
+
+    const char *env = getenv(sym->name);
 
 	switch (sym->type) {
 	case S_OTHER:
@@ -733,8 +785,76 @@ next_menu:
 	return 0;
 }
 
+int conf_update_env()
+{
+    struct symbol *sym;
+    struct menu *menu;
+
+    /* Traverse all menus to find all relevant symbols */
+    menu = rootmenu.list;
+
+    while (menu != NULL)
+    {
+        sym = menu->sym;
+        if (sym == NULL) {
+            if (!menu_is_visible(menu))
+                goto update_next_menu;
+        } else if (!sym_is_choice(sym)) {
+            sym_calc_value(sym);
+            if (!(sym->flags & SYMBOL_WRITE))
+                goto update_next_menu;
+            // sym->flags &= ~SYMBOL_WRITE;
+            /* If we cannot change the symbol - skip */
+            if (!sym_is_changable(sym))
+                goto update_next_menu;
+            /* If symbol equals to default value - skip */
+            if (strcmp(sym_get_string_value(sym), sym_get_string_default(sym)) == 0)
+                goto update_next_menu;
+
+            /*
+             * If symbol is a choice value and equals to the
+             * default for a choice - skip.
+             * But only if value is bool and equal to "y" and
+             * choice is not "optional".
+             * (If choice is "optional" then all values can be "n")
+             */
+            if (sym_is_choice_value(sym)) {
+                struct symbol *cs;
+                struct symbol *ds;
+
+                cs = prop_get_symbol(sym_get_choice_prop(sym));
+                ds = sym_choice_default(cs);
+                if (!sym_is_optional(cs) && sym == ds) {
+                    if ((sym->type == S_BOOLEAN) &&
+                        sym_get_tristate_value(sym) == yes)
+                        goto update_next_menu;
+                }
+            }
+            printf("update sym %s\n",sym->name);
+            conf_update_symbol(sym);
+        }
+update_next_menu:
+        if (menu->list != NULL) {
+            menu = menu->list;
+        }
+        else if (menu->next != NULL) {
+            menu = menu->next;
+        } else {
+            while ((menu = menu->parent)) {
+                if (menu->next != NULL) {
+                    menu = menu->next;
+                    break;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+
 int conf_write(const char *name)
 {
+    printf("WRITE_CONF\n");
 	FILE *out;
 	struct symbol *sym;
 	struct menu *menu;

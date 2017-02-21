@@ -55,7 +55,14 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 
 	  # update
 	  [update],
-	  [$SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --savedefconfig .defconfig Kconfig" <&AS_ORIGINAL_STDIN_FD]
+	  [AC_CONFIG_COMMANDS([kconfig-update],
+			     [AX_GETVAR_SUBDIR([$1],[KCONFIG_CONF])
+			      AS_ECHO(["store back configuration to .defconfig"])
+			      AS_ECHO(["store ${CONFIG_EXAMPLE_STRING_VAR}"])
+			      $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --updateconfig Kconfig" <&AS_ORIGINAL_STDIN_FD
+			      # $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --savedefconfig .defconfig Kconfig" <&AS_ORIGINAL_STDIN_FD
+			      ],
+			     [])]
 
 	 ))
 
@@ -70,13 +77,22 @@ AC_DEFUN([AX_KCONFIG_EXPAND_YN],[
 	  [n],AS_VAR_SET([$1],[no]))
 ])
 
+AC_DEFUN([AX_KCONFIG_COMPRESS_YN],[
+  AS_CASE([$$1],
+	  [yes],AS_VAR_SET([$1],[y]),
+	  [no],AS_VAR_SET([$1],[n]))
+])
 
 
 # AX_KCONFIG_VAR(VAR)
 # ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_VAR],[
   m4_pushdef([_var_],[$1])
-  AS_VAR_SET_IF(_var_,,AS_VAR_SET(_var_,${[CONFIG_]_var_[]}))
+  AS_VAR_SET_IF(_var_,,[AS_VAR_SET_IF([CONFIG_]_var_[],
+			       [AS_VAR_SET(_var_,${[CONFIG_]_var_[]})])])
+
+  AS_VAR_SET_IF(_var_,[AS_VAR_SET([CONFIG_]_var_[],${_var_})]
+		      [export [CONFIG_]_var_])
   m4_append_uniq([_KCONF_VARS],_var_,[ ])
   dnl  AC_SUBST(_var_)
   m4_popdef([_var_])
@@ -86,8 +102,14 @@ AC_DEFUN([AX_KCONFIG_VAR],[
 # ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_CONDITIONAL],[
   m4_pushdef([_var_],[$1])
-  AS_VAR_SET_IF(_var_,,[AS_VAR_SET(_var_,${[CONFIG_]_var_[]})]
-		       [AX_KCONFIG_EXPAND_YN(_var_)])
+  AS_VAR_SET_IF(_var_,,[AS_VAR_SET_IF([CONFIG_]_var_,
+			       [AS_VAR_SET(_var_,${[CONFIG_]_var_[]})]
+			       [AX_KCONFIG_EXPAND_YN(_var_)])])
+
+  AS_VAR_SET_IF(_var_,[AS_VAR_SET([CONFIG_]_var_[],${_var_})]
+		      [AX_KCONFIG_COMPRESS_YN([CONFIG_]_var_)]
+		      [export [CONFIG_]_var_])
+
   m4_append_uniq([_KCONF_VARS],_var_,[ ])
   AM_CONDITIONAL(_var_, test x"${_var_}" = x"yes")
   dnl  AC_SUBST(_var_)
@@ -99,12 +121,21 @@ AC_DEFUN([AX_KCONFIG_CONDITIONAL],[
 # ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_VAR_WITH],[
   m4_pushdef([_var_],m4_bpatsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^with_],[]))
-  AS_VAR_SET_IF([$1],,[AS_VAR_SET([$1],${[CONFIG_$1]})]
-		      [AX_KCONFIG_EXPAND_YN([$1])])
+  #AS_VAR_SET_IF([$1],,[AS_VAR_SET([$1],${[CONFIG_$1]})]
+		      #[AX_KCONFIG_EXPAND_YN([$1])])
+  AS_VAR_SET_IF([$1],,[AS_VAR_SET_IF([CONFIG_$1],
+				     [AS_VAR_SET([$1],${[CONFIG_$1]})]
+				     [AX_KCONFIG_EXPAND_YN([$1])])])
+
   m4_append_uniq([_KCONF_VARS],[$1],[ ])
   AC_ARG_WITH(_var_,
 	      [AS_HELP_STRING(--with-[]m4_translit(_var_,[_],[-]),[$2])],
 	      [AS_VAR_SET([$1],${with_[]_var_})])
+
+  AS_VAR_SET_IF([$1],[AS_VAR_SET([CONFIG_$1],${[$1]})]
+		     [AX_KCONFIG_COMPRESS_YN([CONFIG_$1])]
+		     [export CONFIG_$1])
+
   m4_popdef([_var_])
 ])
 
@@ -113,12 +144,21 @@ AC_DEFUN([AX_KCONFIG_VAR_WITH],[
 # ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_VAR_ENABLE],[
   m4_pushdef([_var_],m4_bpatsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^enable_],[]))
-  AS_VAR_SET_IF([$1],,[AS_VAR_SET([$1],${[CONFIG_$1]})]
-		      [AX_KCONFIG_EXPAND_YN([$1])])
+  #AS_VAR_SET_IF([$1],,[AS_VAR_SET([$1],${[CONFIG_$1]})]
+		      #[AX_KCONFIG_EXPAND_YN([$1])])
+  AS_VAR_SET_IF([$1],,[AS_VAR_SET_IF([CONFIG_$1],
+				     [AS_VAR_SET([$1],${[CONFIG_$1]})]
+				     [AX_KCONFIG_EXPAND_YN([$1])])])
+
   m4_append_uniq([_KCONF_VARS],[$1],[ ])
   AC_ARG_ENABLE(_var_,
 		[AS_HELP_STRING(--enable-[]m4_translit(_var_,[_],[-]),[$2])],
 		[AS_VAR_SET([$1],${enable_[]_var_})])
+
+  AS_VAR_SET_IF([$1],[AS_VAR_SET([CONFIG_$1],${[$1]})]
+		     [AX_KCONFIG_COMPRESS_YN([CONFIG_$1])]
+		     [export CONFIG_$1])
+
   m4_popdef([_var_])
 ])
 
