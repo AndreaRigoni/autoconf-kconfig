@@ -27,7 +27,8 @@ AC_DEFUN([AX_KCONFIG],[
 	       [AS_VAR_SET([enable_kconfig],[$enableval])])],
     [AS_VAR_SET_IF([ENABLE_KCONFIG],
 		   [AS_VAR_SET([enable_kconfig],[${ENABLE_KCONFIG}])],
-		   [AS_IF([test -f .config],,AS_VAR_SET([enable_kconfig],[default]))]
+		   [AS_VAR_SET([enable_kconfig],[update])]
+dnl		   [AS_IF([test -f .config],,AS_VAR_SET([enable_kconfig],[update]))]
 dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 		   )]
   )
@@ -38,8 +39,12 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 		[])
 
   AS_IF([test -t AS_ORIGINAL_STDIN_FD -o -p /dev/stdin],
-  AS_ECHO([interactive console])
+  AS_ECHO(["interactive console"])
   AS_CASE([${enable_kconfig}],
+
+	  # test
+	  [test],
+	  [AS_ECHO(${ac_user_opts})],
 
 	  # conf
 	  [conf],
@@ -51,21 +56,20 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 
 	  # create default .config
 	  [default],
-	  [$SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --alldefconfig Kconfig" <&AS_ORIGINAL_STDIN_FD],
+	  [$SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --alldefconfig Kconfig"],
 
 	  # update
 	  [update],
 	  [AC_CONFIG_COMMANDS([kconfig-update],
 			     [AX_GETVAR_SUBDIR([$1],[KCONFIG_CONF])
-			      AS_ECHO(["store back configuration to .defconfig"])
-			      AS_ECHO(["store ${CONFIG_EXAMPLE_STRING_VAR}"])
-			      $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --updateconfig Kconfig" <&AS_ORIGINAL_STDIN_FD
-			      # $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --savedefconfig .defconfig Kconfig" <&AS_ORIGINAL_STDIN_FD
-			      ],
-			     [])]
-
+			      AS_ECHO(["store back configuration to .config"])
+			      $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --updateconfig Kconfig"
+			      ## $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF}
+			      ##        --savedefconfig .defconfig Kconfig"
+			      ],[])]
 	 ))
 
+  # ---- APPLY KCONFIG CONFIG ---- #
   [ test -f .config ] && source ./.config
   AS_VAR_SET([subdirs],[$subdirs_SAVE])
 ])

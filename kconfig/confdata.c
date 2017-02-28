@@ -808,8 +808,8 @@ int conf_update_env()
             if (!sym_is_changable(sym))
                 goto update_next_menu;
             /* If symbol equals to default value - skip */
-            if (strcmp(sym_get_string_value(sym), sym_get_string_default(sym)) == 0)
-                goto update_next_menu;
+            // if (strcmp(sym_get_string_value(sym), sym_get_string_default(sym)) == 0)
+            //   goto update_next_menu;
 
             /*
              * If symbol is a choice value and equals to the
@@ -830,7 +830,7 @@ int conf_update_env()
                         goto update_next_menu;
                 }
             }
-            printf("update sym %s\n",sym->name);
+            // printf("update sym %s\n",sym->name);
             conf_update_symbol(sym);
         }
 update_next_menu:
@@ -854,7 +854,6 @@ update_next_menu:
 
 int conf_write(const char *name)
 {
-    printf("WRITE_CONF\n");
 	FILE *out;
 	struct symbol *sym;
 	struct menu *menu;

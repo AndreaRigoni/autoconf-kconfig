@@ -45,7 +45,7 @@ AC_SUBST([DOCKER_SHARES])
 # //  TOOLCHAIN  ///////////////////////////////////////////////////////////// #
 # //////////////////////////////////////////////////////////////////////////// #
 
-AX_KCONFIG_VAR_ENABLE([ENABLE_TOOLCHAIN],["Enable external toolchain"])
+AX_KCONFIG_VAR_ENABLE([ENABLE_CUSTOM_TOOLCHAIN],["Enable external toolchain"])
 AX_KCONFIG_VAR_WITH([TOOLCHAIN_DIR],["Set toolchain base dir"])
 AC_SUBST([TOOLCHAIN_DIR])
 
@@ -59,7 +59,7 @@ AS_BOX([// READ CONFIG VARIABLES //////], [\/])
 AS_ECHO()
 AS_ECHO("EXAMPLE_BOOL_VAR   ----> $EXAMPLE_BOOL_VAR")
 AS_ECHO("EXAMPLE_STRING_VAR ----> $EXAMPLE_STRING_VAR")
-AS_ECHO("CONFIG_EXAMPLE_STRING_VAR ----> $CONFIG_EXAMPLE_STRING_VAR")
+AS_ECHO("ENABLE_CUSTOM_TOOLCHAIN ---> $ENABLE_CUSTOM_TOOLCHAIN")
 AS_ECHO()
 
 
