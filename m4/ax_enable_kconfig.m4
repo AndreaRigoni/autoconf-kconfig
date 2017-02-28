@@ -38,14 +38,9 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 		[AS_VAR_SET([enable_kconfig],[${ENABLE_KCONFIG}])],
 		[])
 
-  AS_IF([test -t AS_ORIGINAL_STDIN_FD -o -p /dev/stdin],
-  AS_ECHO(["interactive console"])
-  AS_CASE([${enable_kconfig}],
-
-	  # test
-	  [test],
-	  [AS_ECHO(${ac_user_opts})],
-
+  AS_IF([test -t AS_ORIGINAL_STDIN_FD -o -p /dev/stdin],[
+   AS_ECHO(["interactive console"])
+   AS_CASE([${enable_kconfig}],
 	  # conf
 	  [conf],
 	  [$SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} Kconfig" <&AS_ORIGINAL_STDIN_FD],
@@ -54,20 +49,25 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 	  [nconf],
 	  [$SHELL -c "srctree=${srcdir} ${KCONFIG_NCONF} Kconfig" <&AS_ORIGINAL_STDIN_FD],
 
-	  # create default .config
-	  [default],
-	  [$SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --alldefconfig Kconfig"],
+	  )])
 
-	  # update
-	  [update],
-	  [AC_CONFIG_COMMANDS([kconfig-update],
-			     [AX_GETVAR_SUBDIR([$1],[KCONFIG_CONF])
-			      AS_ECHO(["store back configuration to .config"])
-			      $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --updateconfig Kconfig"
-			      ## $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF}
-			      ##        --savedefconfig .defconfig Kconfig"
-			      ],[])]
-	 ))
+  ## for non interactive console also
+  AS_CASE([${enable_kconfig}],
+	   # create default .config
+	   [default],
+	   [$SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --alldefconfig Kconfig"],
+	   # update
+	   [update],
+	   [AC_CONFIG_COMMANDS([kconfig-update],
+		     [AX_GETVAR_SUBDIR([$1],[KCONFIG_CONF])
+		      AS_ECHO(["store back configuration to .config"])
+		      $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --updateconfig Kconfig"
+		      ## $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF}
+		      ##        --savedefconfig .defconfig Kconfig"
+		      ],[])]
+	  )
+
+
 
   # ---- APPLY KCONFIG CONFIG ---- #
   [ test -f .config ] && source ./.config
