@@ -412,8 +412,11 @@ int conf_read(const char *name)
 
 	sym_set_change_count(0);
 
-	if (conf_read_simple(name, S_DEF_USER))
+    if (conf_read_simple(name, S_DEF_USER)) {
+        // READ FROM ENV //
+        conf_update_env();
 		return 1;
+    }
 
 	for_all_symbols(i, sym) {
 		sym_calc_value(sym);
@@ -468,6 +471,8 @@ int conf_read(const char *name)
 
 	sym_add_change_count(conf_warnings || conf_unsaved);
 
+    // READ FROM ENV //
+    conf_update_env();
 	return 0;
 }
 
@@ -801,7 +806,7 @@ int conf_update_env()
                 goto update_next_menu;
         } else if (!sym_is_choice(sym)) {
             sym_calc_value(sym);
-            if (!(sym->flags & SYMBOL_WRITE))
+            if (!(sym->flags & SYMBOL_WRITE)) // COMMENT TO SAVE FROM ENV
                 goto update_next_menu;
             // sym->flags &= ~SYMBOL_WRITE;
             /* If we cannot change the symbol - skip */
