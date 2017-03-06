@@ -48,35 +48,26 @@ AC_DEFUN([AX_KCONFIG],[
   ])])
 
   # preparse option variables
-  AC_PROG_AWK
   for opt in $ax_kconfig_user_opts; do
-    echo $opt;
+    var=${opt#*:}
+    opt=${opt%:*}
+    #echo $opt;
     AS_CASE([$opt],
      # enable
      [enable_*],
-     [echo "ENABLE: ${opt#enable_}=$(eval echo \$$opt)"]
      [AS_VAR_SET_IF([$(eval echo $opt)],[
-      var=${opt#enable_}
-      var=$(echo "$var" | $AWK 'BEGIN { getline; print toupper($[]0) }')
       AS_VAR_SET([$var],[$(eval echo \$$opt)])
       AS_VAR_SET([CONFIG_$var], $(eval echo \$$opt))
       AX_KCONFIG_COMPRESS_YN([CONFIG_$var])
-      #export CONFIG_$var
-      #AS_ECHO("$var = $(eval echo \$$var)")
-      #AS_ECHO("CONFIG_$var = $(eval echo \${CONFIG_$var})")
+      export CONFIG_$var
      ])],
      # with
      [with_*],
-     [echo "WITH: ${opt#with_}=$(eval echo \$$opt)"]
      [AS_VAR_SET_IF([$(eval echo $opt)],[
-      var=${opt#with_}
-      var=$(echo "$var" | $AWK 'BEGIN { getline; print toupper($[]0) }')
       AS_VAR_SET([$var],[$(eval echo \$$opt)])
       AS_VAR_SET([CONFIG_$var], $(eval echo \$$opt))
       AX_KCONFIG_COMPRESS_YN([CONFIG_$var])
-      #export CONFIG_$var
-      #AS_ECHO("$var = $(eval echo \$$var)")
-      #AS_ECHO("CONFIG_$var = $(eval echo \${CONFIG_$var})")
+      export CONFIG_$var
      ])],
      # default
      [])
@@ -112,7 +103,7 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 
 	  # nconf
 	  [nconf],
-	  [$SHELL -c "echo $CONFIG_EXAMPLE_BOOL_VAR; srctree=${srcdir} ${KCONFIG_NCONF} Kconfig" <&AS_ORIGINAL_STDIN_FD],
+	  [$SHELL -c "srctree=${srcdir} ${KCONFIG_NCONF} Kconfig" <&AS_ORIGINAL_STDIN_FD],
 
 	  )])
 
@@ -134,12 +125,6 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 
   # ---- APPLY KCONFIG CONFIG ---- #
   [ test -f .config ] && source ./.config
-
-  #
-  #
-  # DA FARE: se la variabile CONFIG_xx e' definita env allora settarla anche se no
-  #
-  # AS_ECHO("CONFIG_EXAMPLE_BOOL_VAR = $CONFIG_EXAMPLE_BOOL_VAR")
   AS_VAR_SET([subdirs],[$subdirs_SAVE])
 ])
 
@@ -199,7 +184,7 @@ AC_DEFUN([AX_KCONFIG_VAR_WITH],[
 
   m4_append_uniq([_AX_KCONF_VARS],[$1],[
   ])
-  m4_append_uniq([_AX_KCONF_OPTS],with_[]_var_,[
+  m4_append_uniq([_AX_KCONF_OPTS],with_[]_var_:[$1],[
   ])
 
   AS_VAR_SET_IF([$1],[AS_VAR_SET([CONFIG_$1],${[$1]})]
@@ -226,7 +211,7 @@ AC_DEFUN([AX_KCONFIG_VAR_ENABLE],[
 
   m4_append_uniq([_AX_KCONF_VARS],[$1],[
   ])
-  m4_append_uniq([_AX_KCONF_OPTS],enable_[]_var_,[
+  m4_append_uniq([_AX_KCONF_OPTS],enable_[]_var_:[$1],[
   ])
 
   AS_VAR_SET_IF([$1],[AS_VAR_SET([CONFIG_$1],${[$1]})]

@@ -596,7 +596,7 @@ int main(int ac, char **av)
 		break;
     case updateconfig:
         conf_read(NULL);
-        conf_update_env();
+        conf_read_env();
         // sync_kconfig = 1;
         break;
 	case allnoconfig:

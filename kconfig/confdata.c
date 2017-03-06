@@ -414,7 +414,7 @@ int conf_read(const char *name)
 
     if (conf_read_simple(name, S_DEF_USER)) {
         // READ FROM ENV //
-        conf_update_env();
+        conf_read_env();
 		return 1;
     }
 
@@ -472,9 +472,12 @@ int conf_read(const char *name)
 	sym_add_change_count(conf_warnings || conf_unsaved);
 
     // READ FROM ENV //
-    conf_update_env();
+    conf_read_env();
 	return 0;
 }
+
+
+
 
 /*
  * Kconfig configuration printer
@@ -655,7 +658,7 @@ static void conf_update_symbol(struct symbol *sym)
     strcat(sym_name,sym->name);
     const char *env = getenv(sym_name);
     if(env) {
-        printf("updating %s -> [%s]\n",sym_name,env);
+        //  printf("updating %s -> [%s]\n",sym_name,env);
     } else return;
 
     switch (sym->type) {
@@ -672,6 +675,33 @@ static void conf_update_symbol(struct symbol *sym)
     default:
         //str = sym_get_string_value(sym);
         if(env) sym_set_string_value(sym,env);
+    }
+}
+
+// ANDREA ADD: NOT USED //
+static void conf_update_symbol_env(struct symbol *sym)
+{
+    if(!sym) return;
+    const char *str;
+    char sym_name[400] = "";
+    strcat(sym_name,CONFIG_);
+    strcat(sym_name,sym->name);
+    const char *env = getenv(sym_name);
+    if(!env) return;
+
+    switch (sym->type) {
+    case S_OTHER:
+    case S_UNKNOWN:
+        break;
+    case S_TRISTATE:
+    case S_STRING:
+    default:
+        str = sym_get_string_value(sym);
+        if(env) {
+            //            printf("updating back %s -> [%s]\n",sym_name,str);
+            setenv(sym_name,str,1);
+        }
+        break;
     }
 }
 
@@ -790,67 +820,21 @@ next_menu:
 	return 0;
 }
 
-int conf_update_env()
+
+int conf_read_env()
 {
     struct symbol *sym;
     struct menu *menu;
+    int i;
 
-    /* Traverse all menus to find all relevant symbols */
-    menu = rootmenu.list;
-
-    while (menu != NULL)
-    {
-        sym = menu->sym;
-        if (sym == NULL) {
-            if (!menu_is_visible(menu))
-                goto update_next_menu;
-        } else if (!sym_is_choice(sym)) {
-            sym_calc_value(sym);
-            if (!(sym->flags & SYMBOL_WRITE)) // COMMENT TO SAVE FROM ENV
-                goto update_next_menu;
-            // sym->flags &= ~SYMBOL_WRITE;
-            /* If we cannot change the symbol - skip */
-            if (!sym_is_changable(sym))
-                goto update_next_menu;
-            /* If symbol equals to default value - skip */
-            // if (strcmp(sym_get_string_value(sym), sym_get_string_default(sym)) == 0)
-            //   goto update_next_menu;
-
-            /*
-             * If symbol is a choice value and equals to the
-             * default for a choice - skip.
-             * But only if value is bool and equal to "y" and
-             * choice is not "optional".
-             * (If choice is "optional" then all values can be "n")
-             */
-            if (sym_is_choice_value(sym)) {
-                struct symbol *cs;
-                struct symbol *ds;
-
-                cs = prop_get_symbol(sym_get_choice_prop(sym));
-                ds = sym_choice_default(cs);
-                if (!sym_is_optional(cs) && sym == ds) {
-                    if ((sym->type == S_BOOLEAN) &&
-                        sym_get_tristate_value(sym) == yes)
-                        goto update_next_menu;
-                }
-            }
-            // printf("update sym %s\n",sym->name);
+    for_all_symbols(i, sym) {
+        switch (sym->type ) {
+        case S_UNKNOWN:
+        case S_OTHER:
+            break;
+        default:
             conf_update_symbol(sym);
-        }
-update_next_menu:
-        if (menu->list != NULL) {
-            menu = menu->list;
-        }
-        else if (menu->next != NULL) {
-            menu = menu->next;
-        } else {
-            while ((menu = menu->parent)) {
-                if (menu->next != NULL) {
-                    menu = menu->next;
-                    break;
-                }
-            }
+            break;
         }
     }
     return 0;
@@ -923,7 +907,11 @@ int conf_write(const char *name)
 				goto next;
 			sym->flags &= ~SYMBOL_WRITE;
 
-			conf_write_symbol(out, sym, &kconfig_printer_cb, NULL);
+//            char sym_name[400] = "";
+//            strcat(sym_name,CONFIG_);
+//            strcat(sym_name,sym->name);
+//            char *env = getenv(sym_name);
+            conf_write_symbol(out, sym, &kconfig_printer_cb, NULL);
 		}
 
 next:
@@ -953,7 +941,6 @@ next:
 	conf_message(_("configuration written to %s"), newname);
 
 	sym_set_change_count(0);
-
 	return 0;
 }
 
