@@ -200,7 +200,7 @@ AC_DEFUN([_FIND_CURSES_FLAGS], [
         AC_MSG_RESULT([no])
         # No suitable .pc file found, have to find flags via fallback
         AC_CACHE_CHECK([for $1 via fallback], [ax_cv_$1], [
-            AS_ECHO()
+	    #AS_ECHO()
             pkg_cv__ax_cv_$1_lib="-l$1"
             pkg_cv__ax_cv_$1_cppflags="$CURSES_CPPFLAGS"
             LIBS="$ax_saved_LIBS $pkg_cv__ax_cv_$1_lib"
