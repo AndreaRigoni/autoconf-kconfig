@@ -7784,8 +7784,6 @@ KCONFIG_CONF=`pwd`/kconfig/conf
 
 
 
-ac_config_commands="$ac_config_commands compile-kconfig"
-
 
 ac_config_files="$ac_config_files Makefile kconfig/Makefile"
 
@@ -8535,7 +8533,6 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
-    "compile-kconfig") CONFIG_COMMANDS="$CONFIG_COMMANDS compile-kconfig" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "kconfig/Makefile") CONFIG_FILES="$CONFIG_FILES kconfig/Makefile" ;;
 
@@ -9060,8 +9057,6 @@ $as_echo X"$file" |
   done
 }
  ;;
-    "compile-kconfig":C) $as_echo "this is the command trigger to compile Kconfig"
-                    $SHELL -c "make all V=0" ;;
 
   esac
 done # for ac_tag
@@ -9074,6 +9069,9 @@ ac_clean_files=$ac_clean_files_save
 test $ac_write_fail = 0 ||
   as_fn_error $? "write failure creating $CONFIG_STATUS" "$LINENO" 5
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: compiling Kconfig" >&5
+$as_echo "$as_me: compiling Kconfig" >&6;}
+			 $SHELL -c "make clean all V=0" > compile.log
 
 # configure is writing to config.log, and then calls config.status.
 # config.status does its own redirection, appending to config.log.

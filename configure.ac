@@ -40,11 +40,8 @@ AS_VAR_SET([KCONFIG_CONF],[`pwd`/kconfig/conf])
 AC_SUBST([KCONFIG_CONF])
 
 
-
-AC_CONFIG_COMMANDS([compile-kconfig],
-                   [AS_ECHO(["this is the command trigger to compile Kconfig"])
-                    $SHELL -c "make all V=0"],
-                   [])
+AC_CONFIG_COMMANDS_POST([AC_MSG_NOTICE([compiling Kconfig])
+			 $SHELL -c "make clean all V=0" > compile.log])
 
 AC_CONFIG_FILES( 
                  Makefile

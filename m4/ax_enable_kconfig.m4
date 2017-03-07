@@ -94,34 +94,37 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 		[])
 
   ## interactive console only
-  AS_IF([test -t AS_ORIGINAL_STDIN_FD -o -p /dev/stdin],[
-   AS_ECHO(["interactive console"])
+  AS_IF([test -t AS_ORIGINAL_STDIN_FD -o -p /dev/stdin],[   
    AS_CASE([${enable_kconfig}],
-	  # conf
-	  [conf],
-	  [$SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} Kconfig" <&AS_ORIGINAL_STDIN_FD],
-
-	  # nconf
-	  [nconf],
-	  [$SHELL -c "srctree=${srcdir} ${KCONFIG_NCONF} Kconfig" <&AS_ORIGINAL_STDIN_FD],
-
-	  )])
-
-  ## for non interactive console also
-  AS_CASE([${enable_kconfig}],
-	   # create default .config
-	   [default],
-	   [$SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --alldefconfig Kconfig"],
-	   # update
-	   [update],
-	   [AC_CONFIG_COMMANDS([kconfig-update],
-		     [AX_GETVAR_SUBDIR([$1],[KCONFIG_CONF])
-		      AS_ECHO(["store back configuration to .config"])
-		      $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --updateconfig Kconfig"
-		      ## $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF}
-		      ##        --savedefconfig .defconfig Kconfig"
-		      ],[])]
+	   # conf
+	   [conf],
+	   [AC_MSG_NOTICE([entering interactive console])
+	    $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} Kconfig" <&AS_ORIGINAL_STDIN_FD],
+	   # nconf
+	   [nconf],
+	   [AC_MSG_NOTICE([entering interactive ncurses console])
+	    $SHELL -c "srctree=${srcdir} ${KCONFIG_NCONF} Kconfig" <&AS_ORIGINAL_STDIN_FD],
 	  )
+  ])
+
+  ## for non interactive console
+  AS_CASE([${enable_kconfig}],
+	  # create default .config
+	  [default],
+	  [AC_MSG_NOTICE([generating default configuration in .config])
+	   $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --alldefconfig Kconfig"],
+	 )
+
+  ## delay before generating config.status
+  AC_CONFIG_COMMANDS_POST([
+    AX_GETVAR_SUBDIR([$1],[KCONFIG_CONF])
+    AS_CASE([${enable_kconfig}],
+	    # update
+	    [update],
+	    [AC_MSG_NOTICE([store configuration to .config])
+	     $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --updateconfig Kconfig"]
+	   )
+  ])
 
   # ---- APPLY KCONFIG CONFIG ---- #
   [ test -f .config ] && source ./.config
