@@ -38,7 +38,7 @@ AC_SUBST([DOCKER_SHARES])
 # This is only an example of the actual configure.ac that uses kconfig vars,
 # import ax_docker_build.m4 to use this feature in your project
 #
-# AX_DOCKER_BUILD
+AX_DOCKER_BUILD
 
 
 # //////////////////////////////////////////////////////////////////////////// #
