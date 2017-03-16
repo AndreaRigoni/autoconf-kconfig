@@ -38,14 +38,14 @@ AC_SUBST([DOCKER_SHARES])
 # This is only an example of the actual configure.ac that uses kconfig vars,
 # import ax_docker_build.m4 to use this feature in your project
 #
-# AX_DOCKER_BUILD
+AX_DOCKER_BUILD
 
 
 # //////////////////////////////////////////////////////////////////////////// #
 # //  TOOLCHAIN  ///////////////////////////////////////////////////////////// #
 # //////////////////////////////////////////////////////////////////////////// #
 
-AX_KCONFIG_VAR_ENABLE([ENABLE_TOOLCHAIN],["Enable external toolchain"])
+AX_KCONFIG_VAR_ENABLE([ENABLE_CUSTOM_TOOLCHAIN],["Enable external toolchain"])
 AX_KCONFIG_VAR_WITH([TOOLCHAIN_DIR],["Set toolchain base dir"])
 AC_SUBST([TOOLCHAIN_DIR])
 
@@ -59,6 +59,7 @@ AS_BOX([// READ CONFIG VARIABLES //////], [\/])
 AS_ECHO()
 AS_ECHO("EXAMPLE_BOOL_VAR   ----> $EXAMPLE_BOOL_VAR")
 AS_ECHO("EXAMPLE_STRING_VAR ----> $EXAMPLE_STRING_VAR")
+AS_ECHO("ENABLE_CUSTOM_TOOLCHAIN ---> $ENABLE_CUSTOM_TOOLCHAIN")
 AS_ECHO()
 
 

@@ -17,7 +17,7 @@ config EXAMPLE_STRING_VAR
 	---help---
 	      This is an example string variable define within the kconfig
 	      autoconf addon.
-	
+
 comment "Build Options "
 
 # //////////////////////////////////////////////////////////////////////////// #

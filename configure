@@ -3729,7 +3729,7 @@ if ${ax_cv_ncursesw+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
-            $as_echo
+	    #AS_ECHO()
             pkg_cv__ax_cv_ncursesw_lib="-lncursesw"
             pkg_cv__ax_cv_ncursesw_cppflags="$CURSES_CPPFLAGS"
             LIBS="$ax_saved_LIBS $pkg_cv__ax_cv_ncursesw_lib"
@@ -4127,7 +4127,7 @@ if ${ax_cv_ncurses+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
-            $as_echo
+	    #AS_ECHO()
             pkg_cv__ax_cv_ncurses_lib="-lncurses"
             pkg_cv__ax_cv_ncurses_cppflags="$CURSES_CPPFLAGS"
             LIBS="$ax_saved_LIBS $pkg_cv__ax_cv_ncurses_lib"
@@ -4820,7 +4820,7 @@ fi
 
 elif test "x$ax_cv_curses_which" = xncurses; then :
 
-            $as_echo 1
+	    #AS_ECHO(1)
 
 
 
@@ -4883,7 +4883,7 @@ fi
     LIBS=$ax_saved_LIBS
 
 
-            $as_echo 2
+	    #AS_ECHO(2)
 
 
 
@@ -5157,7 +5157,7 @@ fi
 
 elif test "x$ax_cv_curses_which" = xncurses; then :
 
-            $as_echo 1
+	    #AS_ECHO(1)
 
 
 
@@ -5220,7 +5220,7 @@ fi
     LIBS=$ax_saved_LIBS
 
 
-            $as_echo 2
+	    #AS_ECHO(2)
 
 
 
@@ -5494,7 +5494,7 @@ fi
 
 elif test "x$ax_cv_curses_which" = xncurses; then :
 
-            $as_echo 1
+	    #AS_ECHO(1)
 
 
 
@@ -5557,7 +5557,7 @@ fi
     LIBS=$ax_saved_LIBS
 
 
-            $as_echo 2
+	    #AS_ECHO(2)
 
 
 
@@ -5788,7 +5788,7 @@ if ${ax_cv_ncursesw+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
-            $as_echo
+	    #AS_ECHO()
             pkg_cv__ax_cv_ncursesw_lib="-lncursesw"
             pkg_cv__ax_cv_ncursesw_cppflags="$CURSES_CPPFLAGS"
             LIBS="$ax_saved_LIBS $pkg_cv__ax_cv_ncursesw_lib"
@@ -6186,7 +6186,7 @@ if ${ax_cv_ncurses+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
-            $as_echo
+	    #AS_ECHO()
             pkg_cv__ax_cv_ncurses_lib="-lncurses"
             pkg_cv__ax_cv_ncurses_cppflags="$CURSES_CPPFLAGS"
             LIBS="$ax_saved_LIBS $pkg_cv__ax_cv_ncurses_lib"
@@ -6879,7 +6879,7 @@ fi
 
 elif test "x$ax_cv_curses_which" = xncurses; then :
 
-            $as_echo 1
+	    #AS_ECHO(1)
 
 
 
@@ -6942,7 +6942,7 @@ fi
     LIBS=$ax_saved_LIBS
 
 
-            $as_echo 2
+	    #AS_ECHO(2)
 
 
 
@@ -7216,7 +7216,7 @@ fi
 
 elif test "x$ax_cv_curses_which" = xncurses; then :
 
-            $as_echo 1
+	    #AS_ECHO(1)
 
 
 
@@ -7279,7 +7279,7 @@ fi
     LIBS=$ax_saved_LIBS
 
 
-            $as_echo 2
+	    #AS_ECHO(2)
 
 
 
@@ -7553,7 +7553,7 @@ fi
 
 elif test "x$ax_cv_curses_which" = xncurses; then :
 
-            $as_echo 1
+	    #AS_ECHO(1)
 
 
 
@@ -7616,7 +7616,7 @@ fi
     LIBS=$ax_saved_LIBS
 
 
-            $as_echo 2
+	    #AS_ECHO(2)
 
 
 
@@ -7761,9 +7761,6 @@ else
   have_ncurses=no
 fi
 
-
-
-
 HAVE_NCONF=${have_ncurses}
 
  if test x"${have_ncurses}" = x"yes"; then
@@ -7780,7 +7777,6 @@ KCONFIG_NCONF=`pwd`/kconfig/nconf
 
 
 KCONFIG_CONF=`pwd`/kconfig/conf
-
 
 
 
@@ -9060,8 +9056,9 @@ $as_echo X"$file" |
   done
 }
  ;;
-    "compile-kconfig":C) $as_echo "this is the command trigger to compile Kconfig"
-                    $SHELL -c "make all V=0" ;;
+    "compile-kconfig":C) { $as_echo "$as_me:${as_lineno-$LINENO}: compiling Kconfig" >&5
+$as_echo "$as_me: compiling Kconfig" >&6;}
+		    $SHELL -c "make clean all V=0" > compile.log ;;
 
   esac
 done # for ac_tag

@@ -25,6 +25,7 @@ enum input_mode {
 	oldaskconfig,
 	silentoldconfig,
 	oldconfig,
+    updateconfig,
 	allnoconfig,
 	allyesconfig,
 	allmodconfig,
@@ -449,6 +450,7 @@ static void check_conf(struct menu *menu)
 static struct option long_opts[] = {
 	{"oldaskconfig",    no_argument,       NULL, oldaskconfig},
 	{"oldconfig",       no_argument,       NULL, oldconfig},
+    {"updateconfig",    no_argument,       NULL, updateconfig},
 	{"silentoldconfig", no_argument,       NULL, silentoldconfig},
 	{"defconfig",       optional_argument, NULL, defconfig},
 	{"savedefconfig",   required_argument, NULL, savedefconfig},
@@ -476,6 +478,7 @@ static void conf_usage(const char *progname)
 	printf("  --listnewconfig         List new options\n");
 	printf("  --oldaskconfig          Start a new configuration using a line-oriented program\n");
 	printf("  --oldconfig             Update a configuration using a provided .config as base\n");
+    printf("  --updateconfig          Update configuration using env\n");
 	printf("  --silentoldconfig       Same as oldconfig, but quietly, additionally update deps\n");
 	printf("  --olddefconfig          Same as silentoldconfig but sets new symbols to their default value\n");
 	printf("  --oldnoconfig           An alias of olddefconfig\n");
@@ -537,7 +540,7 @@ int main(int ac, char **av)
 			break;
 		}
 		case oldaskconfig:
-		case oldconfig:
+		case oldconfig:    
 		case allnoconfig:
 		case allyesconfig:
 		case allmodconfig:
@@ -591,6 +594,11 @@ int main(int ac, char **av)
 	case olddefconfig:
 		conf_read(NULL);
 		break;
+    case updateconfig:
+        conf_read(NULL);
+        conf_read_env();
+        // sync_kconfig = 1;
+        break;
 	case allnoconfig:
 	case allyesconfig:
 	case allmodconfig:
@@ -669,8 +677,8 @@ int main(int ac, char **av)
 		/* fall through */
 	case oldconfig:
 	case listnewconfig:
-	case olddefconfig:
-	case silentoldconfig:
+	case olddefconfig:    
+    case silentoldconfig:
 		/* Update until a loop caused no more changes */
 		do {
 			conf_cnt = 0;
@@ -685,7 +693,7 @@ int main(int ac, char **av)
 		/* silentoldconfig is used during the build so we shall update autoconf.
 		 * All other commands are only used to generate a config.
 		 */
-		if (conf_get_changed() && conf_write(NULL)) {
+        if (conf_get_changed() && conf_write(NULL)) {
 			fprintf(stderr, _("\n*** Error during writing of the configuration.\n\n"));
 			exit(1);
 		}
@@ -693,7 +701,7 @@ int main(int ac, char **av)
 			fprintf(stderr, _("\n*** Error during update of the configuration.\n\n"));
 			return 1;
 		}
-	} else if (input_mode == savedefconfig) {
+    } else if (input_mode == savedefconfig ) {
 		if (conf_write_defconfig(defconfig_file)) {
 			fprintf(stderr, _("n*** Error while saving defconfig to: %s\n\n"),
 				defconfig_file);
@@ -704,7 +712,12 @@ int main(int ac, char **av)
 			fprintf(stderr, _("\n*** Error during writing of the configuration.\n\n"));
 			exit(1);
 		}
-	}
+    } else if (input_mode == updateconfig) {
+        if (conf_get_changed() && conf_write(NULL)) {
+            fprintf(stderr, _("\n*** Error during env update of the configuration.\n\n"));
+            exit(1);
+        }
+    }
 	return 0;
 }
 

@@ -412,8 +412,11 @@ int conf_read(const char *name)
 
 	sym_set_change_count(0);
 
-	if (conf_read_simple(name, S_DEF_USER))
+    if (conf_read_simple(name, S_DEF_USER)) {
+        // READ FROM ENV //
+        conf_read_env();
 		return 1;
+    }
 
 	for_all_symbols(i, sym) {
 		sym_calc_value(sym);
@@ -468,8 +471,13 @@ int conf_read(const char *name)
 
 	sym_add_change_count(conf_warnings || conf_unsaved);
 
+    // READ FROM ENV //
+    conf_read_env();
 	return 0;
 }
+
+
+
 
 /*
  * Kconfig configuration printer
@@ -621,10 +629,89 @@ static struct conf_printer tristate_printer_cb =
 	.print_comment = kconfig_print_comment,
 };
 
+
+// ANDREA ADD //
+static void strip(char *str)
+{
+    char *p = str;
+    int l;
+
+    while ((isspace(*p)))
+        p++;
+    l = strlen(p);
+    if (p != str)
+        memmove(str, p, l + 1);
+    if (!l)
+        return;
+    p = str + l - 1;
+    while ((isspace(*p)))
+        *p-- = 0;
+}
+
+// ANDREA ADD //
+static void conf_update_symbol(struct symbol *sym)
+{
+    if(!sym) return;
+    const char *str;
+    char sym_name[400] = "";
+    strcat(sym_name,CONFIG_);
+    strcat(sym_name,sym->name);
+    const char *env = getenv(sym_name);
+    if(env) {
+        //  printf("updating %s -> [%s]\n",sym_name,env);
+    } else return;
+
+    switch (sym->type) {
+    case S_OTHER:
+    case S_UNKNOWN:
+        break;
+    case S_STRING:
+        str = sym_get_string_value(sym);
+        if(env) {
+            sym_set_string_value(sym,env);
+            sym_set_changed(sym);
+        }
+        break;
+    default:
+        //str = sym_get_string_value(sym);
+        if(env) sym_set_string_value(sym,env);
+    }
+}
+
+// ANDREA ADD: NOT USED //
+static void conf_update_symbol_env(struct symbol *sym)
+{
+    if(!sym) return;
+    const char *str;
+    char sym_name[400] = "";
+    strcat(sym_name,CONFIG_);
+    strcat(sym_name,sym->name);
+    const char *env = getenv(sym_name);
+    if(!env) return;
+
+    switch (sym->type) {
+    case S_OTHER:
+    case S_UNKNOWN:
+        break;
+    case S_TRISTATE:
+    case S_STRING:
+    default:
+        str = sym_get_string_value(sym);
+        if(env) {
+            //            printf("updating back %s -> [%s]\n",sym_name,str);
+            setenv(sym_name,str,1);
+        }
+        break;
+    }
+}
+
+
 static void conf_write_symbol(FILE *fp, struct symbol *sym,
 			      struct conf_printer *printer, void *printer_arg)
 {
 	const char *str;
+
+    const char *env = getenv(sym->name);
 
 	switch (sym->type) {
 	case S_OTHER:
@@ -733,6 +820,27 @@ next_menu:
 	return 0;
 }
 
+
+int conf_read_env()
+{
+    struct symbol *sym;
+    struct menu *menu;
+    int i;
+
+    for_all_symbols(i, sym) {
+        switch (sym->type ) {
+        case S_UNKNOWN:
+        case S_OTHER:
+            break;
+        default:
+            conf_update_symbol(sym);
+            break;
+        }
+    }
+    return 0;
+}
+
+
 int conf_write(const char *name)
 {
 	FILE *out;
@@ -799,7 +907,11 @@ int conf_write(const char *name)
 				goto next;
 			sym->flags &= ~SYMBOL_WRITE;
 
-			conf_write_symbol(out, sym, &kconfig_printer_cb, NULL);
+//            char sym_name[400] = "";
+//            strcat(sym_name,CONFIG_);
+//            strcat(sym_name,sym->name);
+//            char *env = getenv(sym_name);
+            conf_write_symbol(out, sym, &kconfig_printer_cb, NULL);
 		}
 
 next:
@@ -829,7 +941,6 @@ next:
 	conf_message(_("configuration written to %s"), newname);
 
 	sym_set_change_count(0);
-
 	return 0;
 }
 
