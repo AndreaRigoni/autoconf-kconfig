@@ -14,22 +14,20 @@ menu MDS_MODULES
 
 	config MDS_LV
 	bool "Enable labview module"
-	default y
+	default n
 
 	config MDS_NI
 	bool "Enable National Instruments module"
-	default y
+	default n
 endmenu
 
 menu MODULES
 	config MOD1
-	bool "Enable mod1 module"
-
-
+	 bool "Enable mod1 module"
 	config MOD2
-	bool "Enable mod2 module"
+	 bool "Enable mod2 module"
 	config MOD3
-	bool "Enable mod3 module"
+	 bool "Enable mod3 module"
 endmenu
 
 
