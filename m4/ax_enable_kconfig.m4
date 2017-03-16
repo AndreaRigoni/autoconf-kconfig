@@ -113,6 +113,10 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 	  [default],
 	  [AC_MSG_NOTICE([generating default configuration in .config])
 	   $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --alldefconfig Kconfig"],
+	  # update
+	  [update],
+	  [AC_MSG_NOTICE([updating Kconfig defaults to .config])
+	   $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --updateconfig Kconfig"]
 	 )
 
   ## delay before generating config.status
@@ -121,7 +125,7 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
     AS_CASE([${enable_kconfig}],
 	    # update
 	    [update],
-	    [AC_MSG_NOTICE([store configuration to .config])
+	    [AC_MSG_NOTICE([store Kconfig values to .config])
 	     $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --updateconfig Kconfig"]
 	   )
   ])
@@ -231,7 +235,7 @@ AC_DEFUN([AX_KCONFIG_VAR_ENABLE],[
 AC_DEFUN([AX_KCONFIG_CHOICE],[
   AX_KCONFIG_CONDITIONAL([$2])
   AS_VAR_IF([$2],[yes], AS_VAR_SET([$1],[$3]))
-  m4_if($#,0, ,m4_eval($# > 3),[1],[AX_KCONFIG_CHOICE($1,m4_shift3($@))], )
+  m4_if($#,0, ,m4_eval($# > 3),[1],[$0($1,m4_shift3($@))], )
 ])
 
 # AX_KCONFIG_WITH_CHOICE(VERBATIM_VAL, HELP_STRING,
@@ -243,6 +247,21 @@ AC_DEFUN([AX_KCONFIG_WITH_CHOICE],[
 ])
 
 
+# AX_KCONFIG_MODULES([modules_group_name], MOD1, HELP1, MOD2, HELP2, ...)
+# -----------------------------------------------------------------------
+AC_DEFUN([AX_KCONFIG_MODULES],[
+  m4_pushdef([mod_],m4_ifblank([$1],[],[m4_toupper(m4_translit($1,[_-],[__]))_]))
+  m4_pushdef([_var_],m4_toupper(m4_translit(mod_[$2],[_-],[__])))
+  AS_VAR_APPEND(mod_[MODULES_AVAILABLE],[" $2"])
+  AX_KCONFIG_VAR_ENABLE(_var_,[module $1 $2 $3])
+  AS_VAR_IF(_var_,[yes],
+		  [AS_VAR_APPEND(mod_[MODULES],[" $2"])]
+		  [AS_VAR_APPEND(mod_[MODULES_ENABLED],[" $2"])],
+		  [AS_VAR_APPEND(mod_[MODULES_DISABLED],[" $2"])])
+  m4_if($#,0, ,m4_eval($# > 3),[1],[$0($1,m4_shift3($@))], )
+  m4_popdef([mod_])
+  m4_popdef([_var_])
+])
 
 
 
