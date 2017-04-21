@@ -15,3 +15,13 @@
 /install-sh
 /missing
 /stamp-h1
+
+Makefile
+config.log
+config.status
+kconfig/.deps/
+kconfig/Makefile
+kconfig/conf.o
+kconfig/nconf-nconf.gui.o
+kconfig/nconf-nconf.o
+kconfig/zconf.tab.o
