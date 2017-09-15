@@ -6,6 +6,8 @@ The kconfig system relies to a Kconfig file that must exist on the top of the pr
 
 All Variable defined by Kconfig input will be stored as CONFIG_xxx in a *.config* file written in the build directory. Than the execution of this file is prepared in a AX_KCONFIG macro (form file ax_enable_kconfig.m4), so that the configure script will load all CONFIG_xxx variable as a new possible further input for the xxx variable defined.
 
+Take a look at a simple google slides presentation: https://docs.google.com/presentation/d/1QE9lVdS2Mk3MOBEGK-_BKf-lTV7ryqQs8lCe5E_6q1E/edit?usp=sharing
+
 ## Enable autoconf-kconfig in a project
 The easiest way to use autoconf-kconfig is to start from an existing project that already embed it, this is already available to be cloned and tested with this procedure:
 
