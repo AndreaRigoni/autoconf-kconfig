@@ -6,6 +6,6 @@ aclocal -I ./m4
 
 # libtoolize
 
-automake --add-missing --copy
+automake --add-missing --copy -W none
 
 autoconf
