@@ -1,7 +1,7 @@
 
 override CPPFLAGS=${LOCAL_CPPFLAGS}
 override LDFLAGS=${LOCAL_LDFLAGS}
-override CFLAGS=${CFLAGS}
+override CFLAGS=${LOCAL_CFLAGS}
 
 # intermediate LEX + HASH file
 zconf.tab.o: zconf.tab.c zconf.hash.c zconf.lex.c
