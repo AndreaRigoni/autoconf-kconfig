@@ -1,7 +1,17 @@
 
 AC_INIT([kbuild autoconf], 1.0)
+
+m4_ifndef([AS_VAR_COPY],
+  [m4_define([AS_VAR_COPY],
+    [AS_LITERAL_IF([$1[]$2], [$1=$$2], [eval $1=\$$2])])])
+
+m4_ifndef([AS_VAR_APPEND],
+  [m4_define([AS_VAR_APPEND],
+      [$1=$$1$2])])
+
+
 AM_INIT_AUTOMAKE
-AC_CONFIG_MACRO_DIRS([m4])
+dnl AC_CONFIG_MACRO_DIRS([m4])
 
 AC_PROG_CC
 
@@ -42,8 +52,7 @@ AC_CONFIG_COMMANDS([compile-kconfig],
 		    $SHELL -c "make clean all V=0" > compile.log],
 		   [])
 
-AC_CONFIG_FILES( 
-                 Makefile
+AC_CONFIG_FILES( Makefile
                  kconfig/Makefile
                )
 AC_OUTPUT
