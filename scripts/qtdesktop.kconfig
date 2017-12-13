@@ -1,0 +1,27 @@
+# //////////////////////////////////////////////////////////////////////////// #
+# //  QT DESKTOP  //////////////////////////////////////////////////////////// #
+# //////////////////////////////////////////////////////////////////////////// #
+
+
+menu QT_DESKTOP
+  config QMAKE_BINARY
+	string  "qmake executable path"
+	default "/usr/bin/qmake"
+
+  choice QMAKE_BUILD_FLAVOR
+	prompt "Qmake build flavor option"
+	config QMAKE_BUILD_FLAVOR_RELEASE
+	bool "Release"
+	config QMAKE_BUILD_FLAVOR_DEBUG
+	bool "Debug"
+	config QMAKE_BUILD_FLAVOR_PROFILE
+	bool "Profile"
+  endchoice
+
+  config QMAKE_CONFIG
+	string "qmake CONFIG setup"
+	default "" if QMAKE_BUILD_FLAVOR_RELEASE
+	default "debug qml_debug" if QMAKE_BUILD_FLAVOR_DEBUG
+	default "qml_debug force_debug_info separate_debug_info" if QMAKE_BUILD_FLAVOR_PROFILE
+
+endmenu # QT_DESKTOP

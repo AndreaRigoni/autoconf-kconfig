@@ -1,0 +1,12 @@
+# //////////////////////////////////////////////////////////////////////////////
+# //  QT  //////////////////////////////////////////////////////////////////////
+# //////////////////////////////////////////////////////////////////////////////
+
+AX_KCONFIG_VAR_WITH([QMAKE_BINARY],["Set qmake"])
+AC_SUBST([QMAKE_BINARY])
+
+AX_KCONFIG_WITH_CHOICE([QMAKE_BUILD_FLAVOR],[qmake build flavor],
+  [QMAKE_BUILD_FLAVOR_RELEASE],["Release"],
+  [QMAKE_BUILD_FLAVOR_DEBUG],["Debug"],
+  [QMAKE_BUILD_FLAVOR_PROFILE],["Profile"])
+AC_SUBST([QMAKE_BUILD_FLAVOR])

@@ -21,6 +21,12 @@ AC_DEFUN([AX_KCONFIG_COMPRESS_YN],[
 ])
 
 
+# AX_KCONFIG_INCLUDE
+# ------------------
+# [configure-sript]
+AC_DEFUN([AX_KCONFIG_INCLUDE],[
+m4_sinclude(conf/kscripts/$1)
+])
 
 
 # AX_KCONFIG
