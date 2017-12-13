@@ -1,0 +1,27 @@
+
+
+# //////////////////////////////////////////////////////////////////////////// #
+# //  DOCKER BUILD /////////////////////////////////////////////////////////// #
+# //////////////////////////////////////////////////////////////////////////// #
+
+AS_VAR_IF([CONFIG_ENABLE_DOCKER_BUILD],[y],[
+		  AS_VAR_SET_IF([CONFIG_DOCKER_CONTAINER],
+			 [AS_VAR_SET([DOCKER_CONTAINER],[${CONFIG_DOCKER_CONTAINER}])] )
+		  AS_VAR_SET_IF([CONFIG_DOCKER_IMAGE],
+			 [AS_VAR_SET([DOCKER_IMAGE],[${CONFIG_DOCKER_IMAGE}])] )
+		  AS_VAR_SET_IF([CONFIG_DOCKER_URL],
+			 [AS_VAR_SET([DOCKER_URL],[${CONFIG_DOCKER_URL}])])
+		 ])
+
+AX_KCONFIG_VAR_WITH([DOCKER_SHARES],["set with DOCKER_SHARES"])
+AC_SUBST([DOCKER_SHARES])
+
+AX_KCONFIG_VAR_WITH([DOCKER_NETWORKS],["set with DOCKER_NETWORKS"])
+AC_SUBST([DOCKER_NETWORKS])
+
+AX_KCONFIG_VAR_WITH([DOCKER_PS1],["set with DOCKER_PS1"])
+AC_SUBST([DOCKER_PS1])
+
+# AX_KCONFIG_VAR_WITH([DOCKER_ENTRYPOINT],["set with DOCKER_ENTRYPOINT"])
+# AC_SUBST([DOCKER_ENTRYPOINT])
+

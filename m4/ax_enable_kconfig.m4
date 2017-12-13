@@ -100,7 +100,7 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 		[])
 
   ## interactive console only
-  AS_IF([test -t AS_ORIGINAL_STDIN_FD -o -p /dev/stdin],[   
+  AS_IF([test -t AS_ORIGINAL_STDIN_FD -o -p /dev/stdin],[
    AS_CASE([${enable_kconfig}],
 	   # conf
 	   [conf],
