@@ -54,5 +54,29 @@ if ENABLE_DOCKER_BUILD
 	  Note:
 	  The srcdir and current build dir are always shared to the container
 
+  config DOCKER_NETWORKS
+	string "Docker container networks"
+	default "bridge"
+	---help---
+	  Docker space separated list of networks to connect in container
+	  bridge for default and host to import host native interface
+
+  config DOCKER_ENTRYPOINT
+	string "DOCKER_ENTRYPOINT selection"
+	default ""
+	--- help ---
+	  the script that will be executed inside build when image is started.
+
+	  Note:
+	  The script must exist in the container internal path
+
+  #
+  config DOCKER_PS1
+	string "DOCKER_PS1 selection"
+	default "[\\u@docker:\\h \\W]\\$"
+	--- help ---
+	  prompt for the docker shell
+
+
 
 endif # ENABLE_DOCKER_BUILD
