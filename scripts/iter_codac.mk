@@ -30,18 +30,18 @@ codac_v6_md5_URL ?= http://static.iter.org/codac/cs-iso/Iter-CCS-v6.md5
 
 
 $(CODAC_NAME).img:
-	@ qemu-img create -f $(QEMU_IMG_FORMAT) $@ $(QEMU_IMG_SIZE)
+	@ qemu-img create -f $(CODAC_QEMU_IMG_FORMAT) $@ $(CODAC_QEMU_IMG_SIZE)
 
 
 install-iso: ##@codac boot iso to install codac
 install-iso: $(CODAC_NAME).img $(CODAC_NAME).iso
-	@ $(QEMU) -m 4G -enable-kvm -cpu host -smp 4 \
+	@ $(CODAC_QEMU) -m 4G -enable-kvm -cpu host -smp 4 \
 			  -hda $(CODAC_NAME).img \
 			  -cdrom $(CODAC_NAME).iso \
 			  -boot d
 
 boot: ##@codac boot into codac image
 boot: $(CODAC_NAME).img
-	@ $(QEMU) -m 4G -enable-kvm -cpu host -smp 4 -hda $(CODAC_NAME).img
+	@ $(CODAC_QEMU) -m 4G -enable-kvm -cpu host -smp 4 -hda $(CODAC_NAME).img
 
 
