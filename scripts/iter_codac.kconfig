@@ -25,7 +25,7 @@ if CODAC_BUILD
 #
 config CODAC_QEMU
   string "CODAC_QEMU selection"
-  depends on depends
+#  depends on depends
   default "qemu-system-x86_64"
   --- help ---
   select codac qemu version
@@ -56,7 +56,7 @@ config CODAC_QEMU_IMG_FORMAT
 #
 config ENABLE_LIBGUEST_DKIMG
   bool "ENABLE_LIBGUEST_DKIMG selection"
-  depends on depends
+#  depends on depends
   default yes
   --- help ---
   enable use of docker to access libguest functionalities

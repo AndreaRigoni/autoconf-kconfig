@@ -1,14 +1,11 @@
 
-
-
 ## ////////////////////////////////////////////////////////////////////////// ##
 ## /// CODAC VMs //////////////////////////////////////////////////////////// ##
 ## ////////////////////////////////////////////////////////////////////////// ##
 
-
-CODAC_QEMU            ?= qemu-system-x86_64
-CODAC_QEMU_IMG_SIZE   ?= 40G
-CODAC_QEMU_IMG_FORMAT ?= qcow2
+# CODAC_QEMU            ?= qemu-system-x86_64
+# CODAC_QEMU_IMG_SIZE   ?= 40G
+# CODAC_QEMU_IMG_FORMAT ?= qcow2
 
 CODAC_VERSION   ?= 5
 CODAC_NAME      ?= codac_v$(CODAC_VERSION)
