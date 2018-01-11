@@ -25,3 +25,40 @@ AM_CONDITIONAL([ENABLE_LIBGUEST_DKIMG],[test x$ENABLE_LIBGUEST_DKIMG = xyes])
 AX_KCONFIG_VAR_WITH([CODAC_LIBGUEST_DKIMG],["set with CODAC_LIBGUEST_DKIMG"])
 AC_SUBST([CODAC_LIBGUEST_DKIMG])
 
+
+
+
+
+#######################################################
+# Default environment variables for EPICS
+#######################################################
+
+# EPICS_HOST_ARCH=linux-x86_64
+# EPICS_ROOT=/opt/codac-5.4/epics
+# EPICS_BASE=/opt/codac-5.4/epics
+# EPICS_MBA_BASE=/opt/codac-5.4/epics
+# EPICS_MBA_TEMPLATE_TOP=/opt/codac-5.4/epics/templates/makeBaseApp/top
+# EPICS_EXTENSIONS=/opt/codac-5.4/epics/extensions
+# EPICS_APPS=/opt/codac-5.4/apps
+# PERL5LIB=/opt/codac-5.4/epics/lib/perl
+# EPICS_CA_ADDR_LIST=$(codac-network pon broadcast 2> /dev/null)
+# EPICS_CA_AUTO_ADDR_LIST=$(codac-network pon > /dev/null 2>&1 && echo "no" || echo "yes")
+
+
+#######################################################
+# Default environment variables for DAN API library
+#######################################################
+
+# DAN_CONFIG_PATH=${CODAC_CONF}/dan
+# DAN_XSD_VALIDATOR=${DAN_CONFIG_PATH}/dan_api_configuration.xsd
+# DAN_STREAMER_PATH=${CODAC_ROOT}/bin
+# LOG_FILTER_LEVEL=info
+# LOG_FILE_PATH=${CODAC_VAR}/log
+# DAN_ARCHIVE_MASTER=localhost:9999
+# DAN_ARCHIVE_SLAVE=localhost:9999
+
+
+AC_SUBST(CODAC_ROOT)
+AC_SUBST(EPICS_HOST_ARCH)
+AC_SUBST(EPICS_BASE)
+AC_SUBST(SDN_TOPIC_DIRECTORY)
