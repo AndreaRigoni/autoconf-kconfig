@@ -26,5 +26,18 @@ $(TARGET): Makefile.qt $(SOURCES) $(HEADERS)
 	  $(MAKE) -f $< $@
 
 clean-local: qmake_clean
-	@ rm -rf $(CLEANFILES)
+	@ rm -rf $(CLEANFILES) Makefile.qt
 
+
+
+# //////////////////////////////////////////////////////////////////////////// #
+# //  EXAMPLE  /////////////////////////////////////////////////////////////// #
+# //////////////////////////////////////////////////////////////////////////// #
+#
+# include $(top_srcdir)/Common.mk
+# include $(abs_top_srcdir)/conf/kscripts/qtdesktop.mk
+#
+# PRO = myapp.pro
+#
+# all: $(TARGET)
+# clean: clean-local

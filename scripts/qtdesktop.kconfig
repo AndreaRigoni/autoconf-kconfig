@@ -2,8 +2,13 @@
 # //  QT DESKTOP  //////////////////////////////////////////////////////////// #
 # //////////////////////////////////////////////////////////////////////////// #
 
+menuconfig  ENABLE_QT
+  bool "Qt desktop Build support"
+  ---help---
+  This enables the Qt desktop build where included
 
-menu QT_DESKTOP
+if ENABLE_QT
+
   config QMAKE_BINARY
 	string  "qmake executable path"
 	default "/usr/bin/qmake"
@@ -24,4 +29,4 @@ menu QT_DESKTOP
 	default "debug qml_debug" if QMAKE_BUILD_FLAVOR_DEBUG
 	default "qml_debug force_debug_info separate_debug_info" if QMAKE_BUILD_FLAVOR_PROFILE
 
-endmenu # QT_DESKTOP
+endif # ENABLE_QT

@@ -2,7 +2,12 @@
 # //  QT  //////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////
 
+AX_KCONFIG_VAR_ENABLE([ENABLE_QT],["Enable Qt build"])
+AM_CONDITIONAL([ENABLE_QT],[test x${ENABLE_QT}=xyes])
+AC_SUBST([ENABLE_QT])
+
 AX_KCONFIG_VAR_WITH([QMAKE_BINARY],["Set qmake"])
+# TODO: WRITE TESTS HERE ...
 AC_SUBST([QMAKE_BINARY])
 
 AX_KCONFIG_WITH_CHOICE([QMAKE_BUILD_FLAVOR],[qmake build flavor],
@@ -10,3 +15,6 @@ AX_KCONFIG_WITH_CHOICE([QMAKE_BUILD_FLAVOR],[qmake build flavor],
   [QMAKE_BUILD_FLAVOR_DEBUG],["Debug"],
   [QMAKE_BUILD_FLAVOR_PROFILE],["Profile"])
 AC_SUBST([QMAKE_BUILD_FLAVOR])
+
+
+

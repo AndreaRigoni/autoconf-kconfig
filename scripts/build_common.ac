@@ -1,0 +1,14 @@
+# //////////////////////////////////////////////////////////////////////////// #
+# //  BUILD COMMON  ////////////////////////////////////////////////////////// #
+# //////////////////////////////////////////////////////////////////////////// #
+
+AX_KCONFIG_VAR_WITH([DOWNLOAD_DIR],["Default download directory path"])
+AC_SUBST([DOWNLOAD_DIR])
+AX_GITIGNORE_ADD([${DOWNLOAD_DIR}])
+
+AX_KCONFIG_VAR_WITH([MAKE_PROCESS],
+			["Number of parallel process (aka -j option, 0=auto)"])
+AS_VAR_IF([MAKE_PROCESS],[0],
+	  [AS_VAR_SET([MAKE_PROCESS],[$(grep -c ^processor /proc/cpuinfo)])])
+AC_MSG_NOTICE([build make process -j${MAKE_PROCESS}])
+AC_SUBST([MAKE_PROCESS])
