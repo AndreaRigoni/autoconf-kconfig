@@ -181,7 +181,7 @@ AC_DEFUN([AX_KCONFIG_CONDITIONAL],[
 ])
 
 
-# AX_KCONFIG_VAR_WITH(FEATURE, HELP, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
+# AX_KCONFIG_VAR_WITH(FEATURE, HELP)
 # ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_VAR_WITH],[
   m4_pushdef([_var_],m4_bpatsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^with_],[]))
@@ -208,7 +208,22 @@ AC_DEFUN([AX_KCONFIG_VAR_WITH],[
 ])
 
 
-# AX_KCONFIG_VAR_ENABLE(FEATURE, HELP, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
+# AX_KCONFIG_WITH_EXEC(VARIABLE, HELP, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
+# ----------------------------------------------------------------------------------
+AC_DEFUN([AX_KCONFIG_WITH_EXEC],[
+  AX_KCONFIG_VAR_WITH([$1],[$2])
+  AC_MSG_CHECKING(${[$1]})
+  AS_IF([test -x ${[$1]}],
+   [AC_MSG_RESULT([yes])
+	$3],
+   [AC_MSG_RESULT([no])
+	$4])
+])
+
+
+
+
+# AX_KCONFIG_VAR_ENABLE(FEATURE, HELP)
 # ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_VAR_ENABLE],[
   m4_pushdef([_var_],m4_bpatsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^enable_],[]))
