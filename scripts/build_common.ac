@@ -4,7 +4,7 @@
 
 AX_KCONFIG_VAR_WITH([DOWNLOAD_DIR],["Default download directory path"])
 AC_SUBST([DOWNLOAD_DIR])
-AX_GITIGNORE_ADD([${DOWNLOAD_DIR}])
+AX_GITIGNORE_ADD_PATH([${DOWNLOAD_DIR}])
 
 AX_KCONFIG_VAR_WITH([MAKE_PROCESS],
 			["Number of parallel process (aka -j option, 0=auto)"])
