@@ -1,0 +1,21 @@
+# //////////////////////////////////////////////////////////////////////////// #
+# //  NODEJS  //////////////////////////////////////////////////////////////// #
+# //////////////////////////////////////////////////////////////////////////// #
+
+# menuconfig  ENABLE_NODEJS
+AX_KCONFIG_VAR_ENABLE([ENABLE_NODEJS],["Enable node.js in build"])
+AM_CONDITIONAL([ENABLE_NODEJS],[test x"${ENABLE_NODEJS}" = xyes])
+AC_SUBST([ENABLE_NODEJS])
+
+# config NODEJS_NODE_BINARY
+AX_KCONFIG_VAR_WITH([NODEJS_NODE_BINARY],["Default node binary"])
+AC_SUBST([NODEJS_NODE_BINARY])
+
+# config NODEJS_NPM_BINARY
+AX_KCONFIG_VAR_WITH([NODEJS_NPM_BINARY],["Default npm binary"])
+AC_SUBST([NODEJS_NPM_BINARY])
+
+# config NODEJS_MODULES_PATH
+AX_KCONFIG_VAR_WITH([NODEJS_MODULES_PATH],["node_modules path"])
+AC_SUBST([NODEJS_MODULES_PATH])
+AX_GITIGNORE_ADD_PATH([${NODEJS_MODULES_PATH}])

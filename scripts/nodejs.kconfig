@@ -1,0 +1,24 @@
+# //////////////////////////////////////////////////////////////////////////// #
+# //  NODEJS  //////////////////////////////////////////////////////////////// #
+# //////////////////////////////////////////////////////////////////////////// #
+
+menuconfig  ENABLE_NODEJS
+  bool "node.js Build support"
+  ---help---
+  This enables the node.js build where included
+
+if ENABLE_NODEJS
+
+  config NODEJS_NODE_BINARY
+	string  "node executable path"
+	default "/usr/sbin/node"
+
+  config NODEJS_NPM_BINARY
+	string  "node executable path"
+	default "/usr/sbin/npm"
+
+  config NODEJS_MODULES_PATH
+	string  "node modules path"
+	default "${builddir}/conf/node_modules"
+
+endif # ENABLE_NODEJS
