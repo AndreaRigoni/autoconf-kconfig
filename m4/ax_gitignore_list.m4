@@ -7,8 +7,8 @@ $1"])
 ])
 
 AC_DEFUN([AX_GITIGNORE_ADD_PATH],[
-  AS_VAR_SET_IF([CONFIG_GIT_IGNORE],,AS_VAR_SET([CONFIG_GIT_IGNORE]))
-  AS_VAR_SET([__ax_gitignore_var],[$(realpath --relative-to=${srcdir} $1)])
+  AS_VAR_SET_IF([CONFIG_GIT_IGNORE],,AS_VAR_SET([CONFIG_GIT_IGNORE]))  
+  AS_VAR_SET([__ax_gitignore_var],[$(perl -e 'use File::Spec; print File::Spec->abs2rel(@ARGV) . "\n"' $1 ${srcdir})])
   AS_VAR_APPEND([CONFIG_GIT_IGNORE],["
 /${__ax_gitignore_var}"])
 ])
