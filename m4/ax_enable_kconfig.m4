@@ -29,6 +29,54 @@ m4_sinclude(conf/kscripts/$1)
 ])
 
 
+# AX_KCONFIG_RECONFIGURE
+# ----------------------
+# request for reconfiguration touching .config after config.status
+#
+AC_DEFUN([AX_KCONFIG_RECONFIGURE],[
+ AS_VAR_IF([REQUIRE_RECONFIGURE],[yes],[
+  AS_ECHO([" TOUCHING .CONFIG "])
+  touch .config
+  ])
+])
+
+
+# AX_KCONFIG_UPDATE([VARIABLE])
+# -----------------------------
+# update variable at the end of configuration and register for reconfigure
+#
+AC_DEFUN([AX_KCONFIG_UPDATE],[
+	AS_VAR_IF($1,[${CONFIG_$1}],,[
+	  AS_VAR_SET([CONFIG_$1],${[$1]})
+	  AX_KCONFIG_COMPRESS_YN([CONFIG_$1])
+	  export CONFIG_$1
+	  AS_VAR_APPEND([_AX_UPDATED_VARIABLES],[$1])
+	  AS_VAR_SET([REQUIRE_RECONFIGURE],[yes])
+	])
+])
+
+AC_DEFUN([AX_KCONFIG_PRINTUPDATES],[
+  AS_VAR_IF([REQUIRE_RECONFIGURE],[yes],[
+   AS_ECHO([" "])
+   AS_ECHO([" "])
+   AS_ECHO([" WARNING:"])
+   AS_ECHO([" ---------------------------------------------------------------------- "])
+   AS_ECHO([" Some conifgurations have been updated by selfcheck,  the list with the "])
+   AS_ECHO([" new corrected values are listed below. "])
+   AS_ECHO([" "])
+   for var in ${_AX_UPDATED_VARIABLES}; do
+	AS_ECHO([" ${var} -> [[${!var}]]"])
+   done
+   AS_ECHO([" "])
+   AS_ECHO([" ---------------------------------------------------------------------- "])
+   AS_ECHO([" "])
+   AS_ECHO([" "])
+   #AS_IF([test -t AS_ORIGINAL_STDIN_FD -o -p /dev/stdin],[
+	#$SHELL -c "read -n 1 -s -r -p \"Press any key to continue\"" <&AS_ORIGINAL_STDIN_FD])
+  ])
+])
+
+
 # AX_KCONFIG
 # ----------
 # [kconfig-subdir]
@@ -39,6 +87,16 @@ AC_DEFUN([AX_KCONFIG],[
 
   AX_GETVAR_SUBDIR([$1],[KCONFIG_CONF])
   AX_GETVAR_SUBDIR([$1],[KCONFIG_NCONF])
+
+  # register reconfiguration upon .config changes
+  AS_VAR_APPEND([CONFIG_STATUS_DEPENDENCIES],[.config])
+  AC_SUBST([CONFIG_STATUS_DEPENDENCIES])
+
+  # touch configuration file
+  #AC_CONFIG_COMMANDS([set_reconfigure],[AX_KCONFIG_RECONFIGURE],
+	#[REQUIRE_RECONFIGURE=${REQUIRE_RECONFIGURE}
+	 #ENABLE_KCONFIG=${ENABLE_KCONFIG}])
+  AC_CONFIG_COMMANDS_PRE([AX_KCONFIG_PRINTUPDATES])
 
   # Add kconf variables to DEFAULTS diversion
   m4_wrap_lifo([m4_divert_text([DEFAULTS],
@@ -57,7 +115,6 @@ AC_DEFUN([AX_KCONFIG],[
   for opt in $ax_kconfig_user_opts; do
     var=${opt#*:}
     opt=${opt%:*}
-    #echo $opt;
     AS_CASE([$opt],
      # enable
      [enable_*],
@@ -77,6 +134,9 @@ AC_DEFUN([AX_KCONFIG],[
      ])],
      # default
      [])
+	 # remove kconfig args from ac_configure_args
+	 AS_VAR_SET([ac_configure_args],[${ac_configure_args/\'--${opt//_/-}\'/}])
+	 AS_VAR_SET([ac_configure_args],[${ac_configure_args/\'--${opt//_/-}=*\'/}])
   done;
 
   AC_ARG_ENABLE([kconfig],
@@ -89,8 +149,6 @@ AC_DEFUN([AX_KCONFIG],[
     [AS_VAR_SET_IF([ENABLE_KCONFIG],
 		   [AS_VAR_SET([enable_kconfig],[${ENABLE_KCONFIG}])],
 		   [AS_VAR_SET([enable_kconfig],[update])]
-dnl		   [AS_IF([test -f .config],,AS_VAR_SET([enable_kconfig],[update]))]
-dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 		   )]
   )
 
@@ -105,9 +163,9 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 	   # conf
 	   [conf],
 	   [AC_MSG_NOTICE([entering interactive console])
-	    $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} Kconfig" <&AS_ORIGINAL_STDIN_FD],
+		$SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} Kconfig" <&AS_ORIGINAL_STDIN_FD],
 	   # nconf
-	   [nconf],
+	   [nconf],	   
 	   [AC_MSG_NOTICE([entering interactive ncurses console])
 	    $SHELL -c "srctree=${srcdir} ${KCONFIG_NCONF} Kconfig" <&AS_ORIGINAL_STDIN_FD],
 	  )
@@ -126,13 +184,23 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
 	 )
 
   ## delay before generating config.status
-  AC_CONFIG_COMMANDS_POST([
-    AX_GETVAR_SUBDIR([$1],[KCONFIG_CONF])
-    AS_CASE([${enable_kconfig}],
+  AC_CONFIG_COMMANDS_PRE([
+	#AX_GETVAR_SUBDIR([$1],[KCONFIG_CONF])
+	AS_ECHO(["updating Kconfig values in .config"])
+	 srctree=${srcdir} ${KCONFIG_CONF} --updateconfig Kconfig
+	AS_VAR_IF([REQUIRE_RECONFIGURE],[yes],[
+	  while [[ "${REQUIRE_RECONFIGURE}" = "yes" ]]; do
+	  AS_ECHO([""])
+	  AS_ECHO(["Reconfigure requested..."])
+	  $SHELL -c "srctree=${srcdir} ../configure ${ac_configure_args}" <&AS_ORIGINAL_STDIN_FD
+	  exit
+	  done
+	])
+	AS_CASE([${enable_kconfig}],
 	    # update
-	    [update],
-	    [AC_MSG_NOTICE([store Kconfig values to .config])
-	     $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --updateconfig Kconfig"]
+		[update],
+		[AC_MSG_NOTICE([store Kconfig values to .config])
+		 $SHELL -c "srctree=${srcdir} ${KCONFIG_CONF} --updateconfig Kconfig"]
 	   )
   ])
 
@@ -140,6 +208,11 @@ dnl		   [AS_VAR_SET([enable_kconfig],[no])]
   [ test -f .config ] && source ./.config
   AS_VAR_SET([subdirs],[$subdirs_SAVE])
 ])
+
+
+
+
+
 
 
 
