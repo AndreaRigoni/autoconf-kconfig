@@ -89,7 +89,7 @@ AC_DEFUN([AX_KCONFIG],[
   AX_GETVAR_SUBDIR([$1],[KCONFIG_NCONF])
 
   # register reconfiguration upon .config changes
-  AS_VAR_APPEND([CONFIG_STATUS_DEPENDENCIES],[.config])
+  AS_VAR_APPEND([CONFIG_STATUS_DEPENDENCIES],[\$\(top_builddir\)/.config])
   AC_SUBST([CONFIG_STATUS_DEPENDENCIES])
 
   # touch configuration file
@@ -138,6 +138,7 @@ AC_DEFUN([AX_KCONFIG],[
 	 AS_VAR_SET([ac_configure_args],[${ac_configure_args/\'--${opt//_/-}\'/}])
 	 AS_VAR_SET([ac_configure_args],[${ac_configure_args/\'--${opt//_/-}=*\'/}])
   done;
+  # AS_ECHO(["ac_configure_args after kconfig: ${ac_configure_args}"])
 
   AC_ARG_ENABLE([kconfig],
     [AS_HELP_STRING([--enable-kconfig=flavor],
@@ -303,8 +304,8 @@ AC_DEFUN([AX_KCONFIG_VAR_ENABLE],[
   #AS_VAR_SET_IF([$1],,[AS_VAR_SET([$1],${[CONFIG_$1]})]
 		      #[AX_KCONFIG_EXPAND_YN([$1])])
   AS_VAR_SET_IF([$1],,[AS_VAR_SET_IF([CONFIG_$1],
-				     [AS_VAR_SET([$1],${[CONFIG_$1]})]
-				     [AX_KCONFIG_EXPAND_YN([$1])])])
+						[AS_VAR_SET([$1],${[CONFIG_$1]})
+						 AX_KCONFIG_EXPAND_YN([$1])])])
 
   AC_ARG_ENABLE(_var_,
 		[AS_HELP_STRING(--enable-[]m4_translit(_var_,[_],[-]),[$2])],
