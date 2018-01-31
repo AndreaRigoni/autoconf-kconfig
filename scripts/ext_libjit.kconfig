@@ -1,0 +1,18 @@
+# //////////////////////////////////////////////////////////////////////////// #
+# //  LIBJIT  //////////////////////////////////////////////////////////////// #
+# //////////////////////////////////////////////////////////////////////////// #
+
+menuconfig  EXT_LIBJIT
+	 bool "Enable LIBJIT compiler"
+	 default n
+	 ---help---
+	  Enable custom libjit compiler tool chain ( work in progress .. )
+
+if EXT_LIBJIT
+
+  config LIBJIT_URL
+	 string "url path for LIBJIT source repository"
+	 default "https://git.savannah.gnu.org/git/libjit.git"
+
+endif # EXT_LIBJIT
+

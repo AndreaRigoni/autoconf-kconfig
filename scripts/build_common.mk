@@ -38,7 +38,7 @@ dl__tar_ext = %.tar %.tar.gz %.tar.xz %.tar.bz %.tar.bz2
 dl__git_ext = %.git
 
 $(DOWNLOADS):
-	@ $(foreach x,$(value $(call _flt,$@)_URL),\
+	@ $(foreach x,$($(call _flt,$@)_URL),\
 		$(info Download: $x) \
 		$(if $(filter $(dl__tar_ext),$x),$(call dl__download_tar,$x,$@), \
 		$(if $(filter $(dl__git_ext),$x),$(call dl__download_git,$x,$@), \

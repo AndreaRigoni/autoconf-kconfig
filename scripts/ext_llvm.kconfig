@@ -1,0 +1,18 @@
+# //////////////////////////////////////////////////////////////////////////// #
+# //  LLVM  ////////////////////////////////////////////////////////////////// #
+# //////////////////////////////////////////////////////////////////////////// #
+
+menuconfig  EXT_LLVM
+	 bool "Enable LLVM external sources"
+	 default n
+	 ---help---
+	  Enable custom llvm compiler tool chain ( work in progress .. )
+
+if EXT_LLVM
+
+  config LLVM_URL
+	 string "url path for LLVM source repository"
+	 default "https://github.com/andrearigoni/llvm.git"
+
+endif # EXT_LIBJIT
+
