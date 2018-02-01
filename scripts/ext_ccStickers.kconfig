@@ -1,0 +1,18 @@
+# //////////////////////////////////////////////////////////////////////////// #
+# //  CCSTICKERS  //////////////////////////////////////////////////////////// #
+# //////////////////////////////////////////////////////////////////////////// #
+
+menuconfig  EXT_CCSTICKERS
+	 bool "Enable CCSTICKERS compiler"
+	 default n
+	 ---help---
+	  Enable custom ccStickers ( work in progress .. )
+
+if EXT_CCSTICKERS
+
+  config CCSTICKERS_URL
+	 string "url path for CCSTICKERS source repository"
+	 default "https://github.com/andrearigoni/ccStickers.git"
+
+endif # EXT_CCSTICKERS
+
