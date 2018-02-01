@@ -31,7 +31,7 @@ define dl__download_generic =
  mkdir -p ${DOWNLOAD_DIR}; \
  _f=${DOWNLOAD_DIR}/$$(echo $1 | sed -e 's|.*/||'); \
  test -f $$_f || curl -SL $1 > $$_f; \
- ln -sr $$_f $2;
+ $(LN_S) $$_f $2;
 endef
 
 dl__tar_ext = %.tar %.tar.gz %.tar.xz %.tar.bz %.tar.bz2
