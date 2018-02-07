@@ -21,6 +21,8 @@
 
 NPM = $(NODEJS_NPM_BINARY)
 NODE = $(NODEJS_NODE_BINARY)
+CREATE_REACT_APP = $(CREATE_REACT_APP_BINARY)
+
 NODE_PATH = $(NODEJS_MODULES_PATH)
 NPM_CONFIG_PREFIX = $(NODEJS_MODULES_PATH)
 
@@ -47,6 +49,7 @@ $(_DIRECTORIES):
 
 init: $(RDIR_NAME)/.init.stamp
 
+.PHONY: $(NODE_MODULES) $(REACT_MODULES)
 $(NODE_MODULES) $(REACT_MODULES):
 	@ $(MAKE) $(AM_MAKEFLAGS) init NAME=$@
 
@@ -74,8 +77,8 @@ clean-deps:
 	@ rm -rf $(RDIR_NAME)/node_modules
 
 list: ##@npm list defined npm modules
-list : _item = $(info | ${SH_YELLOW}$1:${SH_RESET}) \
-			   $(foreach x,$($1), $(if $(filter-out $(NAME),$x),\
+list: _item = $(info | ${SH_YELLOW}$1:${SH_RESET}) \
+			  $(foreach x,$($1),$(if $(filter-out $(NAME),$x),\
 											   $(info |     $x),\
 											   $(info |   * $x)))
 list:
@@ -103,13 +106,12 @@ js-name: ##@node start name.js script directly
 js-%: %.js
 	$(MAKE) $(AM_MAKEFLAGS) node NAME=$(subst js-,,$@)
 
-
 ## /////////////////////////////////////////////////////////////////////////////
 ## //  NPM  ////////////////////////////////////////////////////////////////////
 ## /////////////////////////////////////////////////////////////////////////////
 
-npm-init: st = $(if $(filter $(NAME),$(REACT_MODULES)), \
-					$(shell $(REACT_INIT_FUNC)))
+npm-init: st = "$(if $(filter $(NAME),$(REACT_MODULES)), \
+					$(shell $(REACT_INIT_FUNC)))"
 npm-init: NPM_ARGS = --yes
 
 npm-start: ##@npm start app
@@ -127,8 +129,10 @@ npm-%: $(RDIR_NAME)
 ## //  REACT  //////////////////////////////////////////////////////////////////
 ## /////////////////////////////////////////////////////////////////////////////
 
-REACT_INIT_FUNC ?= create-react-app $(RDIR_NAME)
-
-
+if ENABLE_REACT
+ REACT_INIT_FUNC ?= $(CREATE_REACT_APP) $(RDIR_NAME)
+else
+npm-init: ee = $(error React not found or disabled, use: "make reconfigure")
+endif
 
 

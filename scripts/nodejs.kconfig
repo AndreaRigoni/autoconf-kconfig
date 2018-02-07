@@ -43,4 +43,14 @@ if ENABLE_NODEJS
 	string  "node modules path"
 	default "${builddir}/conf/node_modules"
 
+  config ENABLE_REACT
+	bool "Enable nodejs react applications"
+	---help---
+	This enable the creation of react modules
+
+  config CREATE_REACT_APP_BINARY
+	string  "create react app binary"
+	default "/usr/sbin/create-react-app"
+	depends on ENABLE_REACT
+
 endif # ENABLE_NODEJS
