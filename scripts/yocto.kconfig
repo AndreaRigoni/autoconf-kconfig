@@ -18,21 +18,44 @@
 ##
 ## ////////////////////////////////////////////////////////////////////////// //
 
-
-
 # //////////////////////////////////////////////////////////////////////////// #
-# //  BUILD COMMON  ////////////////////////////////////////////////////////// #
+# //  YOCTO  ///////////////////////////////////////////////////////////////// #
 # //////////////////////////////////////////////////////////////////////////// #
 
-AX_KCONFIG_VAR_WITH([DOWNLOAD_DIR],["Default download directory path"])
-AC_SUBST([DOWNLOAD_DIR])
-AX_GITIGNORE_ADD_PATH([${DOWNLOAD_DIR}])
+menuconfig ENABLE_YOCTO
+  bool "Enable yocto layer builder"
+  default n
+  ---help---
+  Enable Yocto
 
-AX_KCONFIG_VAR_WITH([MAKE_PROCESS],
-			["Number of parallel process (aka -j option, 0=auto)"])
-AS_VAR_IF([MAKE_PROCESS],[0],
-	  [AS_VAR_SET([MAKE_PROCESS],[$(grep -c ^processor /proc/cpuinfo)])])
-AC_MSG_NOTICE([build make process -j${MAKE_PROCESS}])
-AC_SUBST([MAKE_PROCESS])
+if ENABLE_YOCTO
 
-AC_SUBST([DOWNLOADS])
+  config YOCTO_DIR
+	string  "Yocto src directory"
+	depends on ENABLE_YOCTO
+	default "${builddir}/yocto"
+
+  choice YOCTO_DLMETHOD
+	prompt "Yocto sources download method"
+	config YOCTO_DLMETHOD_GIT
+	 bool "git repository"
+	config YOCTO_DLMETHOD_TAR
+	 bool "tar archive"
+  endchoice
+
+  config YOCTO_URL
+	string  "Yocto download repository"
+	default "http://downloads.yoctoproject.org/releases/yocto/yocto-2.2/poky-morty-16.0.0.tar.bz2" if YOCTO_DLMETHOD_TAR
+	default "git://git.yoctoproject.org/poky.git" if YOCTO_DLMETHOD_GIT
+
+  config YOCTO_GIT_BRANCH
+	string  "Yocto version"
+	depends on YOCTO_DLMETHOD_GIT
+	default "pyro"
+
+  config YOCTO_DOCKERBUILD
+	bool "Enable build Yocto within docker build container"
+	depends on ENABLE_DOCKER_BUILD
+	default n
+
+endif # ENABLE_YOCTO

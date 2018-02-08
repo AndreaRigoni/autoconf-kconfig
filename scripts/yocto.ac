@@ -19,20 +19,42 @@
 ## ////////////////////////////////////////////////////////////////////////// //
 
 
+AX_KCONFIG_VAR_ENABLE([ENABLE_YOCTO],["Enable Yocto layered build"])
+AM_CONDITIONAL([ENABLE_YOCTO],[ test x${ENABLE_YOCTO} = xyes ])
 
-# //////////////////////////////////////////////////////////////////////////// #
-# //  BUILD COMMON  ////////////////////////////////////////////////////////// #
-# //////////////////////////////////////////////////////////////////////////// #
+AX_KCONFIG_CHOICE([YOCTO_DLMETHOD],
+		  [YOCTO_DLMETHOD_TAR],["tar"],
+		  [YOCTO_DLMETHOD_GIT],["git"])
+AM_CONDITIONAL([YOCTO_DLMETHOD_TAR],[ test x${YOCTO_DLMETHOD_TAR} = xyes ])
+AM_CONDITIONAL([YOCTO_DLMETHOD_GIT],[ test x${YOCTO_DLMETHOD_GIT} = xyes ])
 
-AX_KCONFIG_VAR_WITH([DOWNLOAD_DIR],["Default download directory path"])
-AC_SUBST([DOWNLOAD_DIR])
-AX_GITIGNORE_ADD_PATH([${DOWNLOAD_DIR}])
+AX_KCONFIG_VAR_WITH([YOCTO_URL],["Yocto url"])
+AC_SUBST([YOCTO_URL])
 
-AX_KCONFIG_VAR_WITH([MAKE_PROCESS],
-			["Number of parallel process (aka -j option, 0=auto)"])
-AS_VAR_IF([MAKE_PROCESS],[0],
-	  [AS_VAR_SET([MAKE_PROCESS],[$(grep -c ^processor /proc/cpuinfo)])])
-AC_MSG_NOTICE([build make process -j${MAKE_PROCESS}])
-AC_SUBST([MAKE_PROCESS])
+AX_KCONFIG_VAR_WITH([YOCTO_GIT_BRANCH],["Yocto version git branch"])
+AC_SUBST([YOCTO_GIT_BRANCH])
 
-AC_SUBST([DOWNLOADS])
+AX_KCONFIG_VAR_ENABLE([YOCTO_DOCKERBUILD],["build Yocto within docker build container"])
+AM_CONDITIONAL([YOCTO_DOCKERBUILD],[ test x${YOCTO_DOCKERBUILD} = xyes ])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
