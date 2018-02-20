@@ -27,7 +27,7 @@ menu  "General build options"
 
   config DOWNLOAD_DIR
 	 string "Default download directory path"
-	 default "${builddir}/download"
+	 default "${builddir}/downloads"
 	 ---help---
 	  Select the default dowload directory to be used if any package must be
 	  retrieved from url or remote. The path set here should be made available to

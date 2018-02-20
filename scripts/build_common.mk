@@ -19,17 +19,16 @@
 ## ////////////////////////////////////////////////////////////////////////// //
 
 
-
 MAKE_PROCESS  ?= $(shell grep -c ^processor /proc/cpuinfo)
-DOWNLOAD_DIR  ?= $(top_builddir)/download
+DOWNLOAD_DIR  ?= $(top_builddir)/downloads
 DOWNLOADS     ?=
 
 ## ////////////////////////////////////////////////////////////////////////// ##
 ## ///  DOWNLOAD  /////////////////////////////////////////////////////////// ##
 ## ////////////////////////////////////////////////////////////////////////// ##
 
-define dl__download_tar =
- $(info "Downloading tar file: $1")
+define dl__download_tar
+ $(info "Downloading tar file: $1") \
  $(MKDIR_P) ${DOWNLOAD_DIR} $2; \
  _tar=${DOWNLOAD_DIR}/$$(echo $1 | sed -e 's|.*/||'); \
  test -f $$_tar || curl -SL $1 > $$_tar; \
@@ -41,30 +40,31 @@ define dl__download_tar =
  fi
 endef
 
-define dl__download_git =
- $(info "Downloading git repo: $1")
+define dl__download_git
+ $(info "Downloading git repo: $1") \
  git clone $1 $2 $(if $3,-b $3)
 endef
 
-define dl__download_generic =
- $(info "Downloading file: $1")
+define dl__download_generic
+ $(info "Downloading file: $1") \
  $(MKDIR_P) ${DOWNLOAD_DIR}; \
  _f=${DOWNLOAD_DIR}/$$(echo $1 | sed -e 's|.*/||'); \
  test -f $$_f || curl -SL $1 > $$_f; \
  $(LN_S) $$_f $2;
 endef
 
+
 dl__tar_ext = %.tar %.tar.gz %.tar.xz %.tar.bz %.tar.bz2
 dl__git_ext = git://% %.git
 
 define dl__dir =
-$(if $(filter-out $1,$($1_DIR)),
-$($1_DIR): $$($1_DEPS)
+_fname = $(subst -,_,$(subst ' ',_,$(subst .,_,$1)))
+$(if $(${_fname}_DIR),
+$(${_fname}_DIR): $$(${_fname}_DEPS)
 	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$1
 )
 endef
 $(foreach x,$(DOWNLOADS),$(eval $(call dl__dir,$x)))
-
 
 # $(DOWNLOADS): _flt = $(subst -,_,$(subst ' ',_,$(subst .,_,$1)))
 $(DOWNLOADS):
@@ -78,7 +78,7 @@ download: DIR     = $(or $($(FNAME)_DIR),$(NAME))
 download: BRANCH := $(or $($(FNAME)_BRANCH),$(BRANCH))
 download: $(or $($(FNAME)_DEPS), $(DOWNLOAD_DEPS))
 	@ $(foreach x,$(URL),\
-		$(info Download: $x) \
+		$(info Download: $x to $(DIR)) \
 		$(if $(filter $(dl__tar_ext),$x),$(call dl__download_tar,$x,$(DIR)), \
 		$(if $(filter $(dl__git_ext),$x),$(call dl__download_git,$x,$(DIR),$(BRANCH)), \
 		$(call dl__download_generic,$x,$(DIR)) ) ) \
