@@ -66,16 +66,17 @@ endef
 $(foreach x,$(DOWNLOADS),$(eval $(call dl__dir,$x)))
 
 
-$(DOWNLOADS): _flt = $(subst ' ',_,$(subst .,_,$1))
+# $(DOWNLOADS): _flt = $(subst -,_,$(subst ' ',_,$(subst .,_,$1)))
 $(DOWNLOADS):
-	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$(call _flt,$@)
+	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$@
 
 .PHONY: download
 download: ##@miscellaneous download target in $NAME and $DOWNLOAD_URL
-download: URL     = $(or $($(NAME)_URL),$(DOWNLOAD_URL))
-download: DIR     = $(or $($(NAME)_DIR),$(NAME))
-download: BRANCH := $(or $($(NAME)_BRANCH),$(BRANCH))
-download: $(or $($(NAME)_DEPS), $(DOWNLOAD_DEPS))
+download: FNAME   = $(subst -,_,$(subst ' ',_,$(subst .,_,$(NAME))))
+download: URL     = $(or $($(FNAME)_URL),$(DOWNLOAD_URL))
+download: DIR     = $(or $($(FNAME)_DIR),$(NAME))
+download: BRANCH := $(or $($(FNAME)_BRANCH),$(BRANCH))
+download: $(or $($(FNAME)_DEPS), $(DOWNLOAD_DEPS))
 	@ $(foreach x,$(URL),\
 		$(info Download: $x) \
 		$(if $(filter $(dl__tar_ext),$x),$(call dl__download_tar,$x,$(DIR)), \
