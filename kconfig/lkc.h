@@ -7,7 +7,7 @@
 #define LKC_H
 
 #include "expr.h"
-
+#define KBUILD_NO_NLS
 #ifndef KBUILD_NO_NLS
 # include <libintl.h>
 #else
