@@ -1,0 +1,18 @@
+# //////////////////////////////////////////////////////////////////////////// #
+# //  JSONRPCC  ////////////////////////////////////////////////////////////// #
+# //////////////////////////////////////////////////////////////////////////// #
+
+menuconfig  EXT_JSONRPCC
+	 bool "Enable JSONRPCC compiler"
+	 default n
+	 ---help---
+	  Enable jsonrpc-c ext module ( work in progress .. )
+
+if EXT_JSONRPCC
+
+  config JSONRPCC_URL
+	 string "url path for JSONRPCC source repository"
+	 default "https://github.com/andrearigoni/jsonrpc-c.git"
+
+endif # EXT_JSONRPCC
+
