@@ -31,3 +31,6 @@ NODOCKERBUILD = help reconfigure
 export DOCKER_ENTRYPOINT ?=
 export DOCKER_NETWORKS ?= bridge
 export DOCKER_PS1
+
+# Disable shared memory for QT exported display
+export QT_X11_NO_MITSHM = 1
