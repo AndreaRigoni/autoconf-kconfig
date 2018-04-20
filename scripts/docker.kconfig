@@ -90,6 +90,16 @@ if ENABLE_DOCKER_BUILD
 	  Note:
 	  The script must exist in the container internal path
 
+
+  #
+  config DOCKER_PROFILE
+  string "DOCKER_PROFILE selection"
+  default ""
+  --- help ---
+	Docker profile to add a predefined set of arguments
+	Currently available: [debug]
+
+
   #
   config DOCKER_PS1
 	string "DOCKER_PS1 selection"

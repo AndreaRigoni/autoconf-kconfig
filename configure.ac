@@ -43,7 +43,7 @@ AS_IF([test x"${ax_cv_curses}" = x"yes" \
        -a x"${ax_cv_panel}" = x"yes" \
        -a x"${ax_cv_menu}" = x"yes" \
        -a x"${ax_cv_form}" = x"yes"],
-      [AS_VAR_SET([have_ncurses],[yes])], 
+	  [AS_VAR_SET([have_ncurses],[yes])],
       [AS_VAR_SET([have_ncurses],[no])])
 
 AC_SUBST([HAVE_NCONF],[${have_ncurses}])
