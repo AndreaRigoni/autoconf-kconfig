@@ -21,7 +21,8 @@
 
 MAKE_PROCESS  ?= $(shell grep -c ^processor /proc/cpuinfo)
 DOWNLOAD_DIR  ?= $(top_builddir)/downloads
-DOWNLOADS     ?=
+DOWNLOADS     =
+DIRECTORIES   =
 
 ## ////////////////////////////////////////////////////////////////////////// ##
 ## ///  DOWNLOAD  /////////////////////////////////////////////////////////// ##
@@ -84,4 +85,6 @@ download: $(or $($(FNAME)_DEPS), $(DOWNLOAD_DEPS))
 		$(call dl__download_generic,$x,$(DIR)) ) ) \
 	   )
 
+$(DIRECTORIES):
+	@ $(MKDIR_P) $@
 
