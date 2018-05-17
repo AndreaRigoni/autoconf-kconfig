@@ -1,0 +1,50 @@
+## ////////////////////////////////////////////////////////////////////////// //
+##
+## This file is part of the autoconf-bootstrap project.
+## Copyright 2018 Andrea Rigoni Garola <andrea.rigoni@igi.cnr.it>.
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+##
+## ////////////////////////////////////////////////////////////////////////// //
+
+
+
+# //////////////////////////////////////////////////////////////////////////// #
+# //  MDSPLUS  /////////////////////////////////////////////////////////////// #
+# //////////////////////////////////////////////////////////////////////////// #
+
+AX_KCONFIG_VAR_ENABLE([EXT_MDSPLUS],["Enable external MDSPLUS"])
+
+AX_KCONFIG_VAR_WITH([EXT_MDSPLUS_URL],["url path for MDSPLUS"])
+AC_SUBST([EXT_MDSPLUS_URL])
+AX_KCONFIG_VAR_WITH([EXT_MDSPLUS_BRANCH],["branch for MDSPLUS"])
+AC_SUBST([EXT_MDSPLUS_BRANCH])
+
+AM_CONDITIONAL([EXT_MDSPLUS],[test x"${EXT_MDSPLUS}" = x"yes"])
+
+AS_VAR_IF([EXT_MDSPLUS],[yes],[
+ if ( uname -m | grep 64 > /dev/null ); then
+  if ( echo $host| grep 64 > /dev/null ); then
+	if [[ -d /usr/lib64 ]]; then
+	  D64="64"
+	else
+	  D64=""
+	fi
+	AS_VAR_SET([MDS_LIBSUFFIX],[${D64}])
+  else
+	AS_VAR_SET([MDS_LIBSUFFIX],[32])
+  fi
+ fi
+ AC_SUBST([MDS_LIBSUFFIX])
+])
