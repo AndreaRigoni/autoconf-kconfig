@@ -99,6 +99,13 @@ if ENABLE_DOCKER_BUILD
 	Docker profile to add a predefined set of arguments
 	Currently available: [debug]
 
+  #
+  config DOCKER_RUNARGS
+  string "DOCKER_RUNARGS selection"
+  default ""
+  --- help ---
+	Docker user arguments passed to run command
+
 
   #
   config DOCKER_PS1
