@@ -20,13 +20,19 @@
 
 
 
-## include project files
-include $(addprefix $(srcdir)/,$(PRO))
+## include project files (not actually possible unfortunately)
+## include $(or $(wildcard $(PRO)),\
+##			 $(wildcard $(addprefix $(srcdir)/,$(PRO))))
 
 QMAKE_BUILD_FLAVOR ?=
 QMAKE_CONFIG ?=
 
 CLEANFILES ?= $(TARGET)
+
+export builddir \
+	   top_builddir \
+	   srcdir \
+	   top_srcdir
 
 list: ##@qt list all available qt targets
 	@ $(info |         ) \
@@ -41,11 +47,14 @@ qmake_: ##@qt build target in qt build (Makefile.qt)
 qmake_%: Makefile.qt
 	@ $(MAKE) -f $< $(subst qmake_,,$@)
 
-$(TARGET): Makefile.qt $(SOURCES) $(HEADERS)
+$(TARGET): Makefile.qt $($(TARGET)_SOURCES) $($(TARGET)_HEADERS) $($(TARGET)_FORMS)
 	@ $(info | ) \
 	  $(info | Performing qt flavor: $(QMAKE_BUILD_FLAVOR)) \
 	  $(info | ) \
 	  $(MAKE) -f $< $@
+
+# this is needed because of the use of variable HEADERS
+includedir = $(builddir)
 
 clean-local: qmake_clean
 	@ rm -rf $(CLEANFILES) Makefile.qt
