@@ -35,6 +35,8 @@ MDS_LDFLAGS  = -L${MDS_LIBDIR} \
 			   -lMdsObjectsCppShr -lMdsShr -lTreeShr -lTdiShr -lMdsIpShr \
 			   -lpthread -lm
 
+export MDS_PATH = $(MDS_SRCDIR)/tdi
+
 MDS_CLASSPATH = $(addprefix $(MDS_BUILDDIR)/,\
 				javascope/jScope.jar \
 				javascope/WaveDisaply.jar \
