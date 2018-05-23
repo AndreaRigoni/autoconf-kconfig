@@ -28,7 +28,6 @@
 @AX_DOCKER_BUILD_TARGETS@
 
 NODOCKERBUILD = help reconfigure
-export DOCKER_ENTRYPOINT ?=
 export DOCKER_NETWORKS   ?= bridge
 export DOCKER_PS1
 

@@ -83,9 +83,10 @@ if ENABLE_DOCKER_BUILD
 
   config DOCKER_ENTRYPOINT
 	string "DOCKER_ENTRYPOINT selection"
-	default ""
+	default "/bin/sh"
 	--- help ---
 	  the script that will be executed inside build when image is started.
+	  Someone might want to try with /usr/sbin/init ...
 
 	  Note:
 	  The script must exist in the container internal path
