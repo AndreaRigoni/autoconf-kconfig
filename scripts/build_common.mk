@@ -88,3 +88,23 @@ download: $(or $($(FNAME)_DEPS), $(DOWNLOAD_DEPS))
 $(DIRECTORIES):
 	@ $(MKDIR_P) $@
 
+
+if BUILD_CUSTOM_GNUMAKE
+
+DOWNLOADS += gnu-make
+gnu_make_URL = http://ftp.gnu.org/gnu/make/make-4.1.tar.gz
+gnu_make_DIR = $(BUILD_CUSTOM_GNUMAKE_DIR)
+
+$(BUILD_CUSTOM_GNUMAKE_DIR)/Makefile: | gnu-make
+	@ cd $(dir $@) && ./configure
+
+$(BUILD_CUSTOM_GNUMAKE_DIR)/make: MAKE = make
+$(BUILD_CUSTOM_GNUMAKE_DIR)/make: $(BUILD_CUSTOM_GNUMAKE_DIR)/Makefile
+	@ make -C $(dir $@) all
+
+_    = $(BUILD_CUSTOM_GNUMAKE_DIR)/make
+MAKE = $(BUILD_CUSTOM_GNUMAKE_DIR)/make
+
+endif
+
+

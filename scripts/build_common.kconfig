@@ -38,4 +38,44 @@ menu  "General build options"
 	 range 0 16
 	 default 0
 
+
+  config IDESUPPORT
+  bool "Configure development ide"
+  ---help---
+	Select and use a preconfigured project with a set ide
+
+  choice IDE
+	  prompt "Select the codac version to use"
+	  depends on IDESUPPORT
+	  config IDE_EMACS
+	   bool "Emacs"
+	  config IDE_QTCREATOR
+	   bool "Qt Creator"
+	  config IDE_ECLIPSE
+	   bool "Eclipse"
+  endchoice
+
+  config IDE_WSDIR
+	string "Workspace directory"
+	depends on IDESUPPORT && IDE_ECLIPSE
+	default "${builddir}/ws"
+	---help---
+	  Workspace directory
+
+  config BUILD_CUSTOM_GNUMAKE
+	bool "Build custom make binary"
+	---help---
+	  Build a custom make executable to have a uptodate version
+
+  config BUILD_CUSTOM_GNUMAKE_URL
+	string "Custom GNU Make URL"
+	depends on BUILD_CUSTOM_GNUMAKE
+	default "https://git.savannah.gnu.org/git/make.git"
+
+  config BUILD_CUSTOM_GNUMAKE_DIR
+	string "Build Custom GNU Make build directory"
+	depends on BUILD_CUSTOM_GNUMAKE
+	default "${builddir}/conf/GnuMake"
+
+
 endmenu
