@@ -10,13 +10,14 @@ zconf.tab.o: zconf.tab.c zconf.hash.c zconf.lex.c
 bin_PROGRAMS  = conf
 conf_SOURCES  = conf.c
 conf_LDADD    = zconf.tab.o
+conf_CPPFLAGS = $(CPPFLAGS) -Wno-format-security
 
 # NCONF
 if HAVE_NCONF
  bin_PROGRAMS += nconf
  nconf_SOURCES = nconf.c nconf.gui.c
  nconf_LDADD = zconf.tab.o @MENU_LIB@ @PANEL_LIB@ @CURSES_LIB@
- nconf_CPPFLAGS = @CURSES_CPPFLAGS@
+ nconf_CPPFLAGS = $(CPPFLAGS) @CURSES_CPPFLAGS@
 endif
 
 
