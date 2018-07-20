@@ -38,6 +38,7 @@ AC_SUBST([MAKE_PROCESS])
 AC_SUBST([DOWNLOADS])
 
 AX_KCONFIG_CHOICE([IDE],
+  [IDE_ATOM],["atom"],
   [IDE_EMACS],["emacs"],
   [IDE_QTCREATOR],["qtcreator"],
   [IDE_ECLIPSE],["eclipse"])
