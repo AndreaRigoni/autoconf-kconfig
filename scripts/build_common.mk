@@ -135,7 +135,7 @@ DIRECTORIES += $(PYTHON_USERBASE)
 pip-install: ##@python install prequired packages in $PYTHON_PACKAGES
 pip-list: ##@python install prequired packages in $PYTHON_PACKAGES
 pip-%: | $(PYTHON_USERBASE)
-	@ pip $* --user $(PYTHON_PACKAGES)
+	@ pip $* -q --user $(PYTHON_PACKAGES)
 
 ## ////////////////////////////////////////////////////////////////////////////////
 ## //  ATOM  //////////////////////////////////////////////////////////////////////
@@ -147,7 +147,10 @@ ATOM_HOME     = $(abs_top_builddir)/conf/ide/atom
 ATOM_PACKAGES =
 
 ATOM_PACKAGES   += project-manager \
-                   atom-ide-ui ide-python
+                   atom-ide-ui ide-python \
+				   teletype \
+				   refactor \
+				   autocomplete-clang goto
 
 PYTHON_PACKAGES += python-language-server[all]
 
@@ -155,7 +158,7 @@ export ATOM_HOME
 
 ATOM_PACKAGES_PATH = $(addprefix $(ATOM_HOME)/packages/,$(ATOM_PACKAGES))
 $(ATOM_PACKAGES_PATH):
-	@ apm install $@
+	@ apm install $(notdir $@)
 
 apm-list: ##@atom apm list packages in $ATOM_HOME
 apm-%: | $(ATOM_HOME)
@@ -169,7 +172,7 @@ DIRECTORIES += $(ATOM_HOME)
 edit-atom: ##@atom start atom ide
 edit-atom: ##@ide start atom
 edit-atom: | apm-install pip-install
-	@ atom --safe -a $(srcdir)
+	@ atom $(foreach d,$(or $(ATOM_PROJECT_PATH),$(top_srcdir)),-a $d )
 
 
 ## ////////////////////////////////////////////////////////////////////////////////
@@ -193,15 +196,3 @@ edit-qtcreator: ##@ide start qtcreator
 edit-qtcreator: | $(QTCREATOR_SETTINGS_PATH)
 	@ qtcreator -settingspath $(QTCREATOR_SETTINGS_PATH) \
 	            -theme $(QTCREATOR_THEME)
-
-
-
-
-
-
-
-
-
-
-
-
