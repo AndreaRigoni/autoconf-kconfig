@@ -1,11 +1,13 @@
 #! /bin/sh
 
-aclocal -I ./m4 -W none
+AUTOCONF_WARNINGS=${AUTOCONF_WARNINGS:-none}
+
+aclocal -I ./m4 -W ${AUTOCONF_WARNINGS}
 
 # autoheader
 
 # libtoolize
 
-automake --add-missing --copy -W none
+automake --add-missing --copy -W ${AUTOCONF_WARNINGS}
 
 autoconf
