@@ -85,6 +85,10 @@ download: $(or $($(FNAME)_DEPS), $(DOWNLOAD_DEPS))
 		$(call dl__download_generic,$x,$(DIR)) ) ) \
 	   )
 
+## ////////////////////////////////////////////////////////////////////////////////
+## //  DIRECTORIES  ///////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
+
 $(DIRECTORIES):
 	@ $(MKDIR_P) $@
 
@@ -116,10 +120,11 @@ endif
 ## //  IDE  ///////////////////////////////////////////////////////////////////////
 ## ////////////////////////////////////////////////////////////////////////////////
 
+if IDESUPPORT
 IDE ?= atom
-edit: ##@ide start editor define in $IDE
+edit: ##@miscellaneous start editor define in $IDE
 edit: edit-$(IDE)
-
+endif
 
 ## ////////////////////////////////////////////////////////////////////////////////
 ## //  PYTHON  ////////////////////////////////////////////////////////////////////
@@ -169,7 +174,6 @@ apm-install: $(ATOM_PACKAGES_PATH)
 
 
 DIRECTORIES += $(ATOM_HOME)
-edit-atom: ##@atom start atom ide
 edit-atom: ##@ide start atom
 edit-atom: | apm-install pip-install
 	@ atom $(foreach d,$(or $(ATOM_PROJECT_PATH),$(top_srcdir)),-a $d )
@@ -179,7 +183,7 @@ edit-atom: | apm-install pip-install
 ## //  EMACS  /////////////////////////////////////////////////////////////////////
 ## ////////////////////////////////////////////////////////////////////////////////
 
-edit-emacs: ##@ide start emacs
+## edit-emacs: ##@ide start emacs
 edit-emacs:
 	@ emacs $(srcdir)
 
@@ -192,7 +196,7 @@ edit-emacs:
 QTCREATOR_SETTINGS_PATH = $(abs_top_builddir)/conf/ide/qtcreator
 QTCREATOR_THEME = dark
 DIRECTORIES += $(QTCREATOR_SETTINGS_PATH)
-edit-qtcreator: ##@ide start qtcreator
+## edit-qtcreator: ##@ide start qtcreator
 edit-qtcreator: | $(QTCREATOR_SETTINGS_PATH)
 	@ qtcreator -settingspath $(QTCREATOR_SETTINGS_PATH) \
 	            -theme $(QTCREATOR_THEME)

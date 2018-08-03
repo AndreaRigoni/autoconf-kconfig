@@ -59,8 +59,8 @@ menu  "General build options"
 
   config IDE_WSDIR
 	string "Workspace directory"
-	depends on IDESUPPORT && IDE_ECLIPSE
-	default "${builddir}/ws"
+	depends on IDESUPPORT
+	default "${builddir}/conf/ide"
 	---help---
 	  Workspace directory
 
