@@ -72,7 +72,7 @@ $(DOWNLOADS):
 	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$@
 
 .PHONY: download
-download: ##@miscellaneous download target in $NAME and $DOWNLOAD_URL
+download: ##@@miscellaneous download target in $NAME and $DOWNLOAD_URL
 download: FNAME   = $(subst -,_,$(subst ' ',_,$(subst .,_,$(NAME))))
 download: URL     = $(or $($(FNAME)_URL),$(DOWNLOAD_URL))
 download: DIR     = $(or $($(FNAME)_DIR),$(NAME))
@@ -137,8 +137,8 @@ PYTHON_PACKAGES =
 export PYTHONUSERBASE = $(PYTHON_USERBASE)
 
 DIRECTORIES += $(PYTHON_USERBASE)
-pip-install: ##@python install prequired packages in $PYTHON_PACKAGES
-pip-list: ##@python install prequired packages in $PYTHON_PACKAGES
+pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
+pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-%: | $(PYTHON_USERBASE)
 	@ pip $* -q --user $(PYTHON_PACKAGES)
 
@@ -165,16 +165,16 @@ ATOM_PACKAGES_PATH = $(addprefix $(ATOM_HOME)/packages/,$(ATOM_PACKAGES))
 $(ATOM_PACKAGES_PATH):
 	@ apm install $(notdir $@)
 
-apm-list: ##@atom apm list packages in $ATOM_HOME
+apm-list: ##@@atom apm list packages in $ATOM_HOME
 apm-%: | $(ATOM_HOME)
 	@ apm $*
 
-apm-install: ##@atom apm install packages in $ATOM_HOME
+apm-install: ##@@atom apm install packages in $ATOM_HOME
 apm-install: $(ATOM_PACKAGES_PATH)
 
 
 DIRECTORIES += $(ATOM_HOME)
-edit-atom: ##@ide start atom
+edit-atom: ##@@ide start atom
 edit-atom: | apm-install pip-install
 	@ atom $(foreach d,$(or $(ATOM_PROJECT_PATH),$(top_srcdir)),-a $d )
 
@@ -183,7 +183,7 @@ edit-atom: | apm-install pip-install
 ## //  EMACS  /////////////////////////////////////////////////////////////////////
 ## ////////////////////////////////////////////////////////////////////////////////
 
-## edit-emacs: ##@ide start emacs
+edit-emacs: ##@@ide start emacs
 edit-emacs:
 	@ emacs $(srcdir)
 
@@ -196,7 +196,7 @@ edit-emacs:
 QTCREATOR_SETTINGS_PATH = $(abs_top_builddir)/conf/ide/qtcreator
 QTCREATOR_THEME = dark
 DIRECTORIES += $(QTCREATOR_SETTINGS_PATH)
-## edit-qtcreator: ##@ide start qtcreator
+edit-qtcreator: ##@@ide start qtcreator
 edit-qtcreator: | $(QTCREATOR_SETTINGS_PATH)
 	@ qtcreator -settingspath $(QTCREATOR_SETTINGS_PATH) \
 	            -theme $(QTCREATOR_THEME)
