@@ -138,9 +138,10 @@ export PYTHONUSERBASE = $(PYTHON_USERBASE)
 
 DIRECTORIES += $(PYTHON_USERBASE)
 pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
+pip-install: Q=-q
 pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-%: | $(PYTHON_USERBASE)
-	@ pip $* -q --user $(PYTHON_PACKAGES)
+	@ pip $* $(Q) --user $(PYTHON_PACKAGES)
 
 ## ////////////////////////////////////////////////////////////////////////////////
 ## //  ATOM  //////////////////////////////////////////////////////////////////////
@@ -148,16 +149,17 @@ pip-%: | $(PYTHON_USERBASE)
 
 
 ## ATOM_DEV_RESOURCE_PATH ?=
-ATOM_HOME     = $(abs_top_builddir)/conf/ide/atom
-ATOM_PACKAGES =
+ATOM_HOME         ?= $(abs_top_builddir)/conf/ide/atom
+ATOM_PROJECT_PATH ?= $(top_srcdir) $(builddir)
 
-ATOM_PACKAGES   += project-manager \
+ATOM_PACKAGES    = project-manager \
                    atom-ide-ui ide-python \
 				   teletype \
 				   refactor \
 				   autocomplete-clang goto
 
 PYTHON_PACKAGES += python-language-server[all]
+
 
 export ATOM_HOME
 
@@ -176,7 +178,7 @@ apm-install: $(ATOM_PACKAGES_PATH)
 DIRECTORIES += $(ATOM_HOME)
 edit-atom: ##@@ide start atom
 edit-atom: | apm-install pip-install
-	@ atom $(foreach d,$(or $(ATOM_PROJECT_PATH),$(top_srcdir)),-a $d )
+	@ atom $(foreach d,$(ATOM_PROJECT_PATH),-a $d )
 
 
 ## ////////////////////////////////////////////////////////////////////////////////
