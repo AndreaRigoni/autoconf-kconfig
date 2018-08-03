@@ -70,7 +70,7 @@ $(addprefix $(RDIR_NAME)/node_modules/,$(filter-out $(ALL_MODULES),$(DEPS))):
 	@ $(info install: $@) \
 	  cd $(RDIR_NAME); $(NPM) install $(notdir $@)
 
-deps: $(RDIR_NAME) $(RDIR_NAME)/node_modules/
+deps: | $(RDIR_NAME) $(RDIR_NAME)/node_modules/
 	@ $(MAKE) $(AM_MAKEFLAGS) $(addprefix $(RDIR_NAME)/node_modules/,$(DEPS))
 
 clean-deps:
