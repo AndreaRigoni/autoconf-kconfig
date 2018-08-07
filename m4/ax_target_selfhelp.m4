@@ -49,17 +49,39 @@ SELFHELP_FUNC = \\\\
     print "\\\\n"; \\\\
     print "| \${HELP_DESCRIPTION}\\\\n"; \\\\
     print "| \\\\n"; \\\\
-    print "| \${SH_GREEN}usage: make [target]\${SH_WHITE}\\\\n"; \\\\
+    print "| \${SH_GREEN}usage: make [target]\${SH_RESET}\\\\n"; \\\\
     print "| \\\\n"; \\\\
     for ( sort keys %help ) { \\\\
-	print "| \${SH_YELLOW}\$\$_\${SH_WHITE}:\\\\n"; \\\\
+	print "| \${SH_YELLOW}\$\$_\${SH_RESET}:\\\\n"; \\\\
 	printf("|   %-20s %-60s\\\\n", \$\$_->[[0]], \$\$_->[[1]]) for @{\$\$help{\$\$_}}; \\\\
 	print "| \\\\n"; \\\\
     } \\\\
     print "\\\\n";
 
+SELFHELP_ADVANCED_FUNC = \\\\
+    %help; \\\\
+    while(<>) { \\\\
+	if(/^([[a-zA-Z0-9_\\\\-\\\\.]]+):.*\\\\[#]\\\\[#](?:@@(\\\\w+))?\\\\s(.*)\$\$/) { \\\\
+	    push(@{\$\$adv_help{\$\$[2]}}, @<:@\$\$[1], \$\$[3]@:>@); \\\\
+	} \\\\
+    }; \\\\
+    print "\\\\n"; \\\\
+	print ", \${SH_GREEN}ADVANCED TARGETS \${SH_RESET}\\\\n"; \\\\
+	print "| \\\\n"; \\\\
+	for ( sort keys %adv_help ) { \\\\
+	print "| \${SH_YELLOW}\$\$_\${SH_RESET}:\\\\n"; \\\\
+	printf("|   %-20s %-60s\\\\n", \$\$_->[[0]], \$\$_->[[1]]) for @{\$\$adv_help{\$\$_}}; \\\\
+	print "| \\\\n"; \\\\
+	} \\\\
+    print "\\\\n";
+
 help:   ##@miscellaneous Show this help.
 	@perl -e '\$(SELFHELP_FUNC)' \$(MAKEFILE_LIST)
+
+help-more:   ##@miscellaneous get help on advanced targets.
+help-more: help
+	@perl -e '\$(SELFHELP_ADVANCED_FUNC)' \$(MAKEFILE_LIST)
+
 endif
 
 ])

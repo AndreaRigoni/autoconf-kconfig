@@ -37,7 +37,17 @@ AC_SUBST([MAKE_PROCESS])
 
 AC_SUBST([DOWNLOADS])
 
+
+# ////////////////////////////////////////////////////////////////////////////////
+# //  IDE SUPPORT  ///////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
+
+AX_KCONFIG_VAR_ENABLE([IDESUPPORT],["set with IDESUPPORT"])
+AM_CONDITIONAL([IDESUPPORT],[test x"${IDESUPPORT}" = x"yes"])
+
+
 AX_KCONFIG_CHOICE([IDE],
+  [IDE_ATOM],["atom"],
   [IDE_EMACS],["emacs"],
   [IDE_QTCREATOR],["qtcreator"],
   [IDE_ECLIPSE],["eclipse"])
@@ -45,13 +55,8 @@ AC_SUBST([IDE])
 AC_PATH_TOOL([IDE_BIN],[${IDE}])
 AC_SUBST([IDE_BIN])
 
-# AC_PATH_TOOL([IDE_EMACS_BIN],[emacs])
-# AC_PATH_TOOL([IDE_QTCREATOR_BIN],[qtcreator])
-# AC_PATH_TOOL([IDE_ECLIPSE_BIN],[eclipse])
-
 AX_KCONFIG_VAR_WITH([IDE_WSDIR],[Workspace directory])
 AC_SUBST([IDE_WSDIR])
-
 
 
 

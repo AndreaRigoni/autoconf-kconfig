@@ -47,6 +47,8 @@ menu  "General build options"
   choice IDE
 	  prompt "Select the codac version to use"
 	  depends on IDESUPPORT
+	  config IDE_ATOM
+	   bool "Atom"
 	  config IDE_EMACS
 	   bool "Emacs"
 	  config IDE_QTCREATOR
@@ -57,8 +59,8 @@ menu  "General build options"
 
   config IDE_WSDIR
 	string "Workspace directory"
-	depends on IDESUPPORT && IDE_ECLIPSE
-	default "${builddir}/ws"
+	depends on IDESUPPORT
+	default "${builddir}/conf/ide"
 	---help---
 	  Workspace directory
 
