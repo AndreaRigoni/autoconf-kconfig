@@ -156,7 +156,8 @@ ATOM_PACKAGES    = project-manager \
                    atom-ide-ui ide-python \
 				   teletype \
 				   refactor \
-				   autocomplete-clang goto
+				   autocomplete-clang goto \
+				   build build-make
 
 PYTHON_PACKAGES += python-language-server[all]
 
@@ -174,11 +175,31 @@ apm-%: | $(ATOM_HOME)
 apm-install: ##@@atom apm install packages in $ATOM_HOME
 apm-install: $(ATOM_PACKAGES_PATH)
 
-
 DIRECTORIES += $(ATOM_HOME)
 edit-atom: ##@@ide start atom
-edit-atom: | apm-install pip-install
+edit-atom: | apm-install pip-install # $(srcdir)/.atom-build.yml
 	@ atom $(foreach d,$(ATOM_PROJECT_PATH),-a $d )
+
+## ATOM_BUILD_TARGETS ?= $(SELFHELP_TARGETS)
+## $(srcdir)/.atom-build.yml: $(MAKEFILE_LIST)
+## 	@ echo "targets:" > $@; \
+## 	  for t in $(ATOM_BUILD_TARGETS); do \
+## 	  echo "   $$t: " >> $@; \
+## 	  echo "     cmd: make $$t " >> $@; \
+## 	  done;
+##
+## edit-atom-build: ##@@ide create atom-build.yml file
+## edit-atom-build: $(srcdir)/.atom-build.yml
+
+CLEANFILES += $(srcdir)/.atom-build.yml
+
+.PHONY: list-all-targets
+list-all-targets: ##@@miscellaneous list all available targets
+list-all-targets:
+	@ $(MAKE) -pRrq : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
+
+
+
 
 
 ## ////////////////////////////////////////////////////////////////////////////////

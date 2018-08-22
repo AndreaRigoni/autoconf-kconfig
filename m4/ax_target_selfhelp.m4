@@ -61,25 +61,48 @@ SELFHELP_FUNC = \\\\
 SELFHELP_ADVANCED_FUNC = \\\\
     %help; \\\\
     while(<>) { \\\\
+	if(/^([[a-zA-Z0-9_\\\\-\\\\.]]+):.*\\\\[#]\\\\[#](?:@(\\\\w+))?\\\\s(.*)\$\$/) { \\\\
+	    push(@{\$\$help{\$\$[2]}}, @<:@\$\$[1], \$\$[3]@:>@); \\\\
+	} \\\\
 	if(/^([[a-zA-Z0-9_\\\\-\\\\.]]+):.*\\\\[#]\\\\[#](?:@@(\\\\w+))?\\\\s(.*)\$\$/) { \\\\
-	    push(@{\$\$adv_help{\$\$[2]}}, @<:@\$\$[1], \$\$[3]@:>@); \\\\
+	    push(@{\$\$help{\$\$[2]}}, @<:@\$\$[1], \$\$[3]@:>@); \\\\
 	} \\\\
     }; \\\\
     print "\\\\n"; \\\\
 	print ", \${SH_GREEN}ADVANCED TARGETS \${SH_RESET}\\\\n"; \\\\
 	print "| \\\\n"; \\\\
-	for ( sort keys %adv_help ) { \\\\
+	for ( sort keys %help ) { \\\\
 	print "| \${SH_YELLOW}\$\$_\${SH_RESET}:\\\\n"; \\\\
-	printf("|   %-20s %-60s\\\\n", \$\$_->[[0]], \$\$_->[[1]]) for @{\$\$adv_help{\$\$_}}; \\\\
+	printf("|   %-20s %-60s\\\\n", \$\$_->[[0]], \$\$_->[[1]]) for @{\$\$help{\$\$_}}; \\\\
 	print "| \\\\n"; \\\\
 	} \\\\
     print "\\\\n";
 
-help:   ##@miscellaneous Show this help.
+SELFHELP_PRINT_TARGET_LIST_FUNC = \\\\
+    %help; \\\\
+    while(<>) { \\\\
+    if(/^([[a-zA-Z0-9_\\\\-\\\\.]]+):.*\\\\[#]\\\\[#](?:@(\\\\w+))?\\\\s(.*)\$\$/) { \\\\
+    	push(@{\$\$help{\$\$[2]}}, @<:@\$\$[1], \$\$[3]@:>@); } \\\\
+    if(/^([[a-zA-Z0-9_\\\\-\\\\.]]+):.*\\\\[#]\\\\[#](?:@@(\\\\w+))?\\\\s(.*)\$\$/) { \\\\
+    	push(@{\$\$help{\$\$[2]}}, @<:@\$\$[1], \$\$[3]@:>@); } \\\\
+    }; \\\\
+    for ( sort keys %help ) { \\\\
+    printf("%s ", \$\$_->[[0]]) for @{\$\$help{\$\$_}}; \\\\
+    } \\\\
+
+SELFHELP_TARGETS = \$(shell perl -e '\$(SELFHELP_PRINT_TARGET_LIST_FUNC)' \$(MAKEFILE_LIST))
+
+help:         ##@miscellaneous Show this help.
+help-more:    ##@miscellaneous get help on advanced targets.
+help-targets: ##@@miscellaneous get list of target with help signature
+
+help-targets:
+	@ \$(info \$(SELFHELP_TARGETS)):;
+
+help:
 	@perl -e '\$(SELFHELP_FUNC)' \$(MAKEFILE_LIST)
 
-help-more:   ##@miscellaneous get help on advanced targets.
-help-more: help
+help-more:
 	@perl -e '\$(SELFHELP_ADVANCED_FUNC)' \$(MAKEFILE_LIST)
 
 endif
