@@ -41,6 +41,7 @@ menu  "General build options"
 
   config IDESUPPORT
   bool "Configure development ide"
+  default y
   ---help---
 	Select and use a preconfigured project with a set ide
 
