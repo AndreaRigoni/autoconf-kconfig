@@ -121,7 +121,7 @@ endif
 ## ////////////////////////////////////////////////////////////////////////////////
 
 if IDESUPPORT
-IDE ?= atom
+IDE ?= qtcreator
 edit: ##@miscellaneous start editor define in $IDE
 edit: edit-$(IDE)
 endif

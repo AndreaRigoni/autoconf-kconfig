@@ -47,12 +47,12 @@ menu  "General build options"
   choice IDE
 	  prompt "Select the codac version to use"
 	  depends on IDESUPPORT
+	  config IDE_QTCREATOR
+	   bool "Qt Creator"
 	  config IDE_ATOM
 	   bool "Atom"
 	  config IDE_EMACS
 	   bool "Emacs"
-	  config IDE_QTCREATOR
-	   bool "Qt Creator"
 	  config IDE_ECLIPSE
 	   bool "Eclipse"
   endchoice

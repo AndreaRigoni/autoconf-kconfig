@@ -38,10 +38,10 @@ if ENABLE_DOCKER_BUILD
 
   choice DOCKER_BUILD
 	prompt "Select the docker build method"
-	config WITH_DOCKER_URL
-	 bool "Create from url with a Dockerfile"
 	config WITH_DOCKER_IMAGE
 	 bool "Pull docker image"
+	config WITH_DOCKER_URL
+	 bool "Create from url with a Dockerfile"
 	config WITH_DOCKER_CONTAINER
 	 bool "Start existing docker container"
   endchoice
@@ -49,7 +49,8 @@ if ENABLE_DOCKER_BUILD
   config DOCKER_IMAGE
 	string "Docker image"
 	depends on WITH_DOCKER_IMAGE
-	default "rigoni/linux-socdev:latest"
+	# default "consorziorfx/devel-blender:0.1"
+	default "${DOCKER_IMAGE}"
 
   config DOCKER_CONTAINER
 	string "Container name or ID"
