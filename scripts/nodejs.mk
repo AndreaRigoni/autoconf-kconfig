@@ -111,7 +111,7 @@ js-%: %.js
 ## /////////////////////////////////////////////////////////////////////////////
 
 npm-init: st = "$(if $(filter $(NAME),$(REACT_MODULES)), \
-					$(shell $(REACT_INIT_FUNC)))"
+					 $(shell $(REACT_INIT_FUNC)))"
 npm-init: NPM_ARGS = --yes
 
 npm-start: ##@npm start app
@@ -131,8 +131,6 @@ npm-%: $(RDIR_NAME)
 
 if ENABLE_REACT
  REACT_INIT_FUNC ?= $(CREATE_REACT_APP) $(RDIR_NAME)
-else
-npm-init: ee = $(error React not found or disabled, use: "make reconfigure")
 endif
 
 

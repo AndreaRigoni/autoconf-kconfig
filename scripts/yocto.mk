@@ -24,7 +24,7 @@
 ################################################################################
 
 if !YOCTO_DOCKERBUILD
-NODOCKERBUILD = yocto%
+NODOCKERBUILD += yocto%
 endif
 
 if ENABLE_YOCTO

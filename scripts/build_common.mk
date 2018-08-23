@@ -190,7 +190,7 @@ edit-atom: | apm-install pip-install # $(srcdir)/.atom-build.yml
 ##
 ## edit-atom-build: ##@@ide create atom-build.yml file
 ## edit-atom-build: $(srcdir)/.atom-build.yml
-
+CLEANFILES =
 CLEANFILES += $(srcdir)/.atom-build.yml
 
 .PHONY: list-all-targets
