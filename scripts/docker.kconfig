@@ -96,7 +96,7 @@ if ENABLE_DOCKER_BUILD
   #
   config DOCKER_PROFILE
   string "DOCKER_PROFILE selection"
-  default ""
+  default "debug"
   --- help ---
 	Docker profile to add a predefined set of arguments
 	Currently available: [debug]
