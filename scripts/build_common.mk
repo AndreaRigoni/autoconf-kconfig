@@ -123,7 +123,7 @@ endif
 if IDESUPPORT
 IDE ?= qtcreator
 edit: ##@miscellaneous start editor define in $IDE
-edit: edit-$(IDE)
+edit: $(edit_DEPS) edit-$(IDE)
 endif
 
 ## ////////////////////////////////////////////////////////////////////////////////
