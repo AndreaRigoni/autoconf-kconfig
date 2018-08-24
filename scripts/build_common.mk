@@ -76,7 +76,7 @@ download: ##@@miscellaneous download target in $NAME and $DOWNLOAD_URL
 download: FNAME   = $(subst -,_,$(subst ' ',_,$(subst .,_,$(NAME))))
 download: URL     = $(or $($(FNAME)_URL),$(DOWNLOAD_URL))
 download: DIR     = $(or $($(FNAME)_DIR),$(NAME))
-download: BRANCH := $(or $($(FNAME)_BRANCH),$(BRANCH))
+download: BRANCH  = $(or $($(FNAME)_BRANCH),$(BRANCH))
 download: $(or $($(FNAME)_DEPS), $(DOWNLOAD_DEPS))
 	@ $(foreach x,$(URL),\
 		$(info Download: $x to $(DIR)) \
