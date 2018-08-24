@@ -46,7 +46,7 @@ menu  "General build options"
 	Select and use a preconfigured project with a set ide
 
   choice IDE
-	  prompt "Select the codac version to use"
+	  prompt "dafault ide"
 	  depends on IDESUPPORT
 	  config IDE_QTCREATOR
 	   bool "Qt Creator"
