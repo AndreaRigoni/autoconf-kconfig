@@ -40,6 +40,12 @@ if EXT_MDSPLUS
 	 string "Branch"
 	 default "alpha"
 
+  config EXT_MDSPLUS_CONFIGURE_ARGS
+     string "conf args"
+     default "--disable-java"
+     --- help ---
+      arguments for the mdsplus configuration
+
 
 endif # EXT_LIBJIT
 
