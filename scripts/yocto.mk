@@ -36,6 +36,8 @@ yocto_DIR    := $(YOCTO_DIR)
 yocto_URL    := $(YOCTO_URL)
 yocto_BRANCH := $(YOCTO_GIT_BRANCH)
 
+YOCTO_BITBAKE_BINDIR = $(YOCTO_DIR)/bitbake/bin
+
 YOCTO_BUILD = $(YOCTO_DIR)/build
 YOCTO_PYBIN_PATH = $(YOCTO_BUILD)/python-bin
 
@@ -53,14 +55,13 @@ YOCTO_PY2_LINKS =  \
    $(YOCTO_PYBIN_PATH)/python-config
 
 yocto-py2-link: ##@yocto build links for python2
-yocto-py2-link: $(YOCTO_DIR) $(YOCTO_PY2_LINKS)
-
+yocto-py2-link: |$(YOCTO_DIR) $(YOCTO_PY2_LINKS)
 
 yocto-shell: ##@yocto enter oe-init-build-env
-yocto-shell: PATH := $(abs_top_builddir)/$(YOCTO_PYBIN_PATH):$(PATH)
-yocto-shell: PS1  := \\u@\h:yocto \\W]\\$$
+yocto-shell: PATH := $(abs_top_builddir)/$(YOCTO_PYBIN_PATH):$(abs_top_builddir)/$(YOCTO_BITBAKE_BINDIR):$(PATH)
+yocto-shell: PS1 := \\u@\h:yocto \\W]\\$$
 yocto-shell: yocto-py2-link
 	@ cd $(YOCTO_DIR); source ./oe-init-build-env; \
-	  bash -l
+	  bash
 
 endif

@@ -22,7 +22,6 @@
 MAKE_PROCESS  ?= $(shell grep -c ^processor /proc/cpuinfo)
 DOWNLOAD_DIR  ?= $(top_builddir)/downloads
 DOWNLOADS     =
-DIRECTORIES   =
 
 
 # PERL ENV SUBST
@@ -98,7 +97,8 @@ download: $(or $($(FNAME)_DEPS), $(DOWNLOAD_DEPS))
 ## //  DIRECTORIES  ///////////////////////////////////////////////////////////////
 ## ////////////////////////////////////////////////////////////////////////////////
 
-$(DIRECTORIES):
+ac__DIRECTORIES    = $(DIRECTORIES)
+$(ac__DIRECTORIES):
 	@ $(MKDIR_P) $@
 
 
@@ -142,17 +142,18 @@ endif
 ## ////////////////////////////////////////////////////////////////////////////////
 
 
-PYTHON_USERBASE = $(abs_top_builddir)/conf/python/site-packages
-PYTHON_PACKAGES =
+PYTHON_USERBASE     ?= $(abs_top_builddir)/conf/python/site-packages
+ac__PYTHON_PACKAGES  = $(PYTHON_PACKAGES)
 
 export PYTHONUSERBASE = $(PYTHON_USERBASE)
+export PATH := $(PYTHON_USERBASE)/bin:$(PATH)
 
-DIRECTORIES += $(PYTHON_USERBASE)
+ac__DIRECTORIES += $(PYTHON_USERBASE)
 pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-install: Q=-q
 pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-%: | $(PYTHON_USERBASE)
-	@ pip $* $(Q) --user $(PYTHON_PACKAGES)
+	@ pip $* $(Q) --upgrade --user $(ac__PYTHON_PACKAGES)
 
 ## ////////////////////////////////////////////////////////////////////////////////
 ## //  ATOM  //////////////////////////////////////////////////////////////////////
@@ -163,19 +164,20 @@ pip-%: | $(PYTHON_USERBASE)
 ATOM_HOME         ?= $(abs_top_builddir)/conf/ide/atom
 ATOM_PROJECT_PATH ?= $(top_srcdir) $(builddir)
 
-ATOM_PACKAGES    = project-manager \
-                   atom-ide-ui ide-python \
-				   teletype \
-				   refactor \
-				   autocomplete-clang goto \
-				   build build-make
+ac__ATOM_PACKAGES  = $(ATOM_PACKAGES)
+ac__ATOM_PACKAGES += project-manager \
+                     atom-ide-ui ide-python \
+				     teletype \
+				     refactor \
+				     autocomplete-clang goto \
+				     build build-make
 
-PYTHON_PACKAGES += python-language-server[all]
+ac__PYTHON_PACKAGES += setuptools python-language-server[all]
 
 
 export ATOM_HOME
 
-ATOM_PACKAGES_PATH = $(addprefix $(ATOM_HOME)/packages/,$(ATOM_PACKAGES))
+ATOM_PACKAGES_PATH = $(addprefix $(ATOM_HOME)/packages/,$(ac__ATOM_PACKAGES))
 $(ATOM_PACKAGES_PATH):
 	@ apm install $(notdir $@)
 
@@ -186,31 +188,11 @@ apm-%: | $(ATOM_HOME)
 apm-install: ##@@atom apm install packages in $ATOM_HOME
 apm-install: $(ATOM_PACKAGES_PATH)
 
-DIRECTORIES += $(ATOM_HOME)
+
+ac__DIRECTORIES += $(ATOM_HOME)
 edit-atom: ##@@ide start atom
-edit-atom: | apm-install pip-install # $(srcdir)/.atom-build.yml
+edit-atom: | apm-install pip-install
 	@ atom $(foreach d,$(ATOM_PROJECT_PATH),-a $d )
-
-## ATOM_BUILD_TARGETS ?= $(SELFHELP_TARGETS)
-## $(srcdir)/.atom-build.yml: $(MAKEFILE_LIST)
-## 	@ echo "targets:" > $@; \
-## 	  for t in $(ATOM_BUILD_TARGETS); do \
-## 	  echo "   $$t: " >> $@; \
-## 	  echo "     cmd: make $$t " >> $@; \
-## 	  done;
-##
-## edit-atom-build: ##@@ide create atom-build.yml file
-## edit-atom-build: $(srcdir)/.atom-build.yml
-CLEANFILES =
-CLEANFILES += $(srcdir)/.atom-build.yml
-
-.PHONY: list-all-targets
-list-all-targets: ##@@miscellaneous list all available targets
-list-all-targets:
-	@ $(MAKE) -pRrq : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
-
-
-
 
 
 ## ////////////////////////////////////////////////////////////////////////////////
@@ -230,7 +212,7 @@ edit-emacs:
 QTCREATOR_SETTINGS_PATH ?= $(abs_top_builddir)/conf/ide
 QTCREATOR_THEME         ?= dark
 QTCREATOR_COLOR         ?= Inkpot
-DIRECTORIES += $(QTCREATOR_SETTINGS_PATH)
+ac__DIRECTORIES += $(QTCREATOR_SETTINGS_PATH)
 edit-qtcreator: ##@@ide start qtcreator
 edit-qtcreator: | $(QTCREATOR_SETTINGS_PATH) edit-qtcreator-import-path
 	@ qtcreator -settingspath $(QTCREATOR_SETTINGS_PATH) \
@@ -262,7 +244,7 @@ edit_DEPS += qws
 
 VS_CODE_PATH         ?= $(abs_top_builddir)/conf/ide/vs_code
 VS_CODE_PROJECT_PATH ?= $(top_srcdir)
-DIRECTORIES += $(VS_CODE_PATH)
+ac__DIRECTORIES += $(VS_CODE_PATH)
 edit-code: ##@@ide start visual studio code editor
 edit-code: | $(VS_CODE_PATH)
 	@ code -n $(VS_CODE_PROJECT_PATH)  --user-data-dir $(VS_CODE_PATH)
