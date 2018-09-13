@@ -21,22 +21,25 @@
 
 NPM = $(NODEJS_NPM_BINARY)
 NODE = $(NODEJS_NODE_BINARY)
-CREATE_REACT_APP = $(CREATE_REACT_APP_BINARY)
 
-NODE_PATH = $(NODEJS_MODULES_PATH)
-NPM_CONFIG_PREFIX = $(NODEJS_MODULES_PATH)
+# NODE_PATH = $(NODEJS_MODULES_PATH)
+# NPM_CONFIG_PREFIX = $(NODEJS_MODULES_PATH)
 
-RDIR        = $(abspath $(srcdir))
-RDIR_NAME   = $(RDIR)/$(NAME)
-ALL_MODULES = $(NODE_MODULES) $(REACT_MODULES)
-NAME       ?= $(or $(lastword $(NODE_MODULES)), \
-				   $(lastword $(REACT_MODULES)))
+NODE_PATH = $(RDIR_NAME)/node_modules
+NPM_CONFIG_PREFIX = $(RDIR_NAME)
+RDIR_NAME   = $(abspath $(srcdir))/$(NAME)
+ALL_MODULES = $(NODE_MODULES)
+
+NAME       ?= $(lastword $(NODE_MODULES))
 DEPS        = $($(subst -,_,$(NAME))_DEPS)
 
+export RDIR_NAME
+export NODE_PATH
+export PATH := $(shell cd $(RDIR_NAME) && npm bin):$(PATH)
+export DEPS
 
-_DIRECTORIES = $(RDIR) \
+_DIRECTORIES = \
 			   $(RDIR_NAME) \
-			   $(NODEJS_MODULES_PATH) \
 			   $(RDIR_NAME)/node_modules/
 
 $(_DIRECTORIES):
@@ -49,8 +52,7 @@ $(_DIRECTORIES):
 
 init: $(RDIR_NAME)/.init.stamp
 
-.PHONY: $(NODE_MODULES) $(REACT_MODULES)
-$(NODE_MODULES) $(REACT_MODULES):
+$(NODE_MODULES):
 	@ $(MAKE) $(AM_MAKEFLAGS) init NAME=$@
 
 $(RDIR_NAME)/.init.stamp: npm-init
@@ -64,11 +66,11 @@ $(RDIR_NAME)/.init.stamp: npm-init
 
 $(addprefix $(RDIR_NAME)/node_modules/,$(ALL_MODULES)):
 	@ $(info link: $@) \
-	  cd $(RDIR_NAME); $(LN_S) $(RDIR)/$(notdir $@) $@
+	  cd $(RDIR_NAME); $(LN_S) $(RDIR)/$(or $(word 2, $(subst @, @,$@)), $(@F)) $@
 
 $(addprefix $(RDIR_NAME)/node_modules/,$(filter-out $(ALL_MODULES),$(DEPS))):
 	@ $(info install: $@) \
-	  cd $(RDIR_NAME); $(NPM) install $(notdir $@)
+	  cd $(RDIR_NAME); $(NPM) install $(or $(word 2, $(subst @, @,$@)), $(@F))
 
 deps: | $(RDIR_NAME) $(RDIR_NAME)/node_modules/
 	@ $(MAKE) $(AM_MAKEFLAGS) $(addprefix $(RDIR_NAME)/node_modules/,$(DEPS))
@@ -88,8 +90,6 @@ list:
 	$(info |) \
 	$(call _item,NODE_MODULES) \
 	$(info |) \
-	$(call _item,REACT_MODULES) \
-	$(info |) \
 	$(call _item,$(NAME)_DEPS) \
 	$(info |) \
 	$(info `-----------------------------------------------------------------) :
@@ -99,38 +99,41 @@ list:
 ## //  NODE  ///////////////////////////////////////////////////////////////////
 ## /////////////////////////////////////////////////////////////////////////////
 
-node: $(RDIR) deps
+
+node: | deps
 	$(NODE) $(srcdir)/$(NAME).js $(NODE_ARGS)
 
-js-name: ##@node start name.js script directly
+js-name: ##@@node start name.js script directly
 js-%: %.js
-	$(MAKE) $(AM_MAKEFLAGS) node NAME=$(subst js-,,$@)
+	$(MAKE) $(AM_MAKEFLAGS) node NAME=$*
 
 ## /////////////////////////////////////////////////////////////////////////////
 ## //  NPM  ////////////////////////////////////////////////////////////////////
 ## /////////////////////////////////////////////////////////////////////////////
 
-npm-init: st = "$(if $(filter $(NAME),$(REACT_MODULES)), \
-					 $(shell $(REACT_INIT_FUNC)))"
-npm-init: NPM_ARGS = --yes
+react-init: ##@@node init new react app
+react-init: $(RDIR_NAME) deps
+	@ create-react-app $(RDIR_NAME);
 
-npm-start: ##@npm start app
+VUE_TEMPLATE ?= webpack-simple
+vue-init: ##@@node init new vue app (adds @vue/cli-init)
+vue-init: DEPS += @vue/cli-init
+vue-init: $(RDIR_NAME) deps
+	@ vue init $(VUE_TEMPLATE) $(NAME); $(MAKE) npm-install
+
+npm-init: ##@@npm init new app
+npm-init: NPM_ARGS = --yes
+npm-init: $(RDIR_NAME)
+	@ cd $(RDIR_NAME); $(NPM) init $(NPM_ARGS)
+
+npm-start: ##@@npm start app
 npm-start: $(NAME) deps
 
-npm-stop:  ##@npm stop app
+npm-stop:  ##@@npm stop app
 
 npm-install: npm-update
 npm-%: $(RDIR_NAME)
-	@ $(info $(st)) \
-	  cd $(RDIR_NAME); $(NPM) $(subst npm-,,$@) $(NPM_ARGS)
+	@ cd $(RDIR_NAME); $(NPM) $* $(NPM_ARGS)
 
-
-## /////////////////////////////////////////////////////////////////////////////
-## //  REACT  //////////////////////////////////////////////////////////////////
-## /////////////////////////////////////////////////////////////////////////////
-
-if ENABLE_REACT
- REACT_INIT_FUNC ?= $(CREATE_REACT_APP) $(RDIR_NAME)
-endif
 
 

@@ -24,6 +24,15 @@ DOWNLOAD_DIR  ?= $(top_builddir)/downloads
 DOWNLOADS     =
 DIRECTORIES   =
 
+
+# PERL ENV SUBST
+# --------------
+# This can be used to make a sh substitution template by calling $(call __ax_pl_envsubst, template, target)
+#
+__ax_pl_envsubst ?= $(PERL) -pe 's/([^\\]|^)\$$\{([a-zA-Z_][a-zA-Z_0-9]*)\}/$$1.$$ENV{$$2}/eg' < $1 > $2
+
+
+
 ## ////////////////////////////////////////////////////////////////////////// ##
 ## ///  DOWNLOAD  /////////////////////////////////////////////////////////// ##
 ## ////////////////////////////////////////////////////////////////////////// ##
@@ -119,6 +128,8 @@ endif
 ## ////////////////////////////////////////////////////////////////////////////////
 ## //  IDE  ///////////////////////////////////////////////////////////////////////
 ## ////////////////////////////////////////////////////////////////////////////////
+
+edit_DEPS =
 
 if IDESUPPORT
 IDE ?= qtcreator
@@ -216,10 +227,48 @@ edit-emacs:
 ## ////////////////////////////////////////////////////////////////////////////////
 
 
-QTCREATOR_SETTINGS_PATH = $(abs_top_builddir)/conf/ide/qtcreator
-QTCREATOR_THEME = dark
+QTCREATOR_SETTINGS_PATH ?= $(abs_top_builddir)/conf/ide
+QTCREATOR_THEME         ?= dark
+QTCREATOR_COLOR         ?= Inkpot
 DIRECTORIES += $(QTCREATOR_SETTINGS_PATH)
 edit-qtcreator: ##@@ide start qtcreator
-edit-qtcreator: | $(QTCREATOR_SETTINGS_PATH)
+edit-qtcreator: | $(QTCREATOR_SETTINGS_PATH) edit-qtcreator-import-path
 	@ qtcreator -settingspath $(QTCREATOR_SETTINGS_PATH) \
-	            -theme $(QTCREATOR_THEME)
+					-theme $(QTCREATOR_THEME) -color $(QTCREATOR_COLOR)
+
+
+## ////////////////////////////////////////////////////////////////////////////////
+## //  QWS  ///////////////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
+##
+## QWS are the qtcreator work spaces files.. they needs to be compiled with the
+## absolute path so then a template is filled using the path discovered by
+## autotools to create the correct project paths in qtcreator for "edit" target
+
+SUFFIXES = .qws .qws.template
+.qws.template.qws:
+	 @ $(call __ax_pl_envsubst,$<,$@);
+
+QWS_FILES_TEMPLATES  = $(shell find $(top_srcdir)/conf/ide/QtProject/qtcreator/ -name '*.qws.template')
+QWS_FILES = $(QWS_FILES_TEMPLATES:.qws.template=.qws)
+qws: abs_top_srcdir := $(abs_top_srcdir)
+qws: $(QWS_FILES)
+edit_DEPS += qws
+
+
+## ////////////////////////////////////////////////////////////////////////////////
+## //  VS CODE  ///////////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
+
+VS_CODE_PATH         ?= $(abs_top_builddir)/conf/ide/vs_code
+VS_CODE_PROJECT_PATH ?= $(top_srcdir)
+DIRECTORIES += $(VS_CODE_PATH)
+edit-code: ##@@ide start visual studio code editor
+edit-code: | $(VS_CODE_PATH)
+	@ code -n $(VS_CODE_PROJECT_PATH)  --user-data-dir $(VS_CODE_PATH)
+
+
+
+
+
+
