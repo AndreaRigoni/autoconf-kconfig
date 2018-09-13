@@ -97,7 +97,7 @@ download: $(or $($(FNAME)_DEPS), $(DOWNLOAD_DEPS))
 ## //  DIRECTORIES  ///////////////////////////////////////////////////////////////
 ## ////////////////////////////////////////////////////////////////////////////////
 
-ac__DIRECTORIES    = $(DIRECTORIES)
+ac__DIRECTORIES  = $(DIRECTORIES)
 $(ac__DIRECTORIES):
 	@ $(MKDIR_P) $@
 
@@ -226,8 +226,10 @@ edit-qtcreator: | $(QTCREATOR_SETTINGS_PATH) edit-qtcreator-import-path
 ## QWS are the qtcreator work spaces files.. they needs to be compiled with the
 ## absolute path so then a template is filled using the path discovered by
 ## autotools to create the correct project paths in qtcreator for "edit" target
-
-SUFFIXES = .qws .qws.template
+# TODO: how to add suffixes transparently?
+ac__SUFFIXES  = $(SUFFIXES)
+ac__SUFFIXES += .qws .qws.template
+SUFFIXES     ?= $(ac__SUFFIXES)
 .qws.template.qws:
 	 @ $(call __ax_pl_envsubst,$<,$@);
 
