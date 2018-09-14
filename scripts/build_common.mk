@@ -21,8 +21,8 @@
 
 MAKE_PROCESS  ?= $(shell grep -c ^processor /proc/cpuinfo)
 DOWNLOAD_DIR  ?= $(top_builddir)/downloads
-DOWNLOADS     =
-
+ak__DOWNLOADS  = $(DOWNLOADS)
+DOWNLOADS     ?= $(ak__DOWNLOADS)
 
 # PERL ENV SUBST
 # --------------
@@ -73,10 +73,10 @@ $(${_fname}_DIR): $$(${_fname}_DEPS)
 	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$1
 )
 endef
-$(foreach x,$(DOWNLOADS),$(eval $(call dl__dir,$x)))
+$(foreach x,$(ak__DOWNLOADS),$(eval $(call dl__dir,$x)))
 
-# $(DOWNLOADS): _flt = $(subst -,_,$(subst ' ',_,$(subst .,_,$1)))
-$(DOWNLOADS):
+# $(ak__DOWNLOADS): _flt = $(subst -,_,$(subst ' ',_,$(subst .,_,$1)))
+$(ak__DOWNLOADS):
 	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$@
 
 .PHONY: download
@@ -97,8 +97,8 @@ download: $(or $($(FNAME)_DEPS), $(DOWNLOAD_DEPS))
 ## //  DIRECTORIES  ///////////////////////////////////////////////////////////////
 ## ////////////////////////////////////////////////////////////////////////////////
 
-ac__DIRECTORIES  = $(DIRECTORIES)
-$(ac__DIRECTORIES):
+ak__DIRECTORIES  = $(DIRECTORIES)
+$(ak__DIRECTORIES):
 	@ $(MKDIR_P) $@
 
 
@@ -108,9 +108,9 @@ $(ac__DIRECTORIES):
 
 if BUILD_CUSTOM_GNUMAKE
 
-DOWNLOADS += gnu-make
-gnu_make_URL = http://ftp.gnu.org/gnu/make/make-4.1.tar.gz
-gnu_make_DIR = $(BUILD_CUSTOM_GNUMAKE_DIR)
+ak__DOWNLOADS += gnu-make
+gnu_make_URL   = http://ftp.gnu.org/gnu/make/make-4.1.tar.gz
+gnu_make_DIR   = $(BUILD_CUSTOM_GNUMAKE_DIR)
 
 $(BUILD_CUSTOM_GNUMAKE_DIR)/Makefile: | gnu-make
 	@ cd $(dir $@) && ./configure
@@ -148,7 +148,7 @@ ac__PYTHON_PACKAGES  = $(PYTHON_PACKAGES)
 export PYTHONUSERBASE = $(PYTHON_USERBASE)
 export PATH := $(PYTHON_USERBASE)/bin:$(PATH)
 
-ac__DIRECTORIES += $(PYTHON_USERBASE)
+ak__DIRECTORIES += $(PYTHON_USERBASE)
 pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-install: Q=-q
 pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
@@ -189,7 +189,7 @@ apm-install: ##@@atom apm install packages in $ATOM_HOME
 apm-install: $(ATOM_PACKAGES_PATH)
 
 
-ac__DIRECTORIES += $(ATOM_HOME)
+ak__DIRECTORIES += $(ATOM_HOME)
 edit-atom: ##@@ide start atom
 edit-atom: | apm-install pip-install
 	@ atom $(foreach d,$(ATOM_PROJECT_PATH),-a $d )
@@ -212,7 +212,7 @@ edit-emacs:
 QTCREATOR_SETTINGS_PATH ?= $(abs_top_builddir)/conf/ide
 QTCREATOR_THEME         ?= dark
 QTCREATOR_COLOR         ?= Inkpot
-ac__DIRECTORIES += $(QTCREATOR_SETTINGS_PATH)
+ak__DIRECTORIES += $(QTCREATOR_SETTINGS_PATH)
 edit-qtcreator: ##@@ide start qtcreator
 edit-qtcreator: | $(QTCREATOR_SETTINGS_PATH) edit-qtcreator-import-path
 	@ qtcreator -settingspath $(QTCREATOR_SETTINGS_PATH) \
@@ -243,7 +243,7 @@ edit_DEPS += qws
 
 VS_CODE_PATH         ?= $(abs_top_builddir)/conf/ide/vs_code
 VS_CODE_PROJECT_PATH ?= $(top_srcdir)
-ac__DIRECTORIES += $(VS_CODE_PATH)
+ak__DIRECTORIES += $(VS_CODE_PATH)
 edit-code: ##@@ide start visual studio code editor
 edit-code: | $(VS_CODE_PATH)
 	@ code -n $(VS_CODE_PROJECT_PATH)  --user-data-dir $(VS_CODE_PATH)

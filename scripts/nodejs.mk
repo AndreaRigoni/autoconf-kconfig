@@ -37,7 +37,7 @@ export NODE_PATH
 export PATH := $(shell cd $(RDIR_NAME) && npm bin):$(PATH)
 export DEPS
 
-am__DIRECTORIES += $(RDIR_NAME) \
+ak__DIRECTORIES += $(RDIR_NAME) \
 				   $(RDIR_NAME)/node_modules/
 
 ## /////////////////////////////////////////////////////////////////////////////
