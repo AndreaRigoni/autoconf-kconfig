@@ -19,22 +19,22 @@
 ## ////////////////////////////////////////////////////////////////////////// //
 
 
-NPM = $(NODEJS_NPM_BINARY)
-NODE = $(NODEJS_NODE_BINARY)
+NPM  = $(or $(NODEJS_NPM_BINARY),npm)
+NODE = $(or $(NODEJS_NODE_BINARY),node)
 
 # NODE_PATH = $(NODEJS_MODULES_PATH)
 # NPM_CONFIG_PREFIX = $(NODEJS_MODULES_PATH)
 
 NODE_PATH = $(RDIR_NAME)/node_modules
 NPM_CONFIG_PREFIX = $(RDIR_NAME)
-RDIR_NAME   = $(abspath $(srcdir))/$(NAME)
 
-NAME       ?= $(lastword $(NODE_MODULES))
+NAME        = $(lastword $(NODE_MODULES))
+RDIR_NAME   = $(abspath $(srcdir))/$(NAME)
 DEPS        = $($(subst -,_,$(NAME))_DEPS)
 
 export RDIR_NAME
 export NODE_PATH
-export PATH := $(shell cd $(RDIR_NAME) && npm bin):$(PATH)
+export PATH := $(RDIR_NAME)/node_modules/.bin:$(PATH)
 export DEPS
 
 ak__DIRECTORIES += $(RDIR_NAME) \
@@ -66,13 +66,12 @@ $(addprefix $(RDIR_NAME)/node_modules/,$(filter-out $(NODE_MODULES),$(DEPS))):
 	  cd $(RDIR_NAME); $(NPM) install $(or $(word 2, $(subst @, @,$@)), $(@F))
 
 deps: | $(RDIR_NAME) $(RDIR_NAME)/node_modules/
-	@ $(MAKE) $(AM_MAKEFLAGS) $(addprefix $(RDIR_NAME)/node_modules/,$(DEPS))
+	@ $(MAKE) $(AM_MAKEFLAGS) $(addprefix $(RDIR_NAME)/node_modules/,$(DEPS)) DEPS="$(DEPS)"
 
 clean-deps:
 	@ rm -rf $(RDIR_NAME)/node_modules
 
-list: \
-##@npm list defined npm modules
+list: ##@npm list defined npm modules
 list: _item = $(info | ${SH_YELLOW}$1:${SH_RESET}) \
 			  $(foreach x,$($1),$(if $(filter-out $(NAME),$x),\
 											   $(info |     $x),\

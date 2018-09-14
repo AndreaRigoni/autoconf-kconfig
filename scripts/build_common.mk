@@ -97,9 +97,9 @@ download: $(or $($(FNAME)_DEPS), $(DOWNLOAD_DEPS))
 ## //  DIRECTORIES  ///////////////////////////////////////////////////////////////
 ## ////////////////////////////////////////////////////////////////////////////////
 
-ak__DIRECTORIES  = $(DIRECTORIES)
+ak__DIRECTORIES = $(DIRECTORIES)
 $(ak__DIRECTORIES):
-	@ $(MKDIR_P) $@
+	@ $(info buildinf dir for: $@) $(MKDIR_P) $@
 
 
 ## ////////////////////////////////////////////////////////////////////////////////
@@ -209,13 +209,13 @@ edit-emacs:
 ## ////////////////////////////////////////////////////////////////////////////////
 
 
-QTCREATOR_SETTINGS_PATH ?= $(abs_top_builddir)/conf/ide
-QTCREATOR_THEME         ?= dark
-QTCREATOR_COLOR         ?= Inkpot
-ak__DIRECTORIES += $(QTCREATOR_SETTINGS_PATH)
+ak__QTCREATOR_SETTINGS_PATH = $(or $(QTCREATOR_SETTINGS_PATH),$(abs_top_builddir)/conf/ide)
+QTCREATOR_THEME ?= dark
+QTCREATOR_COLOR ?= Inkpot
+ak__DIRECTORIES += $(ak__QTCREATOR_SETTINGS_PATH)
 edit-qtcreator: ##@@ide start qtcreator
-edit-qtcreator: | $(QTCREATOR_SETTINGS_PATH) edit-qtcreator-import-path
-	@ qtcreator -settingspath $(QTCREATOR_SETTINGS_PATH) \
+edit-qtcreator: | $(ak__QTCREATOR_SETTINGS_PATH)
+	@ qtcreator -settingspath $(ak__QTCREATOR_SETTINGS_PATH) \
 					-theme $(QTCREATOR_THEME) -color $(QTCREATOR_COLOR)
 
 
@@ -230,23 +230,22 @@ edit-qtcreator: | $(QTCREATOR_SETTINGS_PATH) edit-qtcreator-import-path
 %.qws: %.template.qws
 	 @ $(call __ax_pl_envsubst,$<,$@);
 
-QWS_FILES_TEMPLATES  = $(shell find $(top_srcdir)/conf/ide/QtProject/qtcreator/ -name '*.qws.template')
-QWS_FILES = $(QWS_FILES_TEMPLATES:.qws.template=.qws)
+qws: QWS_FILES_TEMPLATES = $(shell find $(top_srcdir)/conf/ide/QtProject/qtcreator/ -name '*.qws.template' 3>/dev/null)
+qws: QWS_FILES = $(QWS_FILES_TEMPLATES:.qws.template=.qws)
 qws: abs_top_srcdir := $(abs_top_srcdir)
 qws: $(QWS_FILES)
 edit_DEPS += qws
-
 
 ## ////////////////////////////////////////////////////////////////////////////////
 ## //  VS CODE  ///////////////////////////////////////////////////////////////////
 ## ////////////////////////////////////////////////////////////////////////////////
 
-VS_CODE_PATH         ?= $(abs_top_builddir)/conf/ide/vs_code
-VS_CODE_PROJECT_PATH ?= $(top_srcdir)
-ak__DIRECTORIES += $(VS_CODE_PATH)
+ak__VS_CODE_PATH          = $(or $(VS_CODE_PATH),$(abs_top_builddir)/conf/ide/vs_code)
+ak__VS_CODE_PROJECT_PATH  = $(or $(VS_CODE_PROJECT_PATH),$(top_srcdir))
+ak__DIRECTORIES += $(ak__VS_CODE_PATH)
 edit-code: ##@@ide start visual studio code editor
-edit-code: | $(VS_CODE_PATH)
-	@ code -n $(VS_CODE_PROJECT_PATH)  --user-data-dir $(VS_CODE_PATH)
+edit-code: | $(ak__VS_CODE_PATH)
+	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH)
 
 
 
