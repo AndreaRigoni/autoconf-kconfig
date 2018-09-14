@@ -37,17 +37,12 @@ export NODE_PATH
 export PATH := $(shell cd $(RDIR_NAME) && npm bin):$(PATH)
 export DEPS
 
-_DIRECTORIES = \
-			   $(RDIR_NAME) \
-			   $(RDIR_NAME)/node_modules/
-
-$(_DIRECTORIES):
-	@ $(MKDIR_P) $@
+am__DIRECTORIES += $(RDIR_NAME) \
+				   $(RDIR_NAME)/node_modules/
 
 ## /////////////////////////////////////////////////////////////////////////////
 ## //  INIT  ///////////////////////////////////////////////////////////////////
 ## /////////////////////////////////////////////////////////////////////////////
-
 
 init: $(RDIR_NAME)/.init.stamp
 
@@ -56,7 +51,6 @@ $(NODE_MODULES):
 
 $(RDIR_NAME)/.init.stamp: npm-init
 	@ touch $@
-
 
 ## /////////////////////////////////////////////////////////////////////////////
 ## //  DEPS  ///////////////////////////////////////////////////////////////////
@@ -77,7 +71,8 @@ deps: | $(RDIR_NAME) $(RDIR_NAME)/node_modules/
 clean-deps:
 	@ rm -rf $(RDIR_NAME)/node_modules
 
-list: ##@npm list defined npm modules
+list: \
+##@npm list defined npm modules
 list: _item = $(info | ${SH_YELLOW}$1:${SH_RESET}) \
 			  $(foreach x,$($1),$(if $(filter-out $(NAME),$x),\
 											   $(info |     $x),\
