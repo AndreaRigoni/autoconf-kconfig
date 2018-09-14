@@ -28,7 +28,6 @@ NODE = $(NODEJS_NODE_BINARY)
 NODE_PATH = $(RDIR_NAME)/node_modules
 NPM_CONFIG_PREFIX = $(RDIR_NAME)
 RDIR_NAME   = $(abspath $(srcdir))/$(NAME)
-ALL_MODULES = $(NODE_MODULES)
 
 NAME       ?= $(lastword $(NODE_MODULES))
 DEPS        = $($(subst -,_,$(NAME))_DEPS)
@@ -64,11 +63,11 @@ $(RDIR_NAME)/.init.stamp: npm-init
 ## /////////////////////////////////////////////////////////////////////////////
 
 
-$(addprefix $(RDIR_NAME)/node_modules/,$(ALL_MODULES)):
+$(addprefix $(RDIR_NAME)/node_modules/,$(NODE_MODULES)):
 	@ $(info link: $@) \
 	  cd $(RDIR_NAME); $(LN_S) $(RDIR)/$(or $(word 2, $(subst @, @,$@)), $(@F)) $@
 
-$(addprefix $(RDIR_NAME)/node_modules/,$(filter-out $(ALL_MODULES),$(DEPS))):
+$(addprefix $(RDIR_NAME)/node_modules/,$(filter-out $(NODE_MODULES),$(DEPS))):
 	@ $(info install: $@) \
 	  cd $(RDIR_NAME); $(NPM) install $(or $(word 2, $(subst @, @,$@)), $(@F))
 
