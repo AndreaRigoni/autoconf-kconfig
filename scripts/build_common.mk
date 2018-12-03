@@ -146,7 +146,7 @@ PYTHON_USERBASE     ?= $(abs_top_builddir)/conf/python/site-packages
 ac__PYTHON_PACKAGES  = $(PYTHON_PACKAGES)
 
 export PYTHONUSERBASE = $(PYTHON_USERBASE)
-export PATH := $(PYTHON_USERBASE)/bin:$(PATH)
+export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
 
 ak__DIRECTORIES += $(PYTHON_USERBASE)
 pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
