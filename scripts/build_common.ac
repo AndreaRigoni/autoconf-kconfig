@@ -38,6 +38,18 @@ AC_SUBST([MAKE_PROCESS])
 AC_SUBST([DOWNLOADS])
 
 
+
+
+##
+## conditional with src build
+## TODO: move this in bootstrap
+##
+AS_VAR_SET([abs_srcdir],[$(cd ${srcdir}; pwd)])
+AS_VAR_SET([abs_builddir],[$(cd ${builddir}; pwd)])
+AM_CONDITIONAL([SRCDIR_BUILD],[test "x${abs_srcdir}" == "x${abs_builddir}"])
+AC_SUBST([SRCDIR_BUILD])
+
+
 # ////////////////////////////////////////////////////////////////////////////////
 # //  IDE SUPPORT  ///////////////////////////////////////////////////////////////
 # ////////////////////////////////////////////////////////////////////////////////
