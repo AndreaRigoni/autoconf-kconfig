@@ -28,9 +28,12 @@ DOWNLOADS     ?= $(ak__DOWNLOADS)
 # --------------
 # This can be used to make a sh substitution template by calling $(call __ax_pl_envsubst, template, target)
 #
-__ax_pl_envsubst ?= $(PERL) -pe 's/([^\\]|^)\$$\{([a-zA-Z_][a-zA-Z_0-9]*)\}/$$1.$$ENV{$$2}/eg' < $1 > $2
+# __ax_pl_envsubst ?= $(PERL) -pe 's/([^\\]|^)\$$\{([a-zA-Z_][a-zA-Z_0-9]*)\}/$$1.$$ENV{$$2}/eg' < $1 > $2
+__ax_pl_envsubst  ?= $(PERL) -pe 's/([^\\]|^)\$$\{([a-zA-Z_][a-zA-Z_0-9]*)\}/$$1.$$ENV{$$2}/eg;s/\\\$$/\$$/g;' < $1 > $2
+__ax_pl_envsubst2 ?= $(PERL) -pe 's/([^\\]|^)\$$\(([a-zA-Z_][a-zA-Z_0-9]*)\)/$$1.$$ENV{$$2}/eg;s/\\\$$/\$$/g;' < $1 > $2
 
-
+# $(ak__ENVPARSEFILES):
+# 	@ $(call __ax_pl_envsubst2,$<,$@);
 
 ## ////////////////////////////////////////////////////////////////////////// ##
 ## ///  DOWNLOAD  /////////////////////////////////////////////////////////// ##
