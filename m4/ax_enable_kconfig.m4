@@ -317,6 +317,14 @@ AC_DEFUN([AX_KCONFIG_WITH_EXEC],[
 ])
 
 
+# AX_YN2TF(VARIABLE,<true>,<false>)
+# ------------------------------------------------------------------------------------ 
+#   convert yes-no to $3,$4 or true-false into a new variable $2 or $1_TF
+#
+AC_DEFUN([AX_YN2TF],[    
+  AS_VAR_IF([$1],[yes],[AS_VAR_SET([m4_default([$2],[$1_TF])],[m4_default([$3],[true])])])
+  AS_VAR_IF([$1],[no],[AS_VAR_SET([m4_default([$2],[$1_TF])],[m4_default([$4],[false])])])  
+])
 
 
 # AX_KCONFIG_VAR_ENABLE(FEATURE, HELP)
