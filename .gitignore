@@ -25,3 +25,11 @@ kconfig/conf.o
 kconfig/nconf-nconf.gui.o
 kconfig/nconf-nconf.o
 kconfig/zconf.tab.o
+
+COPYING
+INSTALL
+configure
+Makefile.in
+kconfig/Makefile.in
+
+
