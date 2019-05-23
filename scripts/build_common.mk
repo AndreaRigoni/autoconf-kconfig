@@ -109,6 +109,41 @@ $(ak__DIRECTORIES):
 	@ $(info buildinf dir for: $@) $(MKDIR_P) $@
 
 
+## INSTALL DIRECTORY AUTOMAKE OVERLOAD ////////////////////////////////////////////
+#  USAGE: to install name as a whole directory add the following target:
+#
+#  install-<name>DATA:
+# 	 @ $(MAKE) ak__$@
+#
+ak__install-%DATA:
+	@$(NORMAL_INSTALL)
+	@list='$($*_DATA)'; test -n "$($*dir)" || list=; \
+	 if test -n "$$list"; then \
+	   echo " $(MKDIR_P) '$(DESTDIR)$($*dir)'"; \
+	   $(MKDIR_P) "$(DESTDIR)$($*dir)" || exit 1; \
+	 fi; \
+	 for p in $$list; do \
+	   if test -f "$$p"; then echo "$$p"; \
+	   else p="$(srcdir)/$$p"; \
+	    if test -f "$$p"; then echo "$$p"; fi; \
+	   fi; \
+	 done | $(am__base_list) | \
+	 while read files; do \
+	   echo " $(INSTALL_DATA) $$files '$(DESTDIR)$($*dir)'"; \
+	   $(INSTALL_DATA) $$files "$(DESTDIR)$($*dir)" || exit $$?; \
+	 done; \
+	 for p in $$list; do \
+	   if test -d "$$p"; then echo "$$p"; \
+	   else p="$(srcdir)/$$p"; \
+	    if test -d "$$p"; then echo "$$p"; fi; \
+	   fi; \
+	 done | $(am__base_list) | \
+	 while read drs; do \
+	 	echo "copy directory: $$drs to $(DESTDIR)$($*dir)"; \
+	 	cp -an $$drs "$(DESTDIR)$($*dir)"; \
+	 done
+
+
 ## ////////////////////////////////////////////////////////////////////////////////
 ## //  CUSTOM MAKE  ///////////////////////////////////////////////////////////////
 ## ////////////////////////////////////////////////////////////////////////////////
