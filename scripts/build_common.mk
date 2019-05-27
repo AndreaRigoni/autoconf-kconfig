@@ -140,7 +140,7 @@ ak__install-%DATA:
 	 done | $(am__base_list) | \
 	 while read drs; do \
 	 	echo "copy directory: $$drs to $(DESTDIR)$($*dir)"; \
-	 	cp -an $$drs "$(DESTDIR)$($*dir)"; \
+	 	cp -au $$drs "$(DESTDIR)$($*dir)"; \
 	 done
 
 
