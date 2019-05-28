@@ -184,7 +184,7 @@ endif
 ## ////////////////////////////////////////////////////////////////////////////////
 
 
-PYTHON_USERBASE     ?= $(abs_top_builddir)/conf/python/site-packages
+PYTHON_USERBASE      = $(abs_top_builddir)/conf/python/site-packages
 ac__PYTHON_PACKAGES  = $(PYTHON_PACKAGES)
 
 export PYTHONUSERBASE = $(PYTHON_USERBASE)
