@@ -7,14 +7,14 @@ override CFLAGS=${LOCAL_CFLAGS}
 zconf.tab.o: zconf.tab.c zconf.hash.c zconf.lex.c
 
 # CONF
-bin_PROGRAMS  = conf
+noinst_PROGRAMS  = conf
 conf_SOURCES  = conf.c
 conf_LDADD    = zconf.tab.o
 conf_CPPFLAGS = $(CPPFLAGS) -Wno-format-security
 
 # NCONF
 if HAVE_NCONF
- bin_PROGRAMS += nconf
+ noinst_PROGRAMS += nconf
  nconf_SOURCES = nconf.c nconf.gui.c
  nconf_LDADD = zconf.tab.o @MENU_LIB@ @PANEL_LIB@ @CURSES_LIB@
  nconf_CPPFLAGS = $(CPPFLAGS) @CURSES_CPPFLAGS@
@@ -22,10 +22,28 @@ endif
 
 
 MOSTLYCLEANFILES = zconf.tab.c zconf.hash.c zconf.lex.c \
-                   zconf.tab.o
+                   zconf.tab.o .deps/zconf.tab.Po
 
 
+noinst_HEADERS = expr.h \
+				 list.h \
+				 lkc_proto.h \
+				 lkc.h \
+				 nconf.h \
+				 qconf.h
 
+EXTRA_DIST = \
+             zconf.tab.c \
+             zconf.hash.c \
+			 zconf.lex.c \
+             zconf.tab.c_shipped \
+             zconf.hash.c_shipped \
+			 zconf.lex.c_shipped \
+			 util.c \
+			 confdata.c \
+			 expr.c \
+			 symbol.c \
+			 menu.c
 
 src = $(srcdir)
 obj = $(builddir)

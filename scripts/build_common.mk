@@ -143,6 +143,19 @@ ak__install-%DATA:
 	 	cp -au $$drs "$(DESTDIR)$($*dir)"; \
 	 done
 
+## ////////////////////////////////////////////////////////////////////////////////
+## //  DISTFILES  /////////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
+
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST) $(ak__DIST_COMMON)
+
+ak__DIST_COMMON = \
+                  $(top_srcdir)/bootstrap \
+				  $(top_srcdir)/conf/update_submodules.sh \
+				  $(top_srcdir)/Kconfig \
+				  ## this line defines all kconfig files that exists (wildcard trick) from used .ac deps
+				  $(wildcard $(patsubst %.ac,%.kconfig,$(filter %.ac,$(am__aclocal_m4_deps))))
+
 
 ## ////////////////////////////////////////////////////////////////////////////////
 ## //  CUSTOM MAKE  ///////////////////////////////////////////////////////////////
