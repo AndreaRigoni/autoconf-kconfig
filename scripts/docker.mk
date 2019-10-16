@@ -71,9 +71,13 @@ NO_DOCKER_TARGETS = Makefile $(srcdir)/Makefile.in $(srcdir)/Makefile.am $(top_s
 NODOCKERBUILD += ${DOCKER_TARGETS} #this is needed for build with docker
 
 # DSHELL_ARGS = -v
+
+if ENABLE_DOCKER_TARGETS
 $(DOCKER_TARGETS): override SHELL = $(DSHELL)
 $(NO_DOCKER_TARGETS): override SHELL = /bin/sh
 $(NO_DOCKER_TARGETS): override HAVE_DOCKER = no
+endif
+
 
 docker-clean: ##@@docker_target clean docker container conf in .docker directory
 docker-start: ##@@docker_target start advanced per target docker container
