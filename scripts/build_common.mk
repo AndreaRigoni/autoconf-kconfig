@@ -203,12 +203,15 @@ ac__PYTHON_PACKAGES  = $(PYTHON_PACKAGES)
 export PYTHONUSERBASE = $(PYTHON_USERBASE)
 export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
 
+# using python call fixes pip: https://github.com/pypa/pip/issues/7205
+PIP = python -m pip
+
 ak__DIRECTORIES += $(PYTHON_USERBASE)
 pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-install: Q=-q
 pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-%: | $(PYTHON_USERBASE)
-	@ pip $* $(Q) --upgrade --user $(ac__PYTHON_PACKAGES)
+	@ $(PIP) $* $(Q) --upgrade --user $(ac__PYTHON_PACKAGES)
 
 ## ////////////////////////////////////////////////////////////////////////////////
 ## //  ATOM  //////////////////////////////////////////////////////////////////////
@@ -304,6 +307,8 @@ edit-code: | $(ak__VS_CODE_PATH)
 
 
 
-
+print-env-: ##@@miscellaneous print env variable
+print-env-%:
+	@ $(if $($*),$(info $*="$($*)"),$(info $* not set)):;
 
 
