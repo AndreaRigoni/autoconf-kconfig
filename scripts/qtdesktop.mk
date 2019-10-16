@@ -54,7 +54,7 @@ $(TARGET): Makefile.qt $($(TARGET)_SOURCES) $($(TARGET)_HEADERS) $($(TARGET)_FOR
 	  $(MAKE) -f $< $@
 
 # this is needed because of the use of variable HEADERS
-includedir = $(builddir)
+override includedir = $(builddir)
 
 clean-local: qmake_clean
 	@ rm -rf $(CLEANFILES) Makefile.qt
