@@ -317,11 +317,12 @@ ak__CODE_SERVER_URL  = $(or $(CODE_SERVER_URL),https://github.com/cdr/code-serve
 ak__DOWNLOADS += ak__cdr-code-server
 ak__cdr-code-server: 
 ak__cdr_code_server_URL = $(ak__CODE_SERVER_URL)
-ak__cdr_code_server_DIR = $(top_builddir)/conf/code-server
+ak__cdr_code_server_DIR = $(top_builddir)/conf/ide/code-server
 
 edit-code-server: ##@@ide start cdr vs code server installed in conf/code-server
 edit-code-server: ak__cdr-code-server
-	$(ak__cdr_code_server_DIR)/code-server --host $(ak__CODE_SERVER_HOST) --port $(ak__CODE_SERVER_PORT) --auth $(ak__CODE_SERVER_AUTH) $(top_srcdir)
+	$(ak__cdr_code_server_DIR)/code-server --host $(ak__CODE_SERVER_HOST) --port $(ak__CODE_SERVER_PORT) --auth $(ak__CODE_SERVER_AUTH) \
+	--user-data-dir $(ak__VS_CODE_PATH) $(top_srcdir)
 
 
 
