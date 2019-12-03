@@ -306,6 +306,26 @@ edit-code: | $(ak__VS_CODE_PATH)
 	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH)
 
 
+## ////////////////////////////////////////////////////////////////////////////////
+## //  CDR CODE SERVER  ///////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
+
+ak__CODE_SERVER_HOST = $(or $(CODE_SERVER_HOST),0.0.0.0)
+ak__CODE_SERVER_PORT = $(or $(CODE_SERVER_PORT),8080)
+ak__CODE_SERVER_AUTH = $(or $(CODE_SEVER_AUTH),none)
+ak__CODE_SERVER_URL  = $(or $(CODE_SERVER_URL),https://github.com/cdr/code-server/releases/download/2.1692-vsc1.39.2/code-server2.1692-vsc1.39.2-linux-x86_64.tar.gz)
+ak__DOWNLOADS += ak__cdr-code-server
+ak__cdr-code-server: 
+ak__cdr_code_server_URL = $(ak__CODE_SERVER_URL)
+ak__cdr_code_server_DIR = $(top_builddir)/conf/code-server
+
+edit-code-server: ##@@ide start cdr vs code server installed in conf/code-server
+edit-code-server: ak__cdr-code-server
+	$(ak__cdr_code_server_DIR)/code-server --host $(ak__CODE_SERVER_HOST) --port $(ak__CODE_SERVER_PORT) --auth $(ak__CODE_SERVER_AUTH) $(top_srcdir)
+
+
+
+
 
 print-env-: ##@@miscellaneous print env variable
 print-env-%:
