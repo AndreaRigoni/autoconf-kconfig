@@ -84,3 +84,26 @@ AX_KCONFIG_VAR_WITH([BUILD_CUSTOM_GNUMAKE_DIR],[Build custom gnumake directory])
 AC_SUBST([BUILD_CUSTOM_GNUMAKE_DIR])
 
 
+
+# ////////////////////////////////////////////////////////////////////////////////
+# //  REMOTE IDE SUPPORT  ////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
+
+## CODE_SERVER ##
+
+AX_KCONFIG_VAR_ENABLE([REMOTE_IDESUPPORT],["set with REMOTE_IDESUPPORT"])
+AM_CONDITIONAL([REMOTE_IDESUPPORT],[test x"${REMOTE_IDESUPPORT}" = x"yes"])
+
+AX_KCONFIG_VAR_WITH([CODE_SERVER_URL],[code-server binary url download])
+AC_SUBST([CODE_SERVER_URL])
+AX_KCONFIG_VAR_WITH([CODE_SERVER_HOST],[code-server host ip])
+AC_SUBST([CODE_SERVER_HOST])
+AX_KCONFIG_VAR_WITH([CODE_SERVER_PORT],[code-server port])
+AC_SUBST([CODE_SERVER_PORT])
+
+AX_KCONFIG_CHOICE([CODE_SERVER_AUTH],
+  [CODE_SERVER_AUTH_NONE],["none"],
+  [CODE_SERVER_AUTH_PASSWORD],["password"])
+AC_SUBST([CODE_SERVER_AUTH])
+
+
