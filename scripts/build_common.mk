@@ -113,6 +113,54 @@ $(ak__DIRECTORIES):
 	@ $(info buildinf dir for: $@) $(MKDIR_P) $@
 
 
+## INSTALL DIRECTORY AUTOMAKE OVERLOAD ////////////////////////////////////////////
+#  USAGE: to install name as a whole directory add the following target:
+#
+#  install-<name>DATA:
+# 	 @ $(MAKE) ak__$@
+#
+ak__install-%DATA:
+	@$(NORMAL_INSTALL)
+	@list='$($*_DATA)'; test -n "$($*dir)" || list=; \
+	 if test -n "$$list"; then \
+	   echo " $(MKDIR_P) '$(DESTDIR)$($*dir)'"; \
+	   $(MKDIR_P) "$(DESTDIR)$($*dir)" || exit 1; \
+	 fi; \
+	 for p in $$list; do \
+	   if test -f "$$p"; then echo "$$p"; \
+	   else p="$(srcdir)/$$p"; \
+	    if test -f "$$p"; then echo "$$p"; fi; \
+	   fi; \
+	 done | $(am__base_list) | \
+	 while read files; do \
+	   echo " $(INSTALL_DATA) $$files '$(DESTDIR)$($*dir)'"; \
+	   $(INSTALL_DATA) $$files "$(DESTDIR)$($*dir)" || exit $$?; \
+	 done; \
+	 for p in $$list; do \
+	   if test -d "$$p"; then echo "$$p"; \
+	   else p="$(srcdir)/$$p"; \
+	    if test -d "$$p"; then echo "$$p"; fi; \
+	   fi; \
+	 done | $(am__base_list) | \
+	 while read drs; do \
+	 	echo "copy directory: $$drs to $(DESTDIR)$($*dir)"; \
+	 	cp -au $$drs "$(DESTDIR)$($*dir)"; \
+	 done
+
+## ////////////////////////////////////////////////////////////////////////////////
+## //  DISTFILES  /////////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
+
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST) $(ak__DIST_COMMON)
+
+ak__DIST_COMMON = \
+                  $(top_srcdir)/bootstrap \
+				  $(top_srcdir)/conf/update_submodules.sh \
+				  $(top_srcdir)/Kconfig \
+				  ## this line defines all kconfig files that exists (wildcard trick) from used .ac deps
+				  $(wildcard $(patsubst %.ac,%.kconfig,$(filter %.ac,$(am__aclocal_m4_deps))))
+
+
 ## ////////////////////////////////////////////////////////////////////////////////
 ## //  CUSTOM MAKE  ///////////////////////////////////////////////////////////////
 ## ////////////////////////////////////////////////////////////////////////////////
@@ -159,13 +207,16 @@ ac__PYTHON_PACKAGES  = $(PYTHON_PACKAGES)
 export PYTHONUSERBASE = $(PYTHON_USERBASE)
 export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
 
+# using python call fixes pip: https://github.com/pypa/pip/issues/7205
+PIP = python -m pip
+
 ak__DIRECTORIES += $(PYTHON_USERBASE)
 
 pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-install: Q=-q
 pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-%: | $(PYTHON_USERBASE)
-	@ pip $* $(Q) --upgrade --user $(ac__PYTHON_PACKAGES)
+	@ $(PIP) $* $(Q) --upgrade --user $(ac__PYTHON_PACKAGES)
 
 ## ////////////////////////////////////////////////////////////////////////////////
 ## //  ATOM  //////////////////////////////////////////////////////////////////////
@@ -260,7 +311,30 @@ edit-code: | $(ak__VS_CODE_PATH)
 	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH)
 
 
+## ////////////////////////////////////////////////////////////////////////////////
+## //  CDR CODE SERVER  ///////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
+
+ak__CODE_SERVER_HOST = $(or $(CODE_SERVER_HOST),0.0.0.0)
+ak__CODE_SERVER_PORT = $(or $(CODE_SERVER_PORT),8080)
+ak__CODE_SERVER_AUTH = $(or $(CODE_SEVER_AUTH),none)
+ak__CODE_SERVER_URL  = $(or $(CODE_SERVER_URL),https://github.com/cdr/code-server/releases/download/2.1692-vsc1.39.2/code-server2.1692-vsc1.39.2-linux-x86_64.tar.gz)
+ak__DOWNLOADS += ak__cdr-code-server
+ak__cdr-code-server: 
+ak__cdr_code_server_URL = $(ak__CODE_SERVER_URL)
+ak__cdr_code_server_DIR = $(top_builddir)/conf/ide/code-server
+
+edit-code-server: ##@@ide start cdr vs code server installed in conf/code-server
+edit-code-server: ak__cdr-code-server
+	$(ak__cdr_code_server_DIR)/code-server --host $(ak__CODE_SERVER_HOST) --port $(ak__CODE_SERVER_PORT) --auth $(ak__CODE_SERVER_AUTH) \
+	--user-data-dir $(ak__VS_CODE_PATH) $(top_srcdir)
 
 
+
+
+
+print-env-: ##@@miscellaneous print env variable
+print-env-%:
+	@ $(if $($*),$(info $*="$($*)"),$(info $* not set)):;
 
 

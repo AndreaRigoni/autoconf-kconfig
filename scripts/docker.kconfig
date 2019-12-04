@@ -23,6 +23,15 @@
 # //  DOCKER  //////////////////////////////////////////////////////////////// #
 # //////////////////////////////////////////////////////////////////////////// #
 
+
+config ENABLE_DOCKER_TARGETS
+  bool "Enable Docker Targets"
+  default y
+  ---help---
+  Enable usage of docker for specific targets ...
+  if any target are listed in variable DOCKER_TARGETS the shell is switched to dk.sh script
+  that fires up a specific container to run make into.
+
 menuconfig   ENABLE_DOCKER_BUILD
   bool "Docker Build support"
   #  depends on HAS_DOCKER

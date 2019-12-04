@@ -56,9 +56,13 @@ export DOCKER_URL
 export DOCKER_DOCKERFILE
 export DOCKER_SHARES
 export DOCKER_MOUNTS
+export DOCKER_PORTS
 export DOCKER_NETWORKS
 export DOCKER_SHELL = /bin/sh
 export DOCKER_REGISTRY
+export DOCKER_ENTRYPOINT
+
+ak__DOCKER_TARGETS = $(DOCKER_TARGETS)
 
 DSHELL = $(top_srcdir)/conf/dk.sh ${DSHELL_ARGS}
 NO_DOCKER_TARGETS = Makefile $(srcdir)/Makefile.in $(srcdir)/Makefile.am $(top_srcdir)/configure.ac $(ACLOCAL_M4) $(top_srcdir)/configure am--refresh \
@@ -68,12 +72,16 @@ NO_DOCKER_TARGETS = Makefile $(srcdir)/Makefile.in $(srcdir)/Makefile.am $(top_s
 # NODOCKERBUILD += Makefile $(srcdir)/Makefile.in $(srcdir)/Makefile.am $(top_srcdir)/configure.ac $(ACLOCAL_M4) $(top_srcdir)/configure am--refresh \
                     $(am__aclocal_m4_deps) $(am__configure_deps) $(top_srcdir)/%.mk \
 					docker-%
-NODOCKERBUILD += ${DOCKER_TARGETS} #this is needed for build with docker
-
+NODOCKERBUILD += ${ak__DOCKER_TARGETS} #this is needed for build with docker
 # DSHELL_ARGS = -v
-$(DOCKER_TARGETS): override SHELL = $(DSHELL)
+
+if ENABLE_DOCKER_TARGETS
+$(ak__DOCKER_TARGETS): override SHELL = $(DSHELL)
 $(NO_DOCKER_TARGETS): override SHELL = /bin/sh
 $(NO_DOCKER_TARGETS): override HAVE_DOCKER = no
+endif
+
+
 
 docker-clean: ##@@docker_target clean docker container conf in .docker directory
 docker-start: ##@@docker_target start advanced per target docker container
@@ -82,7 +90,6 @@ docker-:      ##@@docker_target advanced per target docker (any command passed t
 docker-%:
 	@ $(info [docker] $*)
 	@ . $(DSHELL) $*
-
 
 
 

@@ -8,6 +8,9 @@ aclocal -I ./m4 -W ${AUTOCONF_WARNINGS}
 
 # libtoolize
 
+# update date of shipped to make sure they do not need to rebuild
+touch kconfig/*_shipped
+
 automake --add-missing --copy -W ${AUTOCONF_WARNINGS}
 
 autoconf

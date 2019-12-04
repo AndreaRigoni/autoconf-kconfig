@@ -65,6 +65,52 @@ menu  "General build options"
 	---help---
 	  Workspace directory
 
+
+
+
+
+
+  ## REMOTE IDE SUPPORT ##
+
+  config REMOTE_IDESUPPORT
+  bool "Remote development ide"
+  default y
+  ---help---
+	Select and use a preconfigured project with a remote ide
+	for now only available as code-server service
+
+  config CODE_SERVER_URL
+	string "code-server URL"
+	depends on REMOTE_IDESUPPORT
+	default "https://github.com/cdr/code-server/releases/download/2.1692-vsc1.39.2/code-server2.1692-vsc1.39.2-linux-x86_64.tar.gz"
+
+
+  config CODE_SERVER_HOST
+	string "code-server HOST"
+	depends on REMOTE_IDESUPPORT
+	default "0.0.0.0"
+
+  config CODE_SERVER_PORT
+	string "code-server PORT"
+	depends on REMOTE_IDESUPPORT
+	default "8080"
+
+  choice CODE_SERVER_AUTH
+	prompt "code-server AUTH"
+	depends on REMOTE_IDESUPPORT
+	config CODE_SERVER_AUTH_NONE
+	 bool "none"
+	config CODE_SERVER_AUTH_PASSWORD
+	 bool "password"
+  endchoice
+
+
+
+
+
+
+  ## CUSTOM MAKE BUILD (NOT WORKING YET) ##
+
   config BUILD_CUSTOM_GNUMAKE
 	bool "Build custom make binary"
 	---help---
