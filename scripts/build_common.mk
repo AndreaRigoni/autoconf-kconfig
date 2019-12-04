@@ -203,12 +203,15 @@ ac__PYTHON_PACKAGES  = $(PYTHON_PACKAGES)
 export PYTHONUSERBASE = $(PYTHON_USERBASE)
 export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
 
+# change this with python version
+PIP = pip
+
 ak__DIRECTORIES += $(PYTHON_USERBASE)
 pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-install: Q=-q
 pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-%: | $(PYTHON_USERBASE)
-	@ pip $* $(Q) --upgrade --user $(ac__PYTHON_PACKAGES)
+	@ $(PIP) $* $(Q) --upgrade --user $(ac__PYTHON_PACKAGES)
 
 ## ////////////////////////////////////////////////////////////////////////////////
 ## //  ATOM  //////////////////////////////////////////////////////////////////////
