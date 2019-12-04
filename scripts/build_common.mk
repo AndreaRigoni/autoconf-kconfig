@@ -39,6 +39,10 @@ __ax_pl_envsubst2 ?= $(PERL) -pe 's/([^\\]|^)\$$\(([a-zA-Z_][a-zA-Z_0-9]*)\)/$$1
 # --------------------------------
 ak__uniq ?= $(if $1,$(firstword $1) $(call ak__uniq,$(filter-out $(firstword $1),$1)))
 
+# FLAT NAME SUBST
+# ---------------
+ak__flt ?= $(subst -,_,$(subst ' ',_,$(subst .,_,$1)))
+
 ## ////////////////////////////////////////////////////////////////////////// ##
 ## ///  DOWNLOAD  /////////////////////////////////////////////////////////// ##
 ## ////////////////////////////////////////////////////////////////////////// ##
@@ -149,13 +153,14 @@ endif
 ## ////////////////////////////////////////////////////////////////////////////////
 
 
-PYTHON_USERBASE     ?= $(abs_top_builddir)/conf/python/site-packages
+PYTHON_USERBASE      = $(abs_top_builddir)/conf/python/site-packages
 ac__PYTHON_PACKAGES  = $(PYTHON_PACKAGES)
 
 export PYTHONUSERBASE = $(PYTHON_USERBASE)
 export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
 
 ak__DIRECTORIES += $(PYTHON_USERBASE)
+
 pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-install: Q=-q
 pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
