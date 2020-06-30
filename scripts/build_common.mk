@@ -18,6 +18,12 @@
 ##
 ## ////////////////////////////////////////////////////////////////////////// //
 
+# COLORS 
+# SH_GREEN  ?= $(shell tput -Txterm setaf 2)
+# SH_WHITE  ?= $(shell tput -Txterm setaf 7)
+# SH_YELLOW ?= $(shell tput -Txterm setaf 3)
+# SH_RESET  ?= $(shell tput -Txterm sgr0)
+
 
 MAKE_PROCESS  ?= $(shell grep -c ^processor /proc/cpuinfo)
 DOWNLOAD_DIR  ?= $(top_builddir)/downloads
@@ -81,14 +87,14 @@ define dl__dir =
 _fname = $(subst -,_,$(subst ' ',_,$(subst .,_,$1)))
 $(if $(${_fname}_DIR),
 $(${_fname}_DIR): $$(${_fname}_DEPS)
-	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$1
+	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$1 DOWNLOAD_DIR=$(DOWNLOAD_DIR)
 )
 endef
 $(foreach x,$(ak__DOWNLOADS),$(eval $(call dl__dir,$x)))
 
 # $(ak__DOWNLOADS): _flt = $(subst -,_,$(subst ' ',_,$(subst .,_,$1)))
-$(ak__DOWNLOADS):
-	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$@
+$(ak__DOWNLOADS): 
+	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$@ DOWNLOAD_DIR=$(DOWNLOAD_DIR)
 
 .PHONY: download
 download: ##@@miscellaneous download target in $NAME and $DOWNLOAD_URL
@@ -97,7 +103,7 @@ download: URL     = $(or $($(FNAME)_URL),$(DOWNLOAD_URL))
 download: DIR     = $(or $($(FNAME)_DIR),$(NAME))
 download: BRANCH  = $(or $($(FNAME)_BRANCH),$(BRANCH))
 download: $(or $($(FNAME)_DEPS), $(DOWNLOAD_DEPS))
-	@ $(foreach x,$(URL),\
+	@ $(foreach x,$(URL), $(info DOWNLOAD_DIR = $(DOWNLOAD_DIR))\
 		$(info Download: $x to $(DIR)) \
 		$(if $(filter $(dl__tar_ext),$x),$(call dl__download_tar,$x,$(DIR)), \
 		$(if $(filter $(dl__git_ext),$x),$(call dl__download_git,$x,$(DIR),$(BRANCH)), \
