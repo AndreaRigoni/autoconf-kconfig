@@ -141,6 +141,7 @@ DOCKER_NETWORKS="${DOCKER_NETWORKS}"
 DOCKER_PORTS="${DOCKER_PORTS}"
 DOCKER_SHARES="${DOCKER_SHARES}"
 DOCKER_MOUNTS="${DOCKER_MOUNTS}"
+DOCKER_DEVICES="${DOCKER_DEVICES}"
 : \${DOCKER_MACHINE=${DOCKER_MACHINE}}
 : \${USER=${USER}}
 user_id=${user_id}
@@ -316,8 +317,11 @@ start() {
 			local _dst="${_vols[1]}"
 		  DOCKER_MOUNTS_VAR="--mount dst=$_dst,volume-driver=local,volume-opt=o=bind,volume-opt=device=$_src ${DOCKER_MOUNTS_VAR}";
 		 done
+		fi	
+	if test -n "${DOCKER_DEVICES}"; then
+		DOCKER_DEVICES_VAR="--device=${DOCKER_DEVICES}"
 		fi
-	  log "Starting docker container from image ${1:-${DOCKER_IMAGE}}"
+	log "Starting docker container from image ${1:-${DOCKER_IMAGE}}"
   	docker run -d ${INT} --entrypoint=${DOCKER_ENTRYPOINT} \
   						 -e USER=${USER} \
   						 -e DISPLAY=${DISPLAY} \
@@ -327,9 +331,10 @@ start() {
   						 -v ${abs_srcdir}:${abs_srcdir} \
   						 -v ${user_home}:${user_home} \
   						 -v $(pwd):$(pwd) \
-  						 -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
   						 --tmpfs /run --tmpfs /run/lock \
   						 --cap-add=SYS_ADMIN \
+						 --cap-add=NET_ADMIN \
+						 ${DOCKER_DEVICES_VAR} \
   						 ${DOCKER_SHARES_VAR} \
   						 ${DOCKER_MOUNTS_VAR} \
   						 ${DOCKER_NETWORKS_VAR} \
@@ -361,6 +366,10 @@ start() {
 	_err=$?
 	return $_err
 }
+
+# // not used anymore as it causes umount busy preventing removal of teh container //
+#  -v /sys/fs/cgroup:/sys/fs/cgroup:ro 
+
 
 # STOP
 stop()  {
