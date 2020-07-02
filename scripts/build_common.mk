@@ -310,11 +310,13 @@ edit_DEPS += qws
 ## ////////////////////////////////////////////////////////////////////////////////
 
 ak__VS_CODE_PATH          = $(or $(VS_CODE_PATH),$(abs_top_builddir)/conf/ide/vs_code)
+ak__VS_CODE_ARGS          = $(VS_CODE_ARGS)
 ak__VS_CODE_PROJECT_PATH  = $(or $(VS_CODE_PROJECT_PATH),$(top_srcdir))
 ak__DIRECTORIES += $(ak__VS_CODE_PATH)
+## export ELECTRON_FORCE_WINDOW_MENU_BAR = 1
 edit-code: ##@@ide start visual studio code editor
 edit-code: | $(ak__VS_CODE_PATH)
-	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH)
+	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) 
 
 
 ## ////////////////////////////////////////////////////////////////////////////////
