@@ -1,0 +1,66 @@
+## ////////////////////////////////////////////////////////////////////////// //
+##
+## This file is part of the autoconf-bootstrap project.
+## Copyright 2018 Andrea Rigoni Garola <andrea.rigoni@igi.cnr.it>.
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+##
+## ////////////////////////////////////////////////////////////////////////// //
+
+
+# //////////////////////////////////////////////////////////////////////////// #
+# //  JUPYTER       ////////////////////////////////////////////////////////// #
+# //////////////////////////////////////////////////////////////////////////// #
+
+menuconfig  ENABLE_JUPYTER_NOTEBOOK
+	 bool "Enable Jupyter notebook"
+	 default n
+	 ---help---
+	  Enable jupyter notebook server as target
+
+if ENABLE_JUPYTER_NOTEBOOK
+
+  config JPNB_CONFIG
+	 string "Jupyter config file"
+	 ---help---
+	  Select optional custom jupyter config file
+
+  config JPNB_DIR
+	 string "Jupyter working directory"
+	 #default ""
+	 ---help---
+	  Select jupyter working directory, $(srcdir) if blank
+
+  config JPNB_PASSWD
+	 string "Jupyter password"
+	 #default ""
+	 ---help---
+	  Select jupyter password or set PASSWORD env when start
+
+  config JPNB_IP
+	 string "server ip"
+	 ---help---
+	  Select optional custom ip to listen at
+
+  config JPNB_PORT
+	 int "server port"
+	 range 8000 10000
+	 default 8888
+
+  config JPNB_BROWSER
+	 string "custom browser command"
+	 ---help---
+	  Select a custom command to start browser
+
+endif
