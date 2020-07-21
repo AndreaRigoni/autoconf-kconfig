@@ -58,6 +58,7 @@ export DOCKER_SHARES
 export DOCKER_MOUNTS
 export DOCKER_PORTS
 export DOCKER_NETWORKS
+export DOCKER_DEVICES
 export DOCKER_SHELL = /bin/sh
 export DOCKER_REGISTRY
 export DOCKER_ENTRYPOINT
@@ -77,8 +78,8 @@ NODOCKERBUILD += ${ak__DOCKER_TARGETS} #this is needed for build with docker
 
 if ENABLE_DOCKER_TARGETS
 $(ak__DOCKER_TARGETS): override SHELL = $(DSHELL)
-$(NO_DOCKER_TARGETS): override SHELL = /bin/sh
-$(NO_DOCKER_TARGETS): override HAVE_DOCKER = no
+$(NO_DOCKER_TARGETS):  override SHELL = /bin/sh
+$(NO_DOCKER_TARGETS):  override HAVE_DOCKER = no
 endif
 
 
@@ -120,6 +121,19 @@ docker-machine-%:
 
 
 
+NODOCKERBUILD += portainer-init docker-registry-init
+
+portainer-init: ##@@docker_services poirtainer init (browse localhost:9000 then)
+portainer-init: DOCKER_PORTAINER_PORT := $(or $(DOCKER_PORTAINER_PORT),9000)
+portainer-init:
+	@ docker volume create portainer_data; \
+      docker run -d -p $(DOCKER_PORTAINER_PORT):9000 --name portainer --restart always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
+
+
+docker-registry-init: ##@@docker_services registry init (provide an image registry at localhost:5000)
+docker-registry-init: DOCKER_REGISTRY_PORT := $(or $(DOCKER_REGISTRY_PORT),5000)
+docker-registry-init:
+	@ docker service create --name registry --publish $(DOCKER_REGISTRY_PORT):5000 registry:2
 
 
 
