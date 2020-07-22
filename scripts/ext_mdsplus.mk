@@ -30,8 +30,8 @@ MDS_SRCDIR    = $(MDSPLUS_DIR)
 MDS_LIBDIR = $(MDS_BUILDDIR)/lib$(MDS_LIBSUFFIX)
 MDS_BINDIR = $(MDS_BUILDDIR)/bin$(MDS_LIBSUFFIX)
 
-MDSCPPFLAGS = -I${MDS_BUILDDIR}/include -I${MDS_SRCDIR}/include
-MDSLDFLAGS  = -L${MDS_LIBDIR} \
+MDS_CPPFLAGS = -I${MDS_BUILDDIR}/include -I${MDS_SRCDIR}/include
+MDS_LDFLAGS  = -L${MDS_LIBDIR} \
 			   -lMdsObjectsCppShr -lMdsShr -lTreeShr -lTdiShr -lMdsIpShr \
 			   -lpthread -lm
 
