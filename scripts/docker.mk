@@ -27,7 +27,8 @@
 # docker build targets
 @AX_DOCKER_BUILD_TARGETS@
 
-NODOCKERBUILD = help reconfigure
+NODOCKERBUILD = help reconfigure am__configure_deps
+
 export DOCKER_NETWORKS   ?= bridge
 export DOCKER_PS1
 

@@ -62,7 +62,7 @@ yocto-py2-link: | $(YOCTO_BUILD) $(YOCTO_PY2_LINKS)
 
 export abs_top_builddir abs_top_srcdir
 
-DOCKER_TARGETS = yocto-%
+ak__DOCKER_TARGETS += yocto-%
 yocto-%: export BDIR = $(YOCTO_BUILD)
 # yocto-%: DOCKER_CONTAINER ?= yocto-builder
 # yocto-%: DOCKER_IMAGE     ?= crops/yocto:ubuntu-18.04-builder
