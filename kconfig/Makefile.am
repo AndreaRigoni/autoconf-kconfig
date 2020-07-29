@@ -92,6 +92,10 @@ YACC_PREFIX = $(if $(YACC_PREFIX_${baseprereq}),$(YACC_PREFIX_${baseprereq}),yy)
 quiet_cmd_bison = YACC    $@
       cmd_bison = bison -o$@ -t -l -p $(YACC_PREFIX) $<
 
+LEX_PREFIX_zconf = zconf
+YACC_PREFIX_zconf = zconf
+baseprereq = $(basename $(notdir $<))
+
 .PRECIOUS: %.tab.c_shipped
 %.tab.c_shipped: %.y
 	$(call cmd,bison)
