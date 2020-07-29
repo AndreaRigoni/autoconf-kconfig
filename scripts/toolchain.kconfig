@@ -43,11 +43,10 @@ if ENABLE_CUSTOM_TOOLCHAIN
   config TOOLCHAIN_TAR
 	 string "url path for Linaro toolchain binaries"
 	 depends on TOOLCHAIN_RETRIEVE_TAR
-	 default "http://releases.linaro.org/components/toolchain/binaries/6.2-2016.11/arm-linux-gnueabihf/gcc-linaro-6.2.1-2016.11-x86_64_arm-linux-gnueabihf.tar.xz"
 
   config TOOLCHAIN_DIR
 	 string  "toolchain root path"
-	 default "${builddir}/toolchain"
+	 default "toolchain"
 
   config CROSS_COMPILE
 	 string "toolchain prefix of build executables"

@@ -25,6 +25,7 @@
 ## TODO: identify file type
 #
 TOOLCHAIN_DIR ?= $(top_builddir)/toolchain
+
 if TOOLCHAIN_RETRIEVE_TAR
 $(top_builddir)/toolchain:
 	@ \
