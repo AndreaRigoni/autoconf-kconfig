@@ -22,6 +22,7 @@ config.status
 kconfig/.deps/
 kconfig/Makefile
 kconfig/conf.o
+kconfig/conf-conf.o
 kconfig/nconf-nconf.gui.o
 kconfig/nconf-nconf.o
 kconfig/zconf.tab.o
@@ -31,5 +32,3 @@ INSTALL
 configure
 Makefile.in
 kconfig/Makefile.in
-
-
