@@ -24,6 +24,34 @@
 # //  BUILD COMMON  ////////////////////////////////////////////////////////// #
 # //////////////////////////////////////////////////////////////////////////// #
 
+AX_KCONFIG_ENABLE_CHOICE([debug], [ debug mode in: yes,info,profile,no ],
+                         [COMPILE_MODE_RELEASE],[yes],
+                         [COMPILE_MODE_INFO],[info],
+                         [COMPILE_MODE_PROFILE],[profile],
+                         [COMPILE_MODE_DEBUG],[no]
+                         )
+
+
+
+dnl AK_ENABLE_DEBUG //////////////////////////////////////////////////////
+dnl see: www.gnu.org/software/autoconf-archive/ak_enable_debug.html
+dnl
+dnl Check for the presence of an --enable-debug option to configure, with the
+dnl specified default value used when the option is not present. Return the
+dnl value in the variable $ax_enable_debug.
+dnl Specifying "yes" adds "-g -O0" to the compilation flags for all languages.
+dnl Specifying "info" adds "-g" to the compilation flags. Specifying "profile"
+dnl adds "-g -pg" to the compilation flags, and "-pg" to the linker flags.
+dnl Otherwise, nothing is added.
+dnl
+dnl AK_ENABLE_DEBUG([enable by default=yes/info/profile/no],
+dnl   [ENABLE DEBUG VARIABLES ...], [DISABLE DEBUG VARIABLES NDEBUG ...],
+dnl   [IS-RELEASE],[DEFAULT_RELEASE_FLAGS])
+# deprecated with gui (ak_enable_debug)
+# AX_CHECK_ENABLE_DEBUG([no],,,,[-g -O2])
+# AC_SUBST([ENABLE_DEBUG],[${ax_enable_debug}])
+
+
 AX_KCONFIG_VAR_WITH([DOWNLOAD_DIR],["Default download directory path"])
 AC_SUBST([DOWNLOAD_DIR])
 AX_GITIGNORE_ADD_PATH([${DOWNLOAD_DIR}])
