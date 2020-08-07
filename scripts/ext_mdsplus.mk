@@ -18,11 +18,9 @@
 ##
 ## ////////////////////////////////////////////////////////////////////////// //
 
-ext_DIR ?= $(top_builddir)/ext
+ext_DIR ?= $(abs_top_builddir)/ext
 
-ext-mdsplus: ##@ext external mdsplus compilation
-ext-mdsplus:
-	@ $(MAKE) -C $(ext_DIR) $@
+	  
 
 MDSPLUS_DIR   = $(ext_DIR)/mdsplus
 MDS_BUILDDIR  = $(MDSPLUS_DIR)
@@ -35,7 +33,9 @@ MDSLDFLAGS   = -L${MDS_LIBDIR} \
 			   -lMdsObjectsCppShr -lMdsShr -lTreeShr -lTdiShr -lMdsIpShr \
 			   -lpthread -lm
 
-export MDS_PATH = $(MDS_SRCDIR)/tdi
+
+mdsplus_CONFIGURE_ARGS = $(EXT_MDSPLUS_CONFIGURE_ARGS) --enable-debug=$(or $(ENABLE_DEBUG),no)
+
 
 MDS_CLASSPATH = $(addprefix $(MDS_BUILDDIR)/,\
 				javascope/jScope.jar \
@@ -46,7 +46,17 @@ MDS_CLASSPATH = $(addprefix $(MDS_BUILDDIR)/,\
 				javadevices/jDevices.jar \
 				javadispatcher/jDispatcher.jar )
 
+ext-mdsplus: ##@ext external mdsplus compilation
+ext-mdsplus:
+	@ $(MAKE) -C $(ext_DIR) $@ && \
+	  cd $(MDSPLUS_DIR)/python/MDSplus && \
+	  python setup.py install --user 
 
+
+export MDS_PATH = $(MDS_SRCDIR)/tdi
+export MDSPLUS_DIR
+export CLASSPATH := $(if ${CLASSPATH},${CLASSPATH}:)${MDS_CLASSPATH}
+export LD_LIBRARY_PATH := $(if ${LD_LIBRARY_PATH},${LD_LIBRARY_PATH}:)${MDS_LIBDIR}
 
 
 
