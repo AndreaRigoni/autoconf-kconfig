@@ -41,3 +41,12 @@ $(top_builddir)/toolchain:
 else
 $(top_builddir)/toolchain:
 endif
+
+
+ARCH                     = arm
+# TOOLCHAIN_DIR           ?= ${abs_top_builddir}/toolchain
+TOOLCHAIN_PATH           = ${TOOLCHAIN_DIR}/bin
+CROSS_COMPILE            = arm-linux-gnueabihf-
+
+export PATH := ${TOOLCHAIN_PATH}:${PATH}
+
