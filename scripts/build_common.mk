@@ -208,10 +208,20 @@ endif
 
 
 PYTHON_USERBASE      = $(abs_top_builddir)/conf/python/site-packages
-ac__PYTHON_PACKAGES  = $(PYTHON_PACKAGES)
+ak__PYTHON_PACKAGES  = $(PYTHON_PACKAGES)
 
 export PYTHONUSERBASE = $(PYTHON_USERBASE)
 export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
+export PYTHON_VERSION
+get_pip_URL = https://bootstrap.pypa.io/get-pip.py
+
+# if HAVE_PIP
+# ak__get_pip:
+# else
+# ak__get_pip:
+# 	$(MAKE) $(AM_MAKEFLAGS) download NAME=get-pip DOWNLOAD_DIR=$(DOWNLOAD_DIR); \
+# 	python $(DOWNLOAD_DIR)/get-pip.py --user; 
+# endif
 
 # using python call fixes pip: https://github.com/pypa/pip/issues/7205
 PIP = python -m pip
@@ -222,7 +232,7 @@ pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-install: Q=-q
 pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-%: | $(PYTHON_USERBASE)
-	@ $(PIP) $* $(Q) --upgrade --user $(ac__PYTHON_PACKAGES)
+	@ $(PIP) $* $(Q) --upgrade --user $(ak__PYTHON_PACKAGES)
 
 # ////////////////////////////////////////////////////////////////////////////////
 # //  ATOM  //////////////////////////////////////////////////////////////////////
@@ -233,20 +243,20 @@ pip-%: | $(PYTHON_USERBASE)
 ATOM_HOME         ?= $(abs_top_builddir)/conf/ide/atom
 ATOM_PROJECT_PATH ?= $(top_srcdir) $(builddir)
 
-ac__ATOM_PACKAGES  = $(ATOM_PACKAGES)
-ac__ATOM_PACKAGES += project-manager \
+ak__ATOM_PACKAGES  = $(ATOM_PACKAGES)
+ak__ATOM_PACKAGES += project-manager \
                      atom-ide-ui ide-python \
 				     teletype \
 				     refactor \
 				     autocomplete-clang goto \
 				     build build-make
 
-ac__PYTHON_PACKAGES += setuptools python-language-server[all]
+ak__PYTHON_PACKAGES += setuptools python-language-server[all]
 
 
 export ATOM_HOME
 
-ATOM_PACKAGES_PATH = $(addprefix $(ATOM_HOME)/packages/,$(ac__ATOM_PACKAGES))
+ATOM_PACKAGES_PATH = $(addprefix $(ATOM_HOME)/packages/,$(ak__ATOM_PACKAGES))
 $(ATOM_PACKAGES_PATH):
 	@ apm install $(notdir $@)
 
@@ -326,7 +336,7 @@ edit-code: | $(ak__VS_CODE_PATH)
 ak__CODE_SERVER_HOST = $(or $(CODE_SERVER_HOST),0.0.0.0)
 ak__CODE_SERVER_PORT = $(or $(CODE_SERVER_PORT),8080)
 ak__CODE_SERVER_AUTH = $(or $(CODE_SEVER_AUTH),none)
-ak__CODE_SERVER_URL  = $(or $(CODE_SERVER_URL),https://github.com/cdr/code-server/releases/download/2.1692-vsc1.39.2/code-server2.1692-vsc1.39.2-linux-x86_64.tar.gz)
+ak__CODE_SERVER_URL  = $(or $(CODE_SERVER_URL),https://github.com/cdr/code-server/releases/download/3.4.1/code-server-3.4.1-linux-x86_64.tar.gz)
 ak__DOWNLOADS += ak__cdr-code-server
 ak__cdr-code-server: 
 ak__cdr_code_server_URL = $(ak__CODE_SERVER_URL)
