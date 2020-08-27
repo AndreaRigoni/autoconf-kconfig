@@ -56,7 +56,7 @@ YOCTO_PY2_LINKS =  \
 
 ak__DIRECTORIES += $(YOCTO_BUILD)
 
-yocto-py2-link: ##@yocto build links for python2
+yocto-py2-link: ##@@yocto build links for python2
 yocto-py2-link: | $(YOCTO_BUILD) $(YOCTO_PY2_LINKS)
 
 
@@ -82,7 +82,17 @@ yocto-image-minimal: yocto-py2-link
 
 yocto-bash:
 	bash
-
 #bash --rcfile <(echo PS1="$(PS1) ")
+
+
+##
+## EXTERNAL TOOLCHAIN 
+##
+DOWNLOADS += meta-external-toolchain
+meta-external-toolchain: ##@@yocto external toolchain layer download
+meta_external_toolchain_URL = https://git.yoctoproject.org/git/meta-external-toolchain.git
+meta_external_toolchain_BRANCH = master
+meta_external_toolchain_DIR = yocto/meta-external-toolchain
+
 
 endif

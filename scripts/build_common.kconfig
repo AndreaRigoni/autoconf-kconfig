@@ -47,11 +47,15 @@ menu  "General build options"
 	  retrieved from url or remote. The path set here should be made available to
 	  Makefile through the AC_SUBST of this variable.
 
+  config VERBOSE_LEVEL
+	 int "Makefile Verbosity (0~1)"
+	 range 0 1
+	 default 0
+
   config MAKE_PROCESS
 	 int "Number of parallel process (aka -j option, 0=auto)"
 	 range 0 16
 	 default 0
-
 
   config IDESUPPORT
   bool "Configure development ide"

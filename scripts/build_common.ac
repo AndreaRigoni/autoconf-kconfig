@@ -56,6 +56,9 @@ AX_KCONFIG_VAR_WITH([DOWNLOAD_DIR],["Default download directory path"])
 AC_SUBST([DOWNLOAD_DIR])
 AX_GITIGNORE_ADD_PATH([${DOWNLOAD_DIR}])
 
+AX_KCONFIG_VAR_WITH([VERBOSE_LEVEL],["Build verbose output (0-1)"])
+AC_SUBST([VERBOSE_LEVEL])
+
 AX_KCONFIG_VAR_WITH([MAKE_PROCESS],
 			["Number of parallel process (aka -j option, 0=auto)"])
 AS_VAR_IF([MAKE_PROCESS],[0],
