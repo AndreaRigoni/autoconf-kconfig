@@ -363,6 +363,14 @@ AC_DEFUN([AX_KCONFIG_CHOICE],[
   m4_if($#,0, ,m4_eval($# > 3),[1],[$0($1,m4_shift3($@))], )
 ])
 
+# AX_KCONFIG_ENABLE_CHOICE(VERBATIM_VAL, HELP_STRING,
+#                          ENABLE_VAL1, VAL1, ENABLE_VAL2, VAL2, ...)
+# ------------------------------------------------------------------------
+AC_DEFUN([AX_KCONFIG_ENABLE_CHOICE],[
+  AX_KCONFIG_VAR_ENABLE([$1],[$2])
+  AX_KCONFIG_CHOICE($1,m4_shift2($@))
+])
+
 # AX_KCONFIG_WITH_CHOICE(VERBATIM_VAL, HELP_STRING,
 #                        ENABLE_VAL1, VAL1, ENABLE_VAL2, VAL2, ...)
 # ------------------------------------------------------------------------
@@ -370,6 +378,7 @@ AC_DEFUN([AX_KCONFIG_WITH_CHOICE],[
   AX_KCONFIG_VAR_WITH([$1],[$2])
   AX_KCONFIG_CHOICE($1,m4_shift2($@))
 ])
+
 
 
 # AX_KCONFIG_MODULES([modules_group_name], MOD1, HELP1, MOD2, HELP2, ...)

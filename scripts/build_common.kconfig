@@ -25,6 +25,20 @@
 
 menu  "General build options"
 
+
+  choice COMPILE_MODE
+	  prompt "Compile Mode"
+	  config COMPILE_MODE_RELEASE
+	   bool "Release"
+	  config COMPILE_MODE_DEBUG
+	   bool "Debug"
+	  config COMPILE_MODE_INFO
+	   bool "Info"
+	  config COMPILE_MODE_PROFILE
+	   bool "Profile"
+  endchoice
+
+
   config DOWNLOAD_DIR
 	 string "Default download directory path"
 	 default "${builddir}/downloads"
