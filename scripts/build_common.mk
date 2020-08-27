@@ -24,6 +24,15 @@ DOWNLOAD_DIR  ?= $(top_builddir)/downloads
 ak__DOWNLOADS  = $(DOWNLOADS)
 DOWNLOADS     ?= $(ak__DOWNLOADS)
 
+AM_DEFAULT_VERBOSITY = $(VERBOSE_LEVEL)
+
+# VERBOSITY VARIABLE that is usable in Makefile if clause
+# See Automake AM_V_P for comparison in bash if clauses
+AK_V_IF    = $(ak__v_IF_$(V))
+ak__v_IF_  = $(ak__v_IF_$(AM_DEFAULT_VERBOSITY))
+ak__v_IF_0 = mark 
+ak__v_IF_1 =
+
 # PERL ENV SUBST
 # --------------
 # This can be used to make a sh substitution template by calling $(call __ax_pl_envsubst, template, target)
@@ -191,7 +200,7 @@ endif
 edit_DEPS =
 
 if IDESUPPORT
-IDE ?= qtcreator
+IDE ?= code
 edit: ##@miscellaneous start editor define in $IDE
 edit: $(edit_DEPS) edit-$(IDE)
 endif
@@ -200,9 +209,11 @@ endif
 ## //  PYTHON  ////////////////////////////////////////////////////////////////////
 ## ////////////////////////////////////////////////////////////////////////////////
 
+PYTHON_USERBASE         = $(abs_top_builddir)/conf/python/site-packages
+ac__PYTHON_PACKAGES     = $(PYTHON_PACKAGES)
+ac__PYTHON_REQUIREMENTS = $(PYTHON_REQUIREMENTS)
 
-PYTHON_USERBASE      = $(abs_top_builddir)/conf/python/site-packages
-ac__PYTHON_PACKAGES  = $(PYTHON_PACKAGES)
+ak__DIRECTORIES += $(PYTHON_USERBASE)
 
 export PYTHONUSERBASE = $(PYTHON_USERBASE)
 export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
@@ -210,13 +221,17 @@ export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
 # using python call fixes pip: https://github.com/pypa/pip/issues/7205
 PIP = python -m pip
 
-ak__DIRECTORIES += $(PYTHON_USERBASE)
-
 pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
-pip-install: Q=-q
+pip-install: Q=$(if $(AK_V_IF),-q)
+
 pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
+
 pip-%: | $(PYTHON_USERBASE)
-	@ $(PIP) $* $(Q) --upgrade --user $(ac__PYTHON_PACKAGES)
+	@ $(PIP) $* $(Q) --upgrade --user \
+	 $(addprefix -r ,$(ac__PYTHON_REQUIREMENTS)) \
+	 $(ac__PYTHON_PACKAGES)
+
+
 
 ## ////////////////////////////////////////////////////////////////////////////////
 ## //  ATOM  //////////////////////////////////////////////////////////////////////
