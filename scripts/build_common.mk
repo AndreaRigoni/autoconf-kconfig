@@ -216,19 +216,17 @@ endif
 ## ////////////////////////////////////////////////////////////////////////////////
 
 PYTHON_USERBASE         = $(abs_top_builddir)/conf/python/site-packages
-ac__PYTHON_PACKAGES     = $(PYTHON_PACKAGES)
+ak__PYTHON_PACKAGES     = $(PYTHON_PACKAGES)
 ac__PYTHON_REQUIREMENTS = $(PYTHON_REQUIREMENTS)
-
-PYTHON_USERBASE      = $(abs_top_builddir)/conf/python/site-packages
-ak__PYTHON_PACKAGES  = $(PYTHON_PACKAGES)
-ak__DIRECTORIES += $(PYTHON_USERBASE)
 
 export PYTHONUSERBASE = $(PYTHON_USERBASE)
 export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
 export PYTHON_VERSION
+export PYTHONDONTWRITEBYTECODE=1
 
 get_pip_URL = https://bootstrap.pypa.io/get-pip.py
 
+ak__DIRECTORIES += $(PYTHON_USERBASE)
 # if HAVE_PIP
 # ak__get_pip:
 # else
@@ -242,13 +240,41 @@ PIP = python -m pip
 
 pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-install: Q=$(if $(AK_V_IF),-q)
-
 pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
-
 pip-%: | $(PYTHON_USERBASE)
 	@ $(PIP) $* $(Q) --upgrade --user \
 	 $(addprefix -r ,$(ac__PYTHON_REQUIREMENTS)) \
-	 $(ac__PYTHON_PACKAGES)
+	 $(ak__PYTHON_PACKAGES)
+
+
+export REMOTE_DEBUG_HOST        ?= localhost
+export REMOTE_DEBUG_GDB_PORT    ?= 3000
+export REMOTE_DEBUG_PYTHON_PORT ?= 3001
+
+ak__PYTHON_PACKAGES += ptvsd
+
+PYTHON_GDB   = gdbserver $(REMOTE_DEBUG_HOST):$(REMOTE_DEBUG_GDB_PORT)
+PYTHON_PTVSD = -m ptvsd --host $(REMOTE_DEBUG_HOST) --port $(REMOTE_DEBUG_PYTHON_PORT) --wait
+# PYTHON = $(if $(PYTHON_DEBUG),$(PYTHON_GDB)) python $(if $(PYTHON_DEBUG),$(PYTHON_PTVSD))
+PYTHON = python $(if $(PYTHON_DEBUG),$(PYTHON_PTVSD))
+
+# # PYTHON_PACKAGES = debugpy
+# debugpy: ##@mdsplus debug test program
+# debugpy:
+#         @ gdbserver localhost:5677 python $(srcdir)/mds_test.py
+# 
+# # @ gdbserver localhost:5677 python -m debugpy --listen 5678 --wait-for-client $(srcdir)/mds_test.py
+# 
+# debug_py: ##@mdsplus debug test only py
+# debug_py:
+#         @ python -m debugpy --listen 5678 --wait-for-client $(srcdir)/mds_test.py
+# 
+# debug_ptvsd: ##@mdsplus debug test only py
+# debug_ptvsd: PYTHON_PACKAGES = ptvsd
+# debug_ptvsd: pip-install
+#         python -m ptvsd --host 0.0.0.0 --port $(or ${PORT},3000) --wait $(srcdir)/mds_test.py
+
+
 
 
 # ////////////////////////////////////////////////////////////////////////////////
