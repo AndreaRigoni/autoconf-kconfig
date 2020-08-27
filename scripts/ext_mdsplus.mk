@@ -20,24 +20,18 @@
 
 ext_DIR ?= $(abs_top_builddir)/ext
 
-	  
+MDSPLUS_DIR   ?= $(ext_DIR)/mdsplus
+MDS_SRCDIR    ?= $(MDSPLUS_DIR)
+MDS_BUILDDIR  := $(MDSPLUS_DIR)
+MDS_LIBDIR    := $(MDS_BUILDDIR)/lib$(MDS_LIBSUFFIX)
+MDS_BINDIR    := $(MDS_BUILDDIR)/bin$(MDS_LIBSUFFIX)
 
-MDSPLUS_DIR   = $(ext_DIR)/mdsplus
-MDS_BUILDDIR  = $(MDSPLUS_DIR)
-MDS_SRCDIR    = $(MDSPLUS_DIR)
-MDS_LIBDIR = $(MDS_BUILDDIR)/lib$(MDS_LIBSUFFIX)
-MDS_BINDIR = $(MDS_BUILDDIR)/bin$(MDS_LIBSUFFIX)
-
-MDSCPPFLAGS  = -I${MDS_BUILDDIR}/include -I${MDS_SRCDIR}/include
-MDSLDFLAGS   = -L${MDS_LIBDIR} \
+MDSCPPFLAGS  := -I${MDS_BUILDDIR}/include -I${MDS_SRCDIR}/include
+MDSLDFLAGS   := -L${MDS_LIBDIR} \
 			   -lMdsObjectsCppShr -lMdsShr -lTreeShr -lTdiShr -lMdsIpShr \
 			   -lpthread -lm
 
-
-mdsplus_CONFIGURE_ARGS = $(EXT_MDSPLUS_CONFIGURE_ARGS) --enable-debug=$(or $(ENABLE_DEBUG),no)
-
-
-MDS_CLASSPATH = $(addprefix $(MDS_BUILDDIR)/,\
+MDS_CLASSPATH := $(addprefix $(MDS_BUILDDIR)/,\
 				javascope/jScope.jar \
 				javascope/WaveDisaply.jar \
 				mdsobjects/java/mdsobjects.jar \
@@ -46,17 +40,19 @@ MDS_CLASSPATH = $(addprefix $(MDS_BUILDDIR)/,\
 				javadevices/jDevices.jar \
 				javadispatcher/jDispatcher.jar )
 
+
+export MDS_PATH := $(MDS_SRCDIR)/tdi
+export MDSPLUS_DIR := $(MDSPLUS_DIR)
+export CLASSPATH := $(if ${CLASSPATH},${MDS_CLASSPATH}:${CLASSPATH},${MDS_CLASSPATH})
+export LD_LIBRARY_PATH := $(if ${LD_LIBRARY_PATH},${MDS_LIBDIR}:${LD_LIBRARY_PATH},${MDS_LIBDIR})
+export PYTHONPATH := $(if ${PYTHONPATH},$(MDS_SRCDIR)/python:${PYTHONPATH},$(MDS_SRCDIR)/python)
+
 ext-mdsplus: ##@ext external mdsplus compilation
 ext-mdsplus:
+if MDSPLUS_DOWNLOAD
 	@ $(MAKE) -C $(ext_DIR) $@ && \
 	  cd $(MDSPLUS_DIR)/python/MDSplus && \
 	  python setup.py install --user 
-
-
-export MDS_PATH = $(MDS_SRCDIR)/tdi
-export MDSPLUS_DIR
-export CLASSPATH := $(if ${CLASSPATH},${CLASSPATH}:)${MDS_CLASSPATH}
-export LD_LIBRARY_PATH := $(if ${LD_LIBRARY_PATH},${LD_LIBRARY_PATH}:)${MDS_LIBDIR}
-
+endif
 
 

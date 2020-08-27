@@ -25,18 +25,27 @@
 # //////////////////////////////////////////////////////////////////////////// #
 
 AX_KCONFIG_VAR_ENABLE([EXT_MDSPLUS],["Enable external MDSPLUS"])
-
-AX_KCONFIG_VAR_WITH([EXT_MDSPLUS_URL],["url path for MDSPLUS"])
-AC_SUBST([EXT_MDSPLUS_URL])
-AX_KCONFIG_VAR_WITH([EXT_MDSPLUS_BRANCH],["branch for MDSPLUS"])
-AC_SUBST([EXT_MDSPLUS_BRANCH])
-AX_KCONFIG_VAR_WITH([EXT_MDSPLUS_CONFIGURE_ARGS],["set with EXT_MDSPLUS_CONFIGURE_ARGS"])
-AC_SUBST([EXT_MDSPLUS_CONFIGURE_ARGS])
-
-
 AM_CONDITIONAL([EXT_MDSPLUS],[test x"${EXT_MDSPLUS}" = x"yes"])
 
-AS_VAR_IF([EXT_MDSPLUS],[yes],[
+AX_KCONFIG_VAR_ENABLE([MDSPLUS_DOWNLOAD],["Enable MDSPLUS download from repo"])
+AM_CONDITIONAL([MDSPLUS_DOWNLOAD],[test x"${MDSPLUS_DOWNLOAD}" = x"yes"])
+
+AS_VAR_IF([MDSPLUS_DOWNLOAD],[yes],[
+	AX_KCONFIG_VAR_WITH([EXT_MDSPLUS_URL],["url path for MDSPLUS"])
+	AC_SUBST([EXT_MDSPLUS_URL])
+	AX_KCONFIG_VAR_WITH([EXT_MDSPLUS_BRANCH],["branch for MDSPLUS"])
+	AC_SUBST([EXT_MDSPLUS_BRANCH])
+	AX_KCONFIG_VAR_WITH([EXT_MDSPLUS_CONFIGURE_ARGS],["set with EXT_MDSPLUS_CONFIGURE_ARGS"])
+	AC_SUBST([EXT_MDSPLUS_CONFIGURE_ARGS])
+],[
+	AX_KCONFIG_VAR_WITH([MDSPLUS_DIR],["base path of mdsplus install path or build directory"])
+	AC_SUBST([MDSPLUS_DIR])
+	AX_KCONFIG_VAR_WITH([MDS_SRCDIR],["base path of mdsplus sources"])
+	AC_SUBST([MDS_SRCDIR])
+])
+
+
+AS_VAR_IF([MDSPLUS_DOWNLOAD],[yes],[
  if ( uname -m | grep 64 > /dev/null ); then
   if ( echo $host| grep 64 > /dev/null ); then
 	if [[ -d /usr/lib64 ]]; then
