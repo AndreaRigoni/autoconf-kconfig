@@ -33,7 +33,7 @@ jpnb-start: JPNB_PASSWD    := $(if $(JPNB_PASSWD),--NotebookApp.token=$(JPNB_PAS
 
 ak__DIRECTORIES += .logs
 
-jpnb-start: ##@@jupyter start notebook server
+jpnb-start: ##@@python start notebook server
 jpnb-start: | .logs
 	@ jupyter-notebook \
 		--port-retries=0 \
@@ -48,12 +48,12 @@ jpnb-start: | .logs
 		>> .logs/notebook.log 2>&1 &
 
 
-jpnb-stop: ##@@jupyter stop notebook server
+jpnb-stop: ##@@python stop notebook server
 jpnb-stop:
 	jupyter-notebook stop
 
 
-jpnb-passwd: ##@@jupyter set new custom passwd
+jpnb-passwd: ##@@python set new custom passwd
 jpnb-passwd:
 	jupyter-notebook password
 
