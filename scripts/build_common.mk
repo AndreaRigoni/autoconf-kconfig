@@ -364,13 +364,23 @@ edit_DEPS += qws
 ak__VS_CODE_PATH          = $(or $(VS_CODE_PATH),$(abs_top_builddir)/conf/ide/vs_code)
 ak__VS_CODE_ARGS          = $(VS_CODE_ARGS)
 ak__VS_CODE_PROJECT_PATH  = $(or $(VS_CODE_PROJECT_PATH),$(top_srcdir))
+
+ak__IDE_CODE_EXTENSIONS  = ms-vscode.cpptools ms-python.python $(IDE_CODE_EXTENSIONS)
+
 ak__DIRECTORIES += $(ak__VS_CODE_PATH)
 ## export ELECTRON_FORCE_WINDOW_MENU_BAR = 1
 edit-code: ##@@ide start visual studio code editor
 edit-code: | $(ak__VS_CODE_PATH)
 	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) 
 
+edit-code-ext: ##@@vs_code list visual studio extensions
+edit-code-ext:
+	@ code --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) --list-extensions
 
+.PHONY: edit-code-local-ext
+edit-code-extinstall: ##@@vs_code install all visual studio extensions in $IDE_CODE_EXTENSIONS
+edit-code-extinstall:
+	@ $(foreach x,$(ak__IDE_CODE_EXTENSIONS),code --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) --install-extension $x;)
 
 ak__DIRECTORIES += $(IDE_CODE_LOCAL_DIR)
 $(IDE_CODE_LOCAL_DIR)/bin/code: | $(DOWNLOAD_DIR) $(IDE_CODE_LOCAL_DIR) 
@@ -378,9 +388,17 @@ $(IDE_CODE_LOCAL_DIR)/bin/code: | $(DOWNLOAD_DIR) $(IDE_CODE_LOCAL_DIR)
 	$(call dl__download_tar,$(DOWNLOAD_DIR)/vs_code_local.tar.gz,$(IDE_CODE_LOCAL_DIR))
 
 edit-code-local: $(IDE_CODE_LOCAL_DIR)/bin/code
-	$(IDE_CODE_LOCAL_DIR)/bin/code --no-sandbox \
+	$(IDE_CODE_LOCAL_DIR)/bin/code \
 	 -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) 
 
+
+edit-code-local-ext: ##@@vs_code list visual studio extensions
+edit-code-local-ext: $(IDE_CODE_LOCAL_DIR)/bin/code
+	@ $(IDE_CODE_LOCAL_DIR)/bin/code --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) --list-extensions
+
+edit-code-local-extinstall: ##@@vs_code install all visual studio extensions in $IDE_CODE_EXTENSIONS
+edit-code-local-extinstall: $(IDE_CODE_LOCAL_DIR)/bin/code
+	@ $(foreach x,$(ak__IDE_CODE_EXTENSIONS),$(IDE_CODE_LOCAL_DIR)/bin/code --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) --install-extension $x;)
 
 # ////////////////////////////////////////////////////////////////////////////////
 # //  CDR CODE SERVER  ///////////////////////////////////////////////////////////
