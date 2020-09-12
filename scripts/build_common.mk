@@ -218,8 +218,6 @@ export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
 export PYTHON_VERSION
 export PYTHONDONTWRITEBYTECODE=1
 
-
-
 get_pip_URL = https://bootstrap.pypa.io/get-pip.py
 
 ak__DIRECTORIES += $(PYTHON_USERBASE)
