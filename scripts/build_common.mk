@@ -18,12 +18,6 @@
 ##
 ## ////////////////////////////////////////////////////////////////////////// //
 
-# COLORS 
-# SH_GREEN  ?= $(shell tput -Txterm setaf 2)
-# SH_WHITE  ?= $(shell tput -Txterm setaf 7)
-# SH_YELLOW ?= $(shell tput -Txterm setaf 3)
-# SH_RESET  ?= $(shell tput -Txterm sgr0)
-
 
 MAKE_PROCESS  ?= $(shell grep -c ^processor /proc/cpuinfo)
 DOWNLOAD_DIR  ?= $(top_builddir)/downloads
@@ -96,14 +90,14 @@ define dl__dir =
 _fname = $(subst -,_,$(subst ' ',_,$(subst .,_,$1)))
 $(if $(${_fname}_DIR),
 $(${_fname}_DIR): $$(${_fname}_DEPS)
-	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$1 DOWNLOAD_DIR=$(DOWNLOAD_DIR)
+	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$1
 )
 endef
 $(foreach x,$(ak__DOWNLOADS),$(eval $(call dl__dir,$x)))
 
 # $(ak__DOWNLOADS): _flt = $(subst -,_,$(subst ' ',_,$(subst .,_,$1)))
-$(ak__DOWNLOADS): 
-	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$@ DOWNLOAD_DIR=$(DOWNLOAD_DIR)
+$(ak__DOWNLOADS):
+	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$@
 
 .PHONY: download
 download: ##@@miscellaneous download target in $NAME and $DOWNLOAD_URL
@@ -112,7 +106,7 @@ download: URL     = $(or $($(FNAME)_URL),$(DOWNLOAD_URL))
 download: DIR     = $(or $($(FNAME)_DIR),$(NAME))
 download: BRANCH  = $(or $($(FNAME)_BRANCH),$(BRANCH))
 download: $(or $($(FNAME)_DEPS), $(DOWNLOAD_DEPS))
-	@ $(foreach x,$(URL), $(info DOWNLOAD_DIR = $(DOWNLOAD_DIR))\
+	@ $(foreach x,$(URL),\
 		$(info Download: $x to $(DIR)) \
 		$(if $(filter $(dl__tar_ext),$x),$(call dl__download_tar,$x,$(DIR)), \
 		$(if $(filter $(dl__git_ext),$x),$(call dl__download_git,$x,$(DIR),$(BRANCH)), \
@@ -216,90 +210,52 @@ endif
 ## ////////////////////////////////////////////////////////////////////////////////
 
 PYTHON_USERBASE         = $(abs_top_builddir)/conf/python/site-packages
-ak__PYTHON_PACKAGES     = $(PYTHON_PACKAGES)
+ac__PYTHON_PACKAGES     = $(PYTHON_PACKAGES)
 ac__PYTHON_REQUIREMENTS = $(PYTHON_REQUIREMENTS)
+
+ak__DIRECTORIES += $(PYTHON_USERBASE)
 
 export PYTHONUSERBASE = $(PYTHON_USERBASE)
 export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
-export PYTHON_VERSION
-export PYTHONDONTWRITEBYTECODE=1
-
-get_pip_URL = https://bootstrap.pypa.io/get-pip.py
-
-ak__DIRECTORIES += $(PYTHON_USERBASE)
-# if HAVE_PIP
-# ak__get_pip:
-# else
-# ak__get_pip:
-# 	$(MAKE) $(AM_MAKEFLAGS) download NAME=get-pip DOWNLOAD_DIR=$(DOWNLOAD_DIR); \
-# 	python $(DOWNLOAD_DIR)/get-pip.py --user; 
-# endif
 
 # using python call fixes pip: https://github.com/pypa/pip/issues/7205
 PIP = python -m pip
 
 pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-install: Q=$(if $(AK_V_IF),-q)
+
 pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
+
 pip-%: | $(PYTHON_USERBASE)
 	@ $(PIP) $* $(Q) --upgrade --user \
 	 $(addprefix -r ,$(ac__PYTHON_REQUIREMENTS)) \
-	 $(ak__PYTHON_PACKAGES)
-
-
-export REMOTE_DEBUG_HOST        ?= localhost
-export REMOTE_DEBUG_GDB_PORT    ?= 3000
-export REMOTE_DEBUG_PYTHON_PORT ?= 3001
-
-ak__PYTHON_PACKAGES += ptvsd
-
-PYTHON_GDB   = gdbserver $(REMOTE_DEBUG_HOST):$(REMOTE_DEBUG_GDB_PORT)
-PYTHON_PTVSD = -m ptvsd --host $(REMOTE_DEBUG_HOST) --port $(REMOTE_DEBUG_PYTHON_PORT) --wait
-# PYTHON = $(if $(PYTHON_DEBUG),$(PYTHON_GDB)) python $(if $(PYTHON_DEBUG),$(PYTHON_PTVSD))
-PYTHON = python $(if $(PYTHON_DEBUG),$(PYTHON_PTVSD))
-
-# # PYTHON_PACKAGES = debugpy
-# debugpy: ##@mdsplus debug test program
-# debugpy:
-#         @ gdbserver localhost:5677 python $(srcdir)/mds_test.py
-# 
-# # @ gdbserver localhost:5677 python -m debugpy --listen 5678 --wait-for-client $(srcdir)/mds_test.py
-# 
-# debug_py: ##@mdsplus debug test only py
-# debug_py:
-#         @ python -m debugpy --listen 5678 --wait-for-client $(srcdir)/mds_test.py
-# 
-# debug_ptvsd: ##@mdsplus debug test only py
-# debug_ptvsd: PYTHON_PACKAGES = ptvsd
-# debug_ptvsd: pip-install
-#         python -m ptvsd --host 0.0.0.0 --port $(or ${PORT},3000) --wait $(srcdir)/mds_test.py
+	 $(ac__PYTHON_PACKAGES)
 
 
 
-
-# ////////////////////////////////////////////////////////////////////////////////
-# //  ATOM  //////////////////////////////////////////////////////////////////////
-# ////////////////////////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
+## //  ATOM  //////////////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
 
 
 ## ATOM_DEV_RESOURCE_PATH ?=
 ATOM_HOME         ?= $(abs_top_builddir)/conf/ide/atom
 ATOM_PROJECT_PATH ?= $(top_srcdir) $(builddir)
 
-ak__ATOM_PACKAGES  = $(ATOM_PACKAGES)
-ak__ATOM_PACKAGES += project-manager \
+ac__ATOM_PACKAGES  = $(ATOM_PACKAGES)
+ac__ATOM_PACKAGES += project-manager \
                      atom-ide-ui ide-python \
 				     teletype \
 				     refactor \
 				     autocomplete-clang goto \
 				     build build-make
 
-ak__PYTHON_PACKAGES += setuptools python-language-server[all]
+ac__PYTHON_PACKAGES += setuptools python-language-server[all]
 
 
 export ATOM_HOME
 
-ATOM_PACKAGES_PATH = $(addprefix $(ATOM_HOME)/packages/,$(ak__ATOM_PACKAGES))
+ATOM_PACKAGES_PATH = $(addprefix $(ATOM_HOME)/packages/,$(ac__ATOM_PACKAGES))
 $(ATOM_PACKAGES_PATH):
 	@ apm install $(notdir $@)
 
@@ -317,18 +273,18 @@ edit-atom: | apm-install pip-install
 	@ atom $(foreach d,$(ATOM_PROJECT_PATH),-a $d )
 
 
-# ////////////////////////////////////////////////////////////////////////////////
-# //  EMACS  /////////////////////////////////////////////////////////////////////
-# ////////////////////////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
+## //  EMACS  /////////////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
 
 edit-emacs: ##@@ide start emacs
 edit-emacs:
 	@ emacs $(srcdir)
 
 
-# ////////////////////////////////////////////////////////////////////////////////
-# //  QTCREATOR  /////////////////////////////////////////////////////////////////
-# ////////////////////////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
+## //  QTCREATOR  /////////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
 
 
 ak__QTCREATOR_SETTINGS_PATH = $(or $(QTCREATOR_SETTINGS_PATH),$(abs_top_builddir)/conf/ide)
@@ -341,9 +297,9 @@ edit-qtcreator: | $(ak__QTCREATOR_SETTINGS_PATH)
 					-theme $(QTCREATOR_THEME) -color $(QTCREATOR_COLOR)
 
 
-# ////////////////////////////////////////////////////////////////////////////////
-# //  QWS  ///////////////////////////////////////////////////////////////////////
-# ////////////////////////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
+## //  QWS  ///////////////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
 ##
 ## QWS are the qtcreator work spaces files.. they needs to be compiled with the
 ## absolute path so then a template is filled using the path discovered by
@@ -358,9 +314,9 @@ qws: abs_top_srcdir := $(abs_top_srcdir)
 qws: $(QWS_FILES)
 edit_DEPS += qws
 
-# ////////////////////////////////////////////////////////////////////////////////
-# //  VS CODE  ///////////////////////////////////////////////////////////////////
-# ////////////////////////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
+## //  VS CODE  ///////////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
 
 ak__VS_CODE_PATH          = $(or $(VS_CODE_PATH),$(abs_top_builddir)/conf/ide/vs_code)
 ak__VS_CODE_ARGS          = $(VS_CODE_ARGS)
@@ -372,14 +328,14 @@ edit-code: | $(ak__VS_CODE_PATH)
 	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) 
 
 
-# ////////////////////////////////////////////////////////////////////////////////
-# //  CDR CODE SERVER  ///////////////////////////////////////////////////////////
-# ////////////////////////////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
+## //  CDR CODE SERVER  ///////////////////////////////////////////////////////////
+## ////////////////////////////////////////////////////////////////////////////////
 
 ak__CODE_SERVER_HOST = $(or $(CODE_SERVER_HOST),0.0.0.0)
 ak__CODE_SERVER_PORT = $(or $(CODE_SERVER_PORT),8080)
 ak__CODE_SERVER_AUTH = $(or $(CODE_SEVER_AUTH),none)
-ak__CODE_SERVER_URL  = $(or $(CODE_SERVER_URL),https://github.com/cdr/code-server/releases/download/3.4.1/code-server-3.4.1-linux-x86_64.tar.gz)
+ak__CODE_SERVER_URL  = $(or $(CODE_SERVER_URL),https://github.com/cdr/code-server/releases/download/2.1692-vsc1.39.2/code-server2.1692-vsc1.39.2-linux-x86_64.tar.gz)
 ak__DOWNLOADS += ak__cdr-code-server
 ak__cdr-code-server: 
 ak__cdr_code_server_URL = $(ak__CODE_SERVER_URL)
