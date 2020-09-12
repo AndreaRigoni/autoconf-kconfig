@@ -215,8 +215,11 @@ ac__PYTHON_REQUIREMENTS = $(PYTHON_REQUIREMENTS)
 
 export PYTHONUSERBASE = $(PYTHON_USERBASE)
 export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
-export PYTHON_VERSION
 export PYTHONDONTWRITEBYTECODE=1
+
+## export PYTHON_VERSION 
+## ..... I can not export it because it breaks reconfiguration.. see issue #11
+
 
 get_pip_URL = https://bootstrap.pypa.io/get-pip.py
 
