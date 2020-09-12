@@ -82,23 +82,29 @@ AC_MSG_NOTICE([ ---- PYTHON ${PYTHON_VERSION} ---- ])
 # this is needed because we might use PYTHON_VERSION in the Makefile
 AC_SUBST([PYTHON_VERSION]) 
 
-# AC_PATH_PROG([PYTHON],[python[$PYTHON_VERSION]])
-# AM_CONDITIONAL([HAVE_PYTHON],[test -n "${ac_cv_path_PYTHON}"])
-# AC_SUBST([PYTHON])
+# Those does not select the correct pytho version... but the most recent one
+# sse at https://www.gnu.org/software/automake/manual/html_node/Python.html
+#
+# AM_PATH_PYTHON([${PYTHON_VERSION}])
+# AM_PATH_PYTHON([${PYTHON_VERSION}],, [:])
 
-# AC_CHECK_PROG([PIP],[pip[${PYTHON_VERSION}]],[])
-# AM_CONDITIONAL([HAVE_PIP],[test -n "${PIP}"])
+AC_PATH_PROG([PYTHON],[python[]${PYTHON_VERSION}])
+AM_CONDITIONAL([HAVE_PYTHON],[test -n "${ac_cv_path_PYTHON}"])
+AC_SUBST([PYTHON])
+
+AC_CHECK_PROG([PIP],[pip[]${PYTHON_VERSION}],[])
+AM_CONDITIONAL([HAVE_PIP],[test -n "${PIP}"])
 
 
-# AX_KCONFIG_CHOICE([PYTHON_ENV_SYSTEM],
-#   [PYTHON_ENV_SYSTEM_USER],["user"],
-#   [PYTHON_ENV_SYSTEM_CONDA],["conda"],
-#   [PYTHON_ENV_SYSTEM_VENV],["venv"])
+AX_KCONFIG_CHOICE([PYTHON_ENV_SYSTEM],
+  [PYTHON_ENV_SYSTEM_USER],["user"],
+  [PYTHON_ENV_SYSTEM_CONDA],["conda"],
+  [PYTHON_ENV_SYSTEM_VENV],["venv"])
 
-# AC_SUBST([PYTHON_ENV_SYSTEM])
+AC_SUBST([PYTHON_ENV_SYSTEM])
 
 ## EMBED PYTHON IN C CODE
-# AX_PYTHON_DEVEL
+AX_PYTHON_DEVEL
 
 ##
 ## conditional for src build
@@ -116,18 +122,29 @@ AC_SUBST([PYTHON_VERSION])
 AX_KCONFIG_VAR_ENABLE([IDESUPPORT],["set with IDESUPPORT"])
 AM_CONDITIONAL([IDESUPPORT],[test x"${IDESUPPORT}" = x"yes"])
 
-
 AX_KCONFIG_CHOICE([IDE],
+  [IDE_CODE],["code"],
+  [IDE_CODE_LOCAL],["code_local"],
   [IDE_ATOM],["atom"],
   [IDE_EMACS],["emacs"],
   [IDE_QTCREATOR],["qtcreator"],
   [IDE_ECLIPSE],["eclipse"])
 AC_SUBST([IDE])
-AC_PATH_TOOL([IDE_BIN],[${IDE}])
+AC_PATH_PROG([IDE_BIN],[${IDE}])
+
 AC_SUBST([IDE_BIN])
 
 AX_KCONFIG_VAR_WITH([IDE_WSDIR],[Workspace directory])
 AC_SUBST([IDE_WSDIR])
+
+
+# IDE CODE LOCAL
+
+AX_KCONFIG_VAR_WITH([IDE_CODE_LOCAL_DIR],[VS code local dir])
+AC_SUBST([IDE_CODE_LOCAL_DIR])
+AX_KCONFIG_VAR_WITH([IDE_CODE_DOWNLOAD_URL],[VS Code download URL])
+AC_SUBST([IDE_CODE_DOWNLOAD_URL])
+
 
 
 

@@ -213,12 +213,14 @@ PYTHON_USERBASE         = $(abs_top_builddir)/conf/python/site-packages
 ak__PYTHON_PACKAGES     = $(PYTHON_PACKAGES)
 ac__PYTHON_REQUIREMENTS = $(PYTHON_REQUIREMENTS)
 
+
 export PYTHONUSERBASE = $(PYTHON_USERBASE)
 export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
 export PYTHONDONTWRITEBYTECODE=1
 
 ## export PYTHON_VERSION 
 ## ..... I can not export it because it breaks reconfiguration.. see issue #11
+
 
 
 get_pip_URL = https://bootstrap.pypa.io/get-pip.py
@@ -233,7 +235,7 @@ ak__DIRECTORIES += $(PYTHON_USERBASE)
 # endif
 
 # using python call fixes pip: https://github.com/pypa/pip/issues/7205
-PIP = python -m pip
+PIP = $(PYTHON) -m pip
 
 pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-install: Q=$(if $(AK_V_IF),-q)
@@ -243,7 +245,6 @@ pip-%: | $(PYTHON_USERBASE)
 	 $(addprefix -r ,$(ac__PYTHON_REQUIREMENTS)) \
 	 $(ak__PYTHON_PACKAGES)
 
-
 export REMOTE_DEBUG_HOST        ?= localhost
 export REMOTE_DEBUG_GDB_PORT    ?= 3000
 export REMOTE_DEBUG_PYTHON_PORT ?= 3001
@@ -252,8 +253,9 @@ ak__PYTHON_PACKAGES += ptvsd
 
 PYTHON_GDB   = gdbserver $(REMOTE_DEBUG_HOST):$(REMOTE_DEBUG_GDB_PORT)
 PYTHON_PTVSD = -m ptvsd --host $(REMOTE_DEBUG_HOST) --port $(REMOTE_DEBUG_PYTHON_PORT) --wait
-# PYTHON = $(if $(PYTHON_DEBUG),$(PYTHON_GDB)) python $(if $(PYTHON_DEBUG),$(PYTHON_PTVSD))
-PYTHON = python $(if $(PYTHON_DEBUG),$(PYTHON_PTVSD))
+
+PYTHON_SHELL = $(if $(PYTHON_DEBUG),$(PYTHON_GDB)) $(PYTHON) $(if $(PYTHON_DEBUG),$(PYTHON_PTVSD))
+
 
 # # PYTHON_PACKAGES = debugpy
 # debugpy: ##@mdsplus debug test program
@@ -367,6 +369,17 @@ ak__DIRECTORIES += $(ak__VS_CODE_PATH)
 edit-code: ##@@ide start visual studio code editor
 edit-code: | $(ak__VS_CODE_PATH)
 	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) 
+
+
+
+ak__DIRECTORIES += $(IDE_CODE_LOCAL_DIR)
+$(IDE_CODE_LOCAL_DIR)/bin/code: | $(DOWNLOAD_DIR) $(IDE_CODE_LOCAL_DIR) 
+	curl -SL $(IDE_CODE_DOWNLOAD_URL) > $(DOWNLOAD_DIR)/vs_code_local.tar.gz;
+	$(call dl__download_tar,$(DOWNLOAD_DIR)/vs_code_local.tar.gz,$(IDE_CODE_LOCAL_DIR))
+
+edit-code-local: $(IDE_CODE_LOCAL_DIR)/bin/code
+	$(IDE_CODE_LOCAL_DIR)/bin/code --no-sandbox \
+	 -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) 
 
 
 # ////////////////////////////////////////////////////////////////////////////////
