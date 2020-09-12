@@ -18,12 +18,6 @@
 ##
 ## ////////////////////////////////////////////////////////////////////////// //
 
-# COLORS 
-# SH_GREEN  ?= $(shell tput -Txterm setaf 2)
-# SH_WHITE  ?= $(shell tput -Txterm setaf 7)
-# SH_YELLOW ?= $(shell tput -Txterm setaf 3)
-# SH_RESET  ?= $(shell tput -Txterm sgr0)
-
 
 MAKE_PROCESS  ?= $(shell grep -c ^processor /proc/cpuinfo)
 DOWNLOAD_DIR  ?= $(top_builddir)/downloads
@@ -223,6 +217,8 @@ export PYTHONUSERBASE = $(PYTHON_USERBASE)
 export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
 export PYTHON_VERSION
 export PYTHONDONTWRITEBYTECODE=1
+
+
 
 get_pip_URL = https://bootstrap.pypa.io/get-pip.py
 

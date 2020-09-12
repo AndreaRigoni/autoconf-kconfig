@@ -19,7 +19,6 @@
 ## ////////////////////////////////////////////////////////////////////////// //
 
 
-
 # //////////////////////////////////////////////////////////////////////////// #
 # //  BUILD COMMON  ////////////////////////////////////////////////////////// #
 # //////////////////////////////////////////////////////////////////////////// #
@@ -74,19 +73,41 @@ AC_SUBST([DOWNLOADS])
 # //  PYTHON  ////////////////////////////////////////////////////////////////////
 # ////////////////////////////////////////////////////////////////////////////////
 
-AX_PROG_PYTHON_VERSION
-AC_CHECK_PROG([pip_binary],[pip${PYTHON_VERSION}],[])
-AM_CONDITIONAL([HAVE_PIP],[test "x${pip_binary}" != "x"])
+AC_MSG_NOTICE([ ---- PYTHON ---- ])
+
+AX_KCONFIG_VAR_WITH([PYTHON_VERSION],[The installed Python version to use, 
+for example '2.3'. This string will be appended to the Python interpreter canonical name.])
+
+# this is needed because we might use PYTHON_VERSION in the Makefile
+AC_SUBST([PYTHON_VERSION]) 
+
+AC_PATH_PROG([PYTHON],[python[$PYTHON_VERSION]])
+AM_CONDITIONAL([HAVE_PYTHON],[test -n "${ac_cv_path_PYTHON}"])
+AC_SUBST([PYTHON])
+
+AC_CHECK_PROG([PIP],[pip[${PYTHON_VERSION}]],[])
+AM_CONDITIONAL([HAVE_PIP],[test -n "${PIP}"])
 
 
+AX_KCONFIG_CHOICE([PYTHON_ENV_SYSTEM],
+  [PYTHON_ENV_SYSTEM_USER],["user"],
+  [PYTHON_ENV_SYSTEM_CONDA],["conda"],
+  [PYTHON_ENV_SYSTEM_VENV],["venv"])
+
+# AC_SUBST([PYTHON_ENV_SYSTEM])
+
+
+
+## EMBED PYTHON IN C CODE
+# AX_PYTHON_DEVEL
+
 ##
-## conditional with src build
-## TODO: move this in bootstrap
-##
-AS_VAR_SET([abs_srcdir],[$(cd ${srcdir}; pwd)])
-AS_VAR_SET([abs_builddir],[$(cd ${builddir}; pwd)])
-AM_CONDITIONAL([SRCDIR_BUILD],[test "x${abs_srcdir}" == "x${abs_builddir}"])
-AC_SUBST([SRCDIR_BUILD])
+## conditional for src build
+## TODO: make this a m4 script
+## 
+## AS_VAR_SET([abs_srcdir],[$(cd ${srcdir}; pwd)])
+## AS_VAR_SET([abs_builddir],[$(cd ${builddir}; pwd)])
+## AM_CONDITIONAL([SRCDIR_BUILD],[test "x${abs_srcdir}" == "x${abs_builddir}"])
 
 
 # ////////////////////////////////////////////////////////////////////////////////
@@ -144,5 +165,4 @@ AX_KCONFIG_CHOICE([CODE_SERVER_AUTH],
   [CODE_SERVER_AUTH_NONE],["none"],
   [CODE_SERVER_AUTH_PASSWORD],["password"])
 AC_SUBST([CODE_SERVER_AUTH])
-
 

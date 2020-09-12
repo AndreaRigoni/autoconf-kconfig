@@ -384,10 +384,9 @@ AC_DEFUN([AC_ARG_VAR],
 # AX_KCONFIG_VAR_WITH(FEATURE, HELP)
 # ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_VAR_WITH],[
-  m4_pushdef([_var_],m4_bpatsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^with_],[]))
-  m4_pushdef([_VAR_],m4_bpatsubst(m4_toupper(m4_translit([$1],[_-],[__])),[^with_],[]))
-  #AS_VAR_SET_IF([$1],,[AS_VAR_SET([$1],${[CONFIG_$1]})]
-		      #[AX_KCONFIG_EXPAND_YN([$1])])
+  m4_pushdef([_var_],m4_bpatsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^with_],[]))dnl
+  m4_pushdef([_VAR_],m4_bpatsubst(m4_toupper(m4_translit([$1],[_-],[__])),[^with_],[]))dnl
+
   AS_VAR_SET_IF([$1],,[AS_VAR_SET_IF([CONFIG_$1],
 				     [AS_VAR_SET([$1],${[CONFIG_$1]})]
 				     [AX_KCONFIG_EXPAND_YN([$1])])])
@@ -403,9 +402,9 @@ AC_DEFUN([AX_KCONFIG_VAR_WITH],[
   | is eventually substituted in Makefile.
 
   ]])dnl
-  m4_divert_text([HELP_VAR_END],[AS_HELP_STRING([_VAR_], [$2])])
+  m4_divert_text([HELP_VAR_END],[AS_HELP_STRING([_VAR_], [$2])])dnl
  
- AC_ARG_WITH(_var_,
+  AC_ARG_WITH(_var_,
 	      [AS_HELP_STRING(--with-[]m4_translit(_var_,[_],[-]),[$2])],
 	      [AS_VAR_SET([$1],${with_[]_var_})])
 
@@ -430,7 +429,7 @@ AC_DEFUN([AX_KCONFIG_VAR],[
   AS_VAR_SET_IF([$1],,[AS_VAR_SET_IF([CONFIG_$1],
 				     [AS_VAR_SET([$1],${[CONFIG_$1]})]
 				     [AX_KCONFIG_EXPAND_YN([$1])])])
-  AC_ARG_VAR(_var_, [$2])
+  #AC_ARG_VAR(_var_, [$2])
   m4_append_uniq([_AX_KCONF_VARS],[$1],[
   ])
 
