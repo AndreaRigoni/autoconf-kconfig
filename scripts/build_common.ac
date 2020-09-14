@@ -141,8 +141,8 @@ AC_SUBST([IDE_WSDIR])
 AX_KCONFIG_VAR_ENABLE([IDE_CODE_LOCAL],[Enable custom local install of VS code])
 AM_CONDITIONAL([IDE_CODE_LOCAL],[test x"${IDE_CODE_LOCAL}" = x"yes" ])
 
-# IDE CODE LOCAL
 
+# IDE CODE LOCAL
 # if ide code has been selected as default ide, but code wasn't found in system,
 # set IDE_CODE_LOCAL as yes to try dowloading it in the default build folder.
 AM_COND_IF([IDE_CODE], 
