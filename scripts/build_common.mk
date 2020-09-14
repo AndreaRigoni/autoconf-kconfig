@@ -377,7 +377,8 @@ if IDE_CODE_LOCAL ## IDE custom folder
 ak__DIRECTORIES += $(IDE_CODE_LOCAL_DIR)
 $(IDE_CODE_LOCAL_DIR)/bin/code: | $(DOWNLOAD_DIR) $(IDE_CODE_LOCAL_DIR) 
 	curl -SL $(IDE_CODE_DOWNLOAD_URL) > $(DOWNLOAD_DIR)/vs_code_local.tar.gz;
-	$(call dl__download_tar,$(DOWNLOAD_DIR)/vs_code_local.tar.gz,$(IDE_CODE_LOCAL_DIR))
+	$(call dl__download_tar,$(DOWNLOAD_DIR)/vs_code_local.tar.gz,$(IDE_CODE_LOCAL_DIR));
+	patch $(IDE_CODE_LOCAL_DIR)/bin/code < $(abs_top_srcdir)/conf/patch/vs_code_libxcb.patch
 
 edit-code: ##@@ide start visual studio code editor
 edit-code: ##@@vs_code start visual studio code editor
