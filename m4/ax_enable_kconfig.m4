@@ -57,7 +57,6 @@ m4_sinclude(conf/kscripts/$1)
 #
 AC_DEFUN([AX_KCONFIG_RECONFIGURE],[
  AS_VAR_IF([REQUIRE_RECONFIGURE],[yes],[
-  AS_ECHO([" TOUCHING .CONFIG "])
   touch .config
   ])
 ])

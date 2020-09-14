@@ -138,18 +138,17 @@ AC_SUBST([IDE_BIN])
 AX_KCONFIG_VAR_WITH([IDE_WSDIR],[Workspace directory])
 AC_SUBST([IDE_WSDIR])
 
-
-
-# IDE CODE LOCAL
-# if ide code has been selected as default ide, but code wasn't found in system,
-# set IDE_CODE_LOCAL as yes to try dowloading it in the default build folder.
-AM_COND_IF([IDE_CODE],
-           [AS_IF([test -n "${ac_cv_path_IDE_BIN}"],,
-                  [AS_VAR_SET([IDE_CODE_LOCAL],[yes])])])
-
-
 AX_KCONFIG_VAR_ENABLE([IDE_CODE_LOCAL],[Enable custom local install of VS code])
 AM_CONDITIONAL([IDE_CODE_LOCAL],[test x"${IDE_CODE_LOCAL}" = x"yes" ])
+
+# IDE CODE LOCAL
+
+# if ide code has been selected as default ide, but code wasn't found in system,
+# set IDE_CODE_LOCAL as yes to try dowloading it in the default build folder.
+AM_COND_IF([IDE_CODE], 
+  [AS_IF([test -z "${ac_cv_path_IDE_BIN} -a x"${IDE_CODE_LOCAL}" != x"yes""],
+         [AS_VAR_SET([IDE_CODE_LOCAL],[yes]) 
+          AX_KCONFIG_UPDATE([IDE_CODE_LOCAL])])])
 
 AX_KCONFIG_VAR_WITH([IDE_CODE_LOCAL_DIR],[VS code local dir])
 AC_SUBST([IDE_CODE_LOCAL_DIR])
