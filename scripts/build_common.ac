@@ -124,13 +124,14 @@ AM_CONDITIONAL([IDESUPPORT],[test x"${IDESUPPORT}" = x"yes"])
 
 AX_KCONFIG_CHOICE([IDE],
   [IDE_CODE],["code"],
-  [IDE_CODE_LOCAL],["code_local"],
   [IDE_ATOM],["atom"],
   [IDE_EMACS],["emacs"],
   [IDE_QTCREATOR],["qtcreator"],
   [IDE_ECLIPSE],["eclipse"])
+
 AC_SUBST([IDE])
 AC_PATH_PROG([IDE_BIN],[${IDE}])
+
 
 AC_SUBST([IDE_BIN])
 
@@ -138,7 +139,17 @@ AX_KCONFIG_VAR_WITH([IDE_WSDIR],[Workspace directory])
 AC_SUBST([IDE_WSDIR])
 
 
+
 # IDE CODE LOCAL
+# if ide code has been selected as default ide, but code wasn't found in system,
+# set IDE_CODE_LOCAL as yes to try dowloading it in the default build folder.
+AM_COND_IF([IDE_CODE],
+           [AS_IF([test -n "${ac_cv_path_IDE_BIN}"],,
+                  [AS_VAR_SET([IDE_CODE_LOCAL],[yes])])])
+
+
+AX_KCONFIG_VAR_ENABLE([IDE_CODE_LOCAL],[Enable custom local install of VS code])
+AM_CONDITIONAL([IDE_CODE_LOCAL],[test x"${IDE_CODE_LOCAL}" = x"yes" ])
 
 AX_KCONFIG_VAR_WITH([IDE_CODE_LOCAL_DIR],[VS code local dir])
 AC_SUBST([IDE_CODE_LOCAL_DIR])

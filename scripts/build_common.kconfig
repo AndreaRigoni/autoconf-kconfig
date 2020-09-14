@@ -68,8 +68,6 @@ menu  "General build options"
 	  depends on IDESUPPORT
 	  config IDE_CODE
 	   bool "Vs Code"
-	  config IDE_CODE_LOCAL
-	   bool "Vs Code local install"
 	  config IDE_QTCREATOR
 	   bool "Qt Creator"
 	  config IDE_ATOM
@@ -87,9 +85,14 @@ menu  "General build options"
 	---help---
 	  Workspace directory
 
+  config IDE_CODE_LOCAL
+	bool "Select custom VS code install"
+	default n
+
   config IDE_CODE_LOCAL_DIR
 	string "Directory of local VS code install"
 	default "${builddir}/conf/ide/code_local"
+	depends on IDE_CODE_LOCAL
 	---help---
 	  Select a proper directory in which the VS code has been downloaded,
 	  or a target directory in which perform the download.
@@ -97,6 +100,9 @@ menu  "General build options"
   config IDE_CODE_DOWNLOAD_URL
 	string "VS Code local download URL"
 	default "https://go.microsoft.com/fwlink/?LinkID=620884"
+	depends on IDE_CODE_LOCAL
+	---help---
+	  If code install is not found in at the provided path, try to download is from this URL
 
 
 
