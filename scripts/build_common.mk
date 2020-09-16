@@ -366,6 +366,10 @@ ak__VS_CODE_ARGS          = $(VS_CODE_ARGS)
 ak__VS_CODE_PROJECT_PATH  = $(or $(VS_CODE_PROJECT_PATH),$(top_srcdir))
 ak__VS_CODE_EXTENSIONS    = ms-vscode.cpptools ms-python.python $(VS_CODE_EXTENSIONS)
 
+if IDE_CODE_LOCAL_EXTENSIONS
+ak__VS_CODE_EXTENSIONS_PATH = --extensions-dir=$(IDE_CODE_LOCAL_EXTENSIONS_PATH)
+endif
+
 ak__DIRECTORIES += $(ak__VS_CODE_PATH)
 
 ## export ELECTRON_FORCE_WINDOW_MENU_BAR = 1
@@ -384,26 +388,33 @@ edit-code: ##@@ide start visual studio code editor
 edit-code: ##@@vs_code start visual studio code editor
 edit-code: $(IDE_CODE_LOCAL_DIR)/bin/code
 	$(IDE_CODE_LOCAL_DIR)/bin/code \
-	 -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) 
+	 -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) \
+	 $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) 
 
 edit-code-ext: ##@@vs_code list visual studio extensions
 edit-code-ext: $(IDE_CODE_LOCAL_DIR)/bin/code
-	@ $(IDE_CODE_LOCAL_DIR)/bin/code --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) --list-extensions
+	@ $(IDE_CODE_LOCAL_DIR)/bin/code --user-data-dir $(ak__VS_CODE_PATH) \
+	  $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) --list-extensions
 
 edit-code-extinstall: ##@@vs_code install all visual studio extensions in $IDE_CODE_EXTENSIONS
 edit-code-extinstall: $(IDE_CODE_LOCAL_DIR)/bin/code
-	@ $(foreach x,$(ak__VS_CODE_EXTENSIONS),$(IDE_CODE_LOCAL_DIR)/bin/code --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) --install-extension $x;)
+	@ $(foreach x,$(ak__VS_CODE_EXTENSIONS),$(IDE_CODE_LOCAL_DIR)/bin/code \
+	  --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) \
+	  $(ak__VS_CODE_EXTENSIONS_PATH) --install-extension $x;)
 
 else ## IDE from system
 
 edit-code: | $(ak__VS_CODE_PATH)
-	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) 
+	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) \
+	 $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) 
 
 edit-code-ext:
-	@ code --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) --list-extensions
+	@ code --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_EXTENSIONS_PATH) \
+	 $(ak__VS_CODE_ARGS) --list-extensions
 
 edit-code-extinstall:
-	@ $(foreach x,$(ak__VS_CODE_EXTENSIONS),code --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) --install-extension $x;)
+	@ $(foreach x,$(ak__VS_CODE_EXTENSIONS),code --user-data-dir $(ak__VS_CODE_PATH) \
+	 $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) --install-extension $x;)
 
 endif
 
@@ -424,7 +435,7 @@ ak__cdr_code_server_DIR = $(top_builddir)/conf/ide/code-server
 edit-code-server: ##@@ide start cdr vs code server installed in conf/code-server
 edit-code-server: ak__cdr-code-server
 	$(ak__cdr_code_server_DIR)/code-server --host $(ak__CODE_SERVER_HOST) --port $(ak__CODE_SERVER_PORT) --auth $(ak__CODE_SERVER_AUTH) \
-	--user-data-dir $(ak__VS_CODE_PATH) $(top_srcdir)
+	--user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_EXTENSIONS_PATH) $(top_srcdir)
 
 
 

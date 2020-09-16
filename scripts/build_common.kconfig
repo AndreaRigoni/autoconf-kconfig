@@ -84,7 +84,20 @@ menu  "General build options"
 	default "${builddir}/conf/ide"
 	---help---
 	  Workspace directory
-
+  
+  config IDE_CODE_LOCAL_EXTENSIONS
+	bool "place VS Code extensions in a custom path"
+	default n
+	---help---
+	  place VS Code extensions in a custom path
+	
+  config IDE_CODE_LOCAL_EXTENSIONS_PATH
+	string "VS Code extensions custom path"
+	depends on IDE_CODE_LOCAL_EXTENSIONS
+	default "${builddir}/conf/ide/vs_code/extensions"
+	---help---
+	  place VS Code extensions in a custom path
+	
   config IDE_CODE_LOCAL
 	bool "Select custom VS code install"
 	default n
@@ -103,7 +116,6 @@ menu  "General build options"
 	depends on IDE_CODE_LOCAL
 	---help---
 	  If code install is not found in at the provided path, try to download is from this URL
-
 
 
   ## REMOTE IDE SUPPORT ##
