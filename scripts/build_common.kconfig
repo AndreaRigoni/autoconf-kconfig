@@ -178,24 +178,3 @@ menu  "General build options"
 endmenu
 
 
-menuconfig  ENABLE_PYTHON
-  bool "Python script support"
-  ---help---
-  This enables the python execution in Makefile targets
-
-if ENABLE_PYTHON
-
-  config PYTHON_VERSION
-	string  "Python version ( ex: 2.7 3.8 )"
-	
-  choice PYTHON_ENV_SYSTEM
-	prompt "Python packaging system"
-	config PYTHON_ENV_SYSTEM_USER
-		bool "user"
-	config PYTHON_ENV_SYSTEM_CONDA
-		bool "conda"
-	config PYTHON_ENV_SYSTEM_VENV
-		bool "venv"
-  endchoice
-
-endif # ENABLE_PYTHON

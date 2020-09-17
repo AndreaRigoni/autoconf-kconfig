@@ -19,6 +19,9 @@
 ## ////////////////////////////////////////////////////////////////////////// //
 
 
+
+
+
 MAKE_PROCESS  ?= $(shell grep -c ^processor /proc/cpuinfo)
 DOWNLOAD_DIR  ?= $(top_builddir)/downloads
 ak__DOWNLOADS  = $(DOWNLOADS)
@@ -205,74 +208,6 @@ edit: ##@miscellaneous start editor define in $IDE
 edit: $(edit_DEPS) edit-$(IDE)
 endif
 
-## ////////////////////////////////////////////////////////////////////////////////
-## //  PYTHON  ////////////////////////////////////////////////////////////////////
-## ////////////////////////////////////////////////////////////////////////////////
-
-PYTHON_USERBASE         = $(abs_top_builddir)/conf/python/site-packages
-ak__PYTHON_PACKAGES     = $(PYTHON_PACKAGES)
-ac__PYTHON_REQUIREMENTS = $(PYTHON_REQUIREMENTS)
-
-
-export PYTHONUSERBASE = $(PYTHON_USERBASE)
-export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
-export PYTHONDONTWRITEBYTECODE=1
-
-## export PYTHON_VERSION 
-## ..... I can not export it because it breaks reconfiguration.. see issue #11
-
-
-
-get_pip_URL = https://bootstrap.pypa.io/get-pip.py
-
-ak__DIRECTORIES += $(PYTHON_USERBASE)
-# if HAVE_PIP
-# ak__get_pip:
-# else
-# ak__get_pip:
-# 	$(MAKE) $(AM_MAKEFLAGS) download NAME=get-pip DOWNLOAD_DIR=$(DOWNLOAD_DIR); \
-# 	python $(DOWNLOAD_DIR)/get-pip.py --user; 
-# endif
-
-# using python call fixes pip: https://github.com/pypa/pip/issues/7205
-PIP = $(PYTHON) -m pip
-
-pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
-pip-install: Q=$(if $(AK_V_IF),-q)
-pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
-pip-%: | $(PYTHON_USERBASE)
-	@ $(PIP) $* $(Q) --upgrade --user \
-	 $(addprefix -r ,$(ac__PYTHON_REQUIREMENTS)) \
-	 $(ak__PYTHON_PACKAGES)
-
-export REMOTE_DEBUG_HOST        ?= localhost
-export REMOTE_DEBUG_GDB_PORT    ?= 3000
-export REMOTE_DEBUG_PYTHON_PORT ?= 3001
-
-ak__PYTHON_PACKAGES += ptvsd
-
-PYTHON_GDB   = gdbserver $(REMOTE_DEBUG_HOST):$(REMOTE_DEBUG_GDB_PORT)
-PYTHON_PTVSD = -m ptvsd --host $(REMOTE_DEBUG_HOST) --port $(REMOTE_DEBUG_PYTHON_PORT) --wait
-
-PYTHON_SHELL = $(if $(PYTHON_DEBUG),$(PYTHON_GDB)) $(PYTHON) $(if $(PYTHON_DEBUG),$(PYTHON_PTVSD))
-
-
-# # PYTHON_PACKAGES = debugpy
-# debugpy: ##@mdsplus debug test program
-# debugpy:
-#         @ gdbserver localhost:5677 python $(srcdir)/mds_test.py
-# 
-# # @ gdbserver localhost:5677 python -m debugpy --listen 5678 --wait-for-client $(srcdir)/mds_test.py
-# 
-# debug_py: ##@mdsplus debug test only py
-# debug_py:
-#         @ python -m debugpy --listen 5678 --wait-for-client $(srcdir)/mds_test.py
-# 
-# debug_ptvsd: ##@mdsplus debug test only py
-# debug_ptvsd: PYTHON_PACKAGES = ptvsd
-# debug_ptvsd: pip-install
-#         python -m ptvsd --host 0.0.0.0 --port $(or ${PORT},3000) --wait $(srcdir)/mds_test.py
-
 
 
 
@@ -293,7 +228,7 @@ ak__ATOM_PACKAGES += project-manager \
 				     autocomplete-clang goto \
 				     build build-make
 
-ak__PYTHON_PACKAGES += setuptools python-language-server[all]
+#ak__PYTHON_PACKAGES += setuptools python-language-server[all]
 
 
 export ATOM_HOME
@@ -364,7 +299,10 @@ edit_DEPS += qws
 ak__VS_CODE_PATH          = $(or $(VS_CODE_PATH),$(abs_top_builddir)/conf/ide/vs_code)
 ak__VS_CODE_ARGS          = $(VS_CODE_ARGS)
 ak__VS_CODE_PROJECT_PATH  = $(or $(VS_CODE_PROJECT_PATH),$(top_srcdir))
-ak__VS_CODE_EXTENSIONS    = ms-vscode.cpptools ms-python.python $(VS_CODE_EXTENSIONS)
+ak__VS_CODE_EXTENSIONS    = ms-vscode.cpptools \
+							ms-python.python \
+							maelvalais.autoconf \
+							$(VS_CODE_EXTENSIONS)
 
 if IDE_CODE_LOCAL_EXTENSIONS
 ak__VS_CODE_EXTENSIONS_PATH = --extensions-dir=$(IDE_CODE_LOCAL_EXTENSIONS_PATH)
@@ -380,9 +318,11 @@ if IDE_CODE_LOCAL ## IDE custom folder
 
 ak__DIRECTORIES += $(IDE_CODE_LOCAL_DIR)
 $(IDE_CODE_LOCAL_DIR)/bin/code: | $(DOWNLOAD_DIR) $(IDE_CODE_LOCAL_DIR) 
-	curl -SL $(IDE_CODE_DOWNLOAD_URL) > $(DOWNLOAD_DIR)/vs_code_local.tar.gz;
-	$(call dl__download_tar,$(DOWNLOAD_DIR)/vs_code_local.tar.gz,$(IDE_CODE_LOCAL_DIR));
-	patch $(IDE_CODE_LOCAL_DIR)/bin/code < $(abs_top_srcdir)/conf/patch/vs_code_libxcb.patch
+	- curl -SL $(IDE_CODE_DOWNLOAD_URL) > $(DOWNLOAD_DIR)/vs_code_local.tar.gz; \
+	$(call dl__download_tar,$(DOWNLOAD_DIR)/vs_code_local.tar.gz,$(IDE_CODE_LOCAL_DIR)); \
+	[ -f $@          ] && patch $@ < $(abs_top_srcdir)/conf/patch/vs_code_libxcb.patch; \
+	[ -f $@-insiders ] && patch $@-insiders < $(abs_top_srcdir)/conf/patch/vs_code_insiders_libxcb.patch; \
+	[ -f $@-insiders ] && ln -s $@-insiders $@; 
 
 edit-code: ##@@ide start visual studio code editor
 edit-code: ##@@vs_code start visual studio code editor
@@ -406,7 +346,8 @@ else ## IDE from system
 
 edit-code: | $(ak__VS_CODE_PATH)
 	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) \
-	 $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) 
+	 $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) \
+	 --enable-proposed-api ms-vscode-remote.remote-ssh
 
 edit-code-ext:
 	@ code --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_EXTENSIONS_PATH) \

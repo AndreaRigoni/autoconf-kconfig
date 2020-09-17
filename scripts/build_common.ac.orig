@@ -69,6 +69,50 @@ AC_SUBST([DOWNLOADS])
 
 
 
+# ////////////////////////////////////////////////////////////////////////////////
+# //  PYTHON  ////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
+
+
+AX_KCONFIG_VAR_WITH([PYTHON_VERSION],[The installed Python version to use, 
+for example '2.3'. This string will be appended to the Python interpreter canonical name.])
+
+AC_MSG_NOTICE([ ---- PYTHON ${PYTHON_VERSION} ---- ])
+
+# this is needed because we might use PYTHON_VERSION in the Makefile
+AC_SUBST([PYTHON_VERSION]) 
+
+# Those does not select the correct pytho version... but the most recent one
+# sse at https://www.gnu.org/software/automake/manual/html_node/Python.html
+#
+# AM_PATH_PYTHON([${PYTHON_VERSION}])
+# AM_PATH_PYTHON([${PYTHON_VERSION}],, [:])
+
+AC_PATH_PROG([PYTHON],[python[]${PYTHON_VERSION}])
+AM_CONDITIONAL([HAVE_PYTHON],[test -n "${ac_cv_path_PYTHON}"])
+AC_SUBST([PYTHON])
+
+AC_CHECK_PROG([PIP],[pip[]${PYTHON_VERSION}],[])
+AM_CONDITIONAL([HAVE_PIP],[test -n "${PIP}"])
+
+
+AX_KCONFIG_CHOICE([PYTHON_ENV_SYSTEM],
+  [PYTHON_ENV_SYSTEM_USER],["user"],
+  [PYTHON_ENV_SYSTEM_CONDA],["conda"],
+  [PYTHON_ENV_SYSTEM_VENV],["venv"])
+
+AC_SUBST([PYTHON_ENV_SYSTEM])
+
+## EMBED PYTHON IN C CODE
+AX_PYTHON_DEVEL
+
+##
+## conditional for src build
+## TODO: make this a m4 script
+## 
+## AS_VAR_SET([abs_srcdir],[$(cd ${srcdir}; pwd)])
+## AS_VAR_SET([abs_builddir],[$(cd ${builddir}; pwd)])
+## AM_CONDITIONAL([SRCDIR_BUILD],[test "x${abs_srcdir}" == "x${abs_builddir}"])
 
 
 # ////////////////////////////////////////////////////////////////////////////////
@@ -94,21 +138,19 @@ AC_SUBST([IDE_BIN])
 AX_KCONFIG_VAR_WITH([IDE_WSDIR],[Workspace directory])
 AC_SUBST([IDE_WSDIR])
 
-AX_KCONFIG_VAR_ENABLE([IDE_CODE_LOCAL_EXTENSIONS],[place VS Code extensions in a custom path])
-AM_CONDITIONAL([IDE_CODE_LOCAL_EXTENSIONS],[test x"${IDE_CODE_LOCAL_EXTENSIONS}" = x"yes"])
-
-AX_KCONFIG_VAR_WITH([IDE_CODE_LOCAL_EXTENSIONS_PATH],[VS Code extensions path])
-AC_SUBST([IDE_CODE_LOCAL_EXTENSIONS_PATH])
-
-
 AX_KCONFIG_VAR_ENABLE([IDE_CODE_LOCAL],[Enable custom local install of VS code])
 AM_CONDITIONAL([IDE_CODE_LOCAL],[test x"${IDE_CODE_LOCAL}" = x"yes" ])
 
 # IDE CODE LOCAL
+
 # if ide code has been selected as default ide, but code wasn't found in system,
 # set IDE_CODE_LOCAL as yes to try dowloading it in the default build folder.
 AM_COND_IF([IDE_CODE], 
+<<<<<<< HEAD
   [AS_IF([test -z "${ac_cv_path_IDE_BIN}" -a x"${IDE_CODE_LOCAL}" != x"yes"],
+=======
+  [AS_IF([test -z "${ac_cv_path_IDE_BIN} -a x"${IDE_CODE_LOCAL}" != x"yes""],
+>>>>>>> 9574500d3ea1178e7219bf81c398751dfc2073f2
          [AS_VAR_SET([IDE_CODE_LOCAL],[yes]) 
           AX_KCONFIG_UPDATE([IDE_CODE_LOCAL])])])
 
