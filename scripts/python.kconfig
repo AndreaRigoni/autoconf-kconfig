@@ -53,6 +53,18 @@ if ENABLE_PYTHON
 		bool "venv"
   endchoice
 
+  config PYTHON_DEVEL
+	bool "Enable Python development (use python under C code)"
+	default n
+	---help---
+	  Activate AC_PYTHON_DEVEL script to check against python dev libraries
+
+  config PYTHON_GETPIP_URL
+	string "If Pyhon pip is missing retrieve if from get-pip.py script here"
+	default "https://bootstrap.pypa.io/get-pip.py"
+	---help---
+	  If pip is missing in your python environment install it from this link
+
 endif # ENABLE_PYTHON
 
 

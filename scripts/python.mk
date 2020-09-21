@@ -41,20 +41,25 @@ export PYTHONDONTWRITEBYTECODE=1
 ak__DIRECTORIES += $(PYTHON_USERBASE)
 
 PYTHON_PIP_URL = https://bootstrap.pypa.io/get-pip.py
-ak__get_pip:
-if HAVE_PIP
-else
-	$(MAKE) $(AM_MAKEFLAGS) download NAME=get-pip DOWNLOAD_DIR=$(DOWNLOAD_DIR); \
-	$(PYTHON) $(DOWNLOAD_DIR)/get-pip.py --user;
-endif
+ak__get_pip: | $(DOWNLOAD_DIR)
+	-@ $(PYTHON) -c "import pip" 2>/dev/null || { curl -SL $(PYTHON_GETPIP_URL) > $(DOWNLOAD_DIR)/get-pip.py; \
+	$(PYTHON) $(DOWNLOAD_DIR)/get-pip.py --user; }
 
 # using python call fixes pip: https://github.com/pypa/pip/issues/7205
 PIP = $(PYTHON) -m pip
 
 pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-install: Q=$(if $(AK_V_IF),-q)
-pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
-pip-%: | $(PYTHON_USERBASE)
+
+pip-list: ##@@python list packages
+pip-list: __list_items=$(foreach x,$1,echo "| $x";)
+pip-list: ak__get_pip | $(PYTHON_USERBASE)
+	@ $(PIP) list; \
+	  echo ""; echo " [ PYTHON_PACKAGES ] requested packages in Makefile "; \
+	  echo ",-------------------------------------------------------"; \
+	  $(call __list_items, ${ak__PYTHON_PACKAGES})
+
+pip-%: ak__get_pip | $(PYTHON_USERBASE)
 	@ $(PIP) $* $(Q) --upgrade --user \
 	 $(addprefix -r ,$(ac__PYTHON_REQUIREMENTS)) \
 	 $(ak__PYTHON_PACKAGES)
