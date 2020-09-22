@@ -35,6 +35,29 @@ export PYTHONDONTWRITEBYTECODE=1
 ## export PYTHON_VERSION 
 ## ..... I can not export it because it breaks reconfiguration.. see issue #11
 
+__py_init = $(__conda_init) $(__venv_init) 
+
+# /////////////////////////////////////////////////
+# //  VENV  ///////////////////////////////////////
+# /////////////////////////////////////////////////
+
+if PYTHON_ENV_SYSTEM_VENV
+# PYTHON_VENV_ACTIVATE_SCRIPT = 
+__venv_init = source $(PYTHON_VENV_ACTIVATE_SCRIPT); 
+endif
+
+# /////////////////////////////////////////////////
+# //  CONDA  //////////////////////////////////////
+# /////////////////////////////////////////////////
+
+if PYTHON_ENV_SYSTEM_CONDA
+PYTHON_CONDA_ENV ?= myenv
+PYTHON_CONDA_DIR ?= $(HOME)/miniconda3
+__conda_init = eval "$$($(PYTHON_CONDA_DIR)/bin/conda shell.bash hook)";
+conda-envs:
+	$(__conda_init) conda env list
+endif
+
 
 
 
@@ -42,11 +65,11 @@ ak__DIRECTORIES += $(PYTHON_USERBASE)
 
 PYTHON_PIP_URL = https://bootstrap.pypa.io/get-pip.py
 ak__get_pip: | $(DOWNLOAD_DIR)
-	-@ $(PYTHON) -c "import pip" 2>/dev/null || { curl -SL $(PYTHON_GETPIP_URL) > $(DOWNLOAD_DIR)/get-pip.py; \
-	$(PYTHON) $(DOWNLOAD_DIR)/get-pip.py --user; }
+	-@ $(__py_init) $(PYTHON) -c "import pip" 2>/dev/null || { curl -SL $(PYTHON_GETPIP_URL) > $(DOWNLOAD_DIR)/get-pip.py; \
+	$(__py_init) $(PYTHON) $(DOWNLOAD_DIR)/get-pip.py --user; }
 
 # using python call fixes pip: https://github.com/pypa/pip/issues/7205
-PIP = $(PYTHON) -m pip
+PIP = $(__py_init) $(PYTHON) -m pip
 
 pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-install: Q=$(if $(AK_V_IF),-q)
@@ -95,20 +118,23 @@ ipysh.py: $(top_srcdir)/conf/kconfig/scripts/ipysh.py
 
 ipython: ##@python ipython shell
 ipython: ipysh.py
-	$(PYTHON) -c "from IPython import start_ipython; import ipysh; start_ipython();"
+	$(__py_init) $(PYTHON) -c "from IPython import start_ipython; import ipysh; start_ipython();"
 
 py-run: ##@python run first script entry of $(NAME)_PYTHON variable of target $NAME
 py-run: $(if $(NAME),$(addprefix $(srcdir)/,$($(NAME)_PYTHON)))
-	$(PYTHON) $<
+	$(__py_init) $(PYTHON) $<
 
 py-ptvsd: ##@python run first script entry of $(NAME)_PYTHON under python debug
 py-ptvsd: $(if $(NAME),$(addprefix $(srcdir)/,$($(NAME)_PYTHON)))
-	$(PYTHON) $(PYTHON_PTVSD) $<
+	$(__py_init) $(PYTHON) $(PYTHON_PTVSD) $<
 
 # TODO:
 # add dbg server un top
+SUFFIXES = .ipynb .md
 
 if ENABLE_JUPYTER_NOTEBOOK
+
+ak__PYTHON_PACKAGES += jupyter
 
 jpnb-start:  ##@jupyter start notebook server
 jpnb-stop:   ##@jupyter stop notebook server
@@ -129,7 +155,7 @@ ak__DIRECTORIES += .logs
 
 jpnb-start: ##@@python start notebook server
 jpnb-start: | .logs
-	@ jupyter-notebook \
+	@ $(__py_init) jupyter-notebook \
 		--port-retries=0 \
 		--NotebookApp.disable_check_xsrf=True \
 		$(JPNB_CONFIG) \
@@ -144,11 +170,22 @@ jpnb-start: | .logs
 
 jpnb-stop: ##@@python stop notebook server
 jpnb-stop:
-	jupyter-notebook stop
+	$(__py_init) jupyter-notebook stop
 
 
 jpnb-passwd: ##@@python set new custom passwd
 jpnb-passwd:
-	jupyter-notebook password
+	$(__py_init) jupyter-notebook password
+
+
+
+# /////////////////////////////////////////////////
+# //  JP_NBCONVERT  ///////////////////////////////
+# /////////////////////////////////////////////////
+
+ak__PYTHON_PACKAGES += nbconvert nbcx
+.ipynb.md:
+	$(__py_init) $(PYTHON) -m jupyter nbconvert --to markdown $<
+
 
 endif
