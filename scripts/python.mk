@@ -35,26 +35,67 @@ export PYTHONDONTWRITEBYTECODE=1
 ## export PYTHON_VERSION 
 ## ..... I can not export it because it breaks reconfiguration.. see issue #11
 
+__py_init = $(__conda_init) $(__venv_init) 
+
+# /////////////////////////////////////////////////
+# //  VENV  ///////////////////////////////////////
+# /////////////////////////////////////////////////
+
+if PYTHON_ENV_SYSTEM_VENV
+# PYTHON_VENV_ACTIVATE_SCRIPT = 
+__venv_init = source $(PYTHON_VENV_ACTIVATE_SCRIPT); 
+endif
+
+# /////////////////////////////////////////////////
+# //  CONDA  //////////////////////////////////////
+# /////////////////////////////////////////////////
+
+if PYTHON_ENV_SYSTEM_CONDA
+PYTHON_CONDA_ENV ?= myenv
+PYTHON_CONDA_DIR ?= $(HOME)/miniconda3
+__conda_init = eval "$$($(PYTHON_CONDA_DIR)/bin/conda shell.bash hook)";
+conda-envs:
+	$(__conda_init) conda env list
+endif
+
 
 
 
 ak__DIRECTORIES += $(PYTHON_USERBASE)
 
 PYTHON_PIP_URL = https://bootstrap.pypa.io/get-pip.py
-ak__get_pip:
-if HAVE_PIP
-else
-	$(MAKE) $(AM_MAKEFLAGS) download NAME=get-pip DOWNLOAD_DIR=$(DOWNLOAD_DIR); \
-	$(PYTHON) $(DOWNLOAD_DIR)/get-pip.py --user;
-endif
+ak__get_pip: | $(DOWNLOAD_DIR)
+	-@ $(__py_init) $(PYTHON) -c "import pip" 2>/dev/null || \
+	{ curl -SL $(PYTHON_GETPIP_URL) > $(DOWNLOAD_DIR)/get-pip.py; \
+	  $(__py_init) $(PYTHON) $(DOWNLOAD_DIR)/get-pip.py --user; }
 
 # using python call fixes pip: https://github.com/pypa/pip/issues/7205
-PIP = $(PYTHON) -m pip
+PIP := $(__py_init) $(PYTHON) -m pip
 
 pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
 pip-install: Q=$(if $(AK_V_IF),-q)
-pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
-pip-%: | $(PYTHON_USERBASE)
+
+pip-list: ##@@python list packages
+pip-list: __list_items=$(foreach x,$1,echo "| $x";)
+pip-list: ak__get_pip | $(PYTHON_USERBASE)
+	@ $(PIP) list; \
+	  echo ""; echo " [ PYTHON_PACKAGES ] requested packages in Makefile "; \
+	  echo ",-------------------------------------------------------"; \
+	  $(call __list_items, ${ak__PYTHON_PACKAGES})
+
+# targets executed before pip-install
+ak__pre_pip_install  := $(pre_pip_install)
+
+# targets executed after pip-install
+ak__post_pip_install := $(post_pip_install)
+
+pip-install: $(ak__pre_pip_install) ak__get_pip | $(PYTHON_USERBASE)
+	@ $(PIP) install $(Q) --upgrade --user \
+	 $(addprefix -r ,$(ac__PYTHON_REQUIREMENTS)) \
+	 $(ak__PYTHON_PACKAGES); \
+	 $(if $(ak__post_pip_install),$(MAKE) $(AM_MAKEFLAGS) $(ak__post_pip_install);)
+
+pip-%: ak__get_pip | $(PYTHON_USERBASE)
 	@ $(PIP) $* $(Q) --upgrade --user \
 	 $(addprefix -r ,$(ac__PYTHON_REQUIREMENTS)) \
 	 $(ak__PYTHON_PACKAGES)
@@ -66,8 +107,13 @@ export REMOTE_DEBUG_PYTHON_PORT ?= 3001
 ak__PYTHON_PACKAGES += setuptools python-language-server[all]
 ak__PYTHON_PACKAGES += ptvsd
 
+
 PYTHON_GDB   ?= gdbserver $(REMOTE_DEBUG_HOST):$(REMOTE_DEBUG_GDB_PORT)
 PYTHON_PTVSD ?= -m ptvsd --host $(REMOTE_DEBUG_HOST) --port $(REMOTE_DEBUG_PYTHON_PORT) --wait
+
+
+--debug:
+	@echo "debug";
 
 # # PYTHON_PACKAGES = debugpy
 # debugpy: ##@mdsplus debug test program
@@ -90,20 +136,36 @@ ipysh.py: $(top_srcdir)/conf/kconfig/scripts/ipysh.py
 
 ipython: ##@python ipython shell
 ipython: ipysh.py
-	$(PYTHON) -c "from IPython import start_ipython; import ipysh; start_ipython();"
+	$(__py_init) $(PYTHON) -c "from IPython import start_ipython; import ipysh; start_ipython();"
 
 py-run: ##@python run first script entry of $(NAME)_PYTHON variable of target $NAME
 py-run: $(if $(NAME),$(addprefix $(srcdir)/,$($(NAME)_PYTHON)))
-	$(PYTHON) $<
+	$(__py_init) $(PYTHON) $<
 
 py-ptvsd: ##@python run first script entry of $(NAME)_PYTHON under python debug
 py-ptvsd: $(if $(NAME),$(addprefix $(srcdir)/,$($(NAME)_PYTHON)))
-	$(PYTHON) $(PYTHON_PTVSD) $<
+	$(__py_init) $(PYTHON) $(PYTHON_PTVSD) $<
 
 # TODO:
 # add dbg server un top
+SUFFIXES = .ipynb .md
 
 if ENABLE_JUPYTER_NOTEBOOK
+
+export JUPYTERLAB_DIR = $(PYTHON_USERBASE)/share/jupyter
+export JUPYTER_PATH   = $(PYTHON_USERBASE)/share/jupyter
+
+ak__PYTHON_PACKAGES += jupyter jupyter-client
+# ak__PYTHON_PACKAGES += jupyter_contrib_nbextensions \
+#                        jupyter_nbextensions_configurator \
+# 					   six
+
+# post install nbextensions ( used for nbconvert )
+# ak__post_pip_install += jpnb-install-nbextensions
+# jpnb-install-nbextensions:
+# 	$(__py_init) $(PYTHON) -m jupyter contrib nbextension install --user;
+# 	$(foreach x,$(JPNB_EXTENSIONS), )
+
 
 jpnb-start:  ##@jupyter start notebook server
 jpnb-stop:   ##@jupyter stop notebook server
@@ -120,11 +182,12 @@ jpnb-start: JPNB_DIR       := $(if $(JPNB_DIR),--notebook-dir=$(JPNB_DIR))
 jpnb-start: JPNB_PASSWD    := $(or $(JPNB_PASSWD),$(PASSWORD))
 jpnb-start: JPNB_PASSWD    := $(if $(JPNB_PASSWD),--NotebookApp.token=$(JPNB_PASSWD))
 
+
 ak__DIRECTORIES += .logs
 
 jpnb-start: ##@@python start notebook server
 jpnb-start: | .logs
-	@ jupyter-notebook \
+	@ $(__py_init) $(PYTHON) -m jupyter notebook \
 		--port-retries=0 \
 		--NotebookApp.disable_check_xsrf=True \
 		$(JPNB_CONFIG) \
@@ -134,16 +197,30 @@ jpnb-start: | .logs
 		$(JPNB_BROWSER) \
 		$(JPNB_DIR) \
 		$(JPNB_PASSWD) \
+		--NotebookApp.extra_nbextensions_path=$(PYTHON_USERBASE)/share/jupyter \
 		>> .logs/notebook.log 2>&1 &
 
 
 jpnb-stop: ##@@python stop notebook server
 jpnb-stop:
-	jupyter-notebook stop
+	$(__py_init) $(PYTHON) -m jupyter notebook stop
 
 
 jpnb-passwd: ##@@python set new custom passwd
 jpnb-passwd:
-	jupyter-notebook password
+	$(__py_init) $(PYTHON) -m jupyter notebook password
+
+
+
+# /////////////////////////////////////////////////
+# //  JP_NBCONVERT  ///////////////////////////////
+# /////////////////////////////////////////////////
+
+
+ak__PYTHON_PACKAGES += nbconvert nbcx
+.ipynb.md:
+	$(__py_init) $(PYTHON) -m jupyter nbconvert \
+	--NotebookApp.extra_nbextensions_path=$(PYTHON_USERBASE)/share/jupyter --to markdown $<
+
 
 endif
