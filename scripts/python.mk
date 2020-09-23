@@ -111,10 +111,6 @@ ak__PYTHON_PACKAGES += ptvsd
 PYTHON_GDB   ?= gdbserver $(REMOTE_DEBUG_HOST):$(REMOTE_DEBUG_GDB_PORT)
 PYTHON_PTVSD ?= -m ptvsd --host $(REMOTE_DEBUG_HOST) --port $(REMOTE_DEBUG_PYTHON_PORT) --wait
 
-
---debug:
-	@echo "debug";
-
 # # PYTHON_PACKAGES = debugpy
 # debugpy: ##@mdsplus debug test program
 # debugpy:
@@ -197,7 +193,6 @@ jpnb-start: | .logs
 		$(JPNB_BROWSER) \
 		$(JPNB_DIR) \
 		$(JPNB_PASSWD) \
-		--NotebookApp.extra_nbextensions_path=$(PYTHON_USERBASE)/share/jupyter \
 		>> .logs/notebook.log 2>&1 &
 
 
@@ -219,8 +214,7 @@ jpnb-passwd:
 
 ak__PYTHON_PACKAGES += nbconvert nbcx
 .ipynb.md:
-	$(__py_init) $(PYTHON) -m jupyter nbconvert \
-	--NotebookApp.extra_nbextensions_path=$(PYTHON_USERBASE)/share/jupyter --to markdown $<
+	$(__py_init) $(PYTHON) -m jupyter nbconvert --to markdown $<
 
 
 endif

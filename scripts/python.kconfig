@@ -53,6 +53,34 @@ if ENABLE_PYTHON
 		bool "venv"
   endchoice
 
+  config PYTHON_CONDA_DIR
+	string "Conda directory to be activated"
+	default "${HOME}/miniconda3"
+	depends on PYTHON_ENV_SYSTEM_CONDA
+
+  config PYTHON_CONDA_ENV
+	string "Conda env to be activated"
+	default ""
+	depends on PYTHON_ENV_SYSTEM_CONDA
+
+  config PYTHON_VENV_ACTIVATE_SCRIPT
+	string "venv activate script"
+	default ""
+	depends on PYTHON_ENV_SYSTEM_VENV
+
+
+  config PYTHON_DEVEL
+	bool "Enable Python development (use python under C code)"
+	default n
+	---help---
+	  Activate AC_PYTHON_DEVEL script to check against python dev libraries
+
+  config PYTHON_GETPIP_URL
+	string "If Pyhon pip is missing retrieve if from get-pip.py script here"
+	default "https://bootstrap.pypa.io/get-pip.py"
+	---help---
+	  If pip is missing in your python environment install it from this link
+
 endif # ENABLE_PYTHON
 
 

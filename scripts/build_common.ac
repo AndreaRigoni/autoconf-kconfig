@@ -50,6 +50,11 @@ dnl   [IS-RELEASE],[DEFAULT_RELEASE_FLAGS])
 # AX_CHECK_ENABLE_DEBUG([no],,,,[-g -O2])
 # AC_SUBST([ENABLE_DEBUG],[${ax_enable_debug}])
 
+AC_MSG_CHECKING(curl download tool is present)
+AC_PATH_PROG([CURL],[curl])
+AS_IF([test -n "${ac_cv_path_CURL}"],
+  [AC_MSG_RESULT([yes])],
+  [AC_MSG_ERROR([curl not present])])
 
 AX_KCONFIG_VAR_WITH([DOWNLOAD_DIR],["Default download directory path"])
 AC_SUBST([DOWNLOAD_DIR])
