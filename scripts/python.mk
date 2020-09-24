@@ -53,7 +53,7 @@ endif
 if PYTHON_ENV_SYSTEM_CONDA
 PYTHON_CONDA_ENV ?= myenv
 PYTHON_CONDA_DIR ?= $(HOME)/miniconda3
-__conda_init = eval "$$($(PYTHON_CONDA_DIR)/bin/conda shell.bash hook)";
+__conda_init = eval "$$($(PYTHON_CONDA_DIR)/bin/conda shell.bash hook)"; conda activate $(PYTHON_CONDA_ENV);
 conda-envs:
 	$(__conda_init) conda env list
 endif
@@ -192,6 +192,7 @@ jpnb-start: $(srcdir)/ipysh.py | .logs
 		$(JPNB_DIR) \
 		$(JPNB_PASSWD) \
 		>> .logs/notebook.log 2>&1 &
+
 
 jplab-build: $(srcdir)/ipysh.py | .logs
 	@ $(__py_init) $(PYTHON) -m jupyter lab build

@@ -38,14 +38,7 @@ AC_SUBST([PYTHON_VERSION])
 # AM_PATH_PYTHON([${PYTHON_VERSION}])
 # AM_PATH_PYTHON([${PYTHON_VERSION}],, [:])
 
-AC_PATH_PROG([PYTHON],[python[]${PYTHON_VERSION}])
-AM_CONDITIONAL([HAVE_PYTHON],[test -n "${ac_cv_path_PYTHON}"])
-AC_SUBST([PYTHON])
 
-# AC_PATH_PROG([PIP],[pip[]${PYTHON_VERSION}],[])
-# AM_CONDITIONAL([HAVE_PIP],[test -n "${ac_cv_path_PIP}"])
-AX_KCONFIG_VAR_WITH([PYTHON_GETPIP_URL],[python get-pip.py download url])
-AC_SUBST([PYTHON_GETPIP_URL])
 
 AX_KCONFIG_CHOICE([PYTHON_ENV_SYSTEM],
   [PYTHON_ENV_SYSTEM_USER],["user"],
@@ -59,6 +52,22 @@ AC_SUBST([PYTHON_CONDA_DIR])
 
 AX_KCONFIG_VAR_WITH([PYTHON_CONDA_ENV],[conda env])
 AC_SUBST([PYTHON_CONDA_ENV])
+
+# activate selected conda env to correctly look for python version
+AM_COND_IF([PYTHON_ENV_SYSTEM_CONDA],[
+  eval "$(${PYTHON_CONDA_DIR}/bin/conda shell.bash hook)";
+  conda activate ${PYTHON_CONDA_ENV};
+])
+
+AC_PATH_PROG([PYTHON],[python[]${PYTHON_VERSION}])
+AM_CONDITIONAL([HAVE_PYTHON],[test -n "${ac_cv_path_PYTHON}"])
+AC_SUBST([PYTHON])
+
+# AC_PATH_PROG([PIP],[pip[]${PYTHON_VERSION}],[])
+# AM_CONDITIONAL([HAVE_PIP],[test -n "${ac_cv_path_PIP}"])
+AX_KCONFIG_VAR_WITH([PYTHON_GETPIP_URL],[python get-pip.py download url])
+AC_SUBST([PYTHON_GETPIP_URL])
+
 
 AX_KCONFIG_VAR_WITH([PYTHON_VENV_ACTIVATE_SCRIPT],[venv activate script])
 AC_SUBST([PYTHON_VENV_ACTIVATE_SCRIPT])
