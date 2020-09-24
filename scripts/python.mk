@@ -110,7 +110,7 @@ pip-%: ak__get_pip | $(PYTHON_USERBASE)
 
 # install prerequisites only once
 pip_install_stamp = .pip-install.stamp
-$(pip_install_stamp): $(srcdir)/Makefile.in $(ac__PYTHON_REQUIREMENTS)
+$(pip_install_stamp): $(ac__PYTHON_REQUIREMENTS) #$(srcdir)/Makefile.in 
 	$(MAKE) $(AM_MAKEFLAGS) pip-install && touch $@
 
 export REMOTE_DEBUG_HOST        ?= localhost
@@ -126,19 +126,19 @@ PYTHON_GDB   ?= gdbserver $(REMOTE_DEBUG_HOST):$(REMOTE_DEBUG_GDB_PORT)
 PYTHON_PTVSD ?= -m ptvsd --host $(REMOTE_DEBUG_HOST) --port $(REMOTE_DEBUG_PYTHON_PORT) --wait
 
 ipysh.py: $(top_srcdir)/conf/kconfig/scripts/ipysh.py
-	$(LN_S) $< $@
+	-@cp $< $@ 
 
 ipython: ##@python ipython shell
 ipython: $(pip_install_stamp) ipysh.py 
-	$(__py_init) $(PYTHON) -c "from IPython import start_ipython; import ipysh; start_ipython();"
+	@ $(__py_init) $(PYTHON) -c "from IPython import start_ipython; start_ipython();"
 
 py-run: ##@python run first script entry of $(NAME)_PYTHON variable of target $NAME
 py-run: $(if $(NAME),$(addprefix $(srcdir)/,$($(NAME)_PYTHON))) $(NAME) $(ak__PYTHON_scripts) $(pip_install_stamp)
-	$(__py_init) $(PYTHON) $<
+	@ $(__py_init) $(PYTHON) $<
 
 py-ptvsd: ##@python run first script entry of $(NAME)_PYTHON under python debug
 py-ptvsd: $(if $(NAME),$(addprefix $(srcdir)/,$($(NAME)_PYTHON))) $(NAME) $(ak__PYTHON_scripts) $(pip_install_stamp)
-	$(__py_init) $(PYTHON) $(PYTHON_PTVSD) $<
+	@ $(__py_init) $(PYTHON) $(PYTHON_PTVSD) $<
 
 # TODO:
 # add dbg server un top
@@ -149,7 +149,7 @@ if ENABLE_JUPYTER_NOTEBOOK
 export JUPYTERLAB_DIR = $(PYTHON_USERBASE)/share/jupyter
 export JUPYTER_PATH   = $(PYTHON_USERBASE)/share/jupyter
 
-ak__PYTHON_PACKAGES += jupyter jupyter-client
+ak__PYTHON_PACKAGES += jupyter jupyter-client jupyterlab
 # ak__PYTHON_PACKAGES += jupyter_contrib_nbextensions \
 #                        jupyter_nbextensions_configurator \
 # 					   six
@@ -166,21 +166,21 @@ jpnb-stop:   ##@jupyter stop notebook server
 jpnb-passwd: ##@jupyter set new custom passwd
 
 
-jpnb-start: JPNB_CONFIG    := $(if $(JPNB_CONFIG),--config=$(JPNB_CONFIG))
-jpnb-start: JPNB_IP        := $(if $(JPNB_IP),--ip=$(JPNB_IP))
-jpnb-start: JPNB_PORT      := $(if $(JPNB_PORT),--port=$(JPNB_PORT))
-jpnb-start: JPNB_TRANSPORT := $(if $(JPNB_TRANSPORT),--transport=$(JPNB_TRANSPORT))
-jpnb-start: JPNB_BROWSER   := $(if $(JPNB_BROWSER),--browser=$(JPNB_BROWSER))
-jpnb-start: JPNB_DIR       := $(or $(JPNB_DIR),$(srcdir))
-jpnb-start: JPNB_DIR       := $(if $(JPNB_DIR),--notebook-dir=$(JPNB_DIR))
-jpnb-start: JPNB_PASSWD    := $(or $(JPNB_PASSWD),$(PASSWORD))
-jpnb-start: JPNB_PASSWD    := $(if $(JPNB_PASSWD),--NotebookApp.token=$(JPNB_PASSWD))
+jp%-start: JPNB_CONFIG    := $(if $(JPNB_CONFIG),--config=$(JPNB_CONFIG))
+jp%-start: JPNB_IP        := $(if $(JPNB_IP),--ip=$(JPNB_IP))
+jp%-start: JPNB_PORT      := $(if $(JPNB_PORT),--port=$(JPNB_PORT))
+jp%-start: JPNB_TRANSPORT := $(if $(JPNB_TRANSPORT),--transport=$(JPNB_TRANSPORT))
+jp%-start: JPNB_BROWSER   := $(if $(JPNB_BROWSER),--browser=$(JPNB_BROWSER))
+jp%-start: JPNB_DIR       := $(or $(JPNB_DIR),$(srcdir))
+jp%-start: JPNB_DIR       := $(if $(JPNB_DIR),--notebook-dir=$(JPNB_DIR))
+jp%-start: JPNB_PASSWD    := $(or $(JPNB_PASSWD),$(PASSWORD))
+jp%-start: JPNB_PASSWD    := $(if $(JPNB_PASSWD),--NotebookApp.token=$(JPNB_PASSWD))
 
 
 ak__DIRECTORIES += .logs
 
 jpnb-start: ##@@python start notebook server
-jpnb-start: $(pip_install_stamp) | .logs
+jpnb-start: $(srcdir)/ipysh.py | .logs
 	@ $(__py_init) $(PYTHON) -m jupyter notebook \
 		--port-retries=0 \
 		--NotebookApp.disable_check_xsrf=True \
@@ -193,6 +193,20 @@ jpnb-start: $(pip_install_stamp) | .logs
 		$(JPNB_PASSWD) \
 		>> .logs/notebook.log 2>&1 &
 
+jplab-build: $(srcdir)/ipysh.py | .logs
+	@ $(__py_init) $(PYTHON) -m jupyter lab build
+
+jplab-start: $(srcdir)/ipysh.py | .logs
+	@ $(__py_init) $(PYTHON) -m jupyter lab \
+		--port-retries=0 \
+		--NotebookApp.disable_check_xsrf=True \
+		$(JPNB_CONFIG) \
+		$(JPNB_IP) \
+		$(JPNB_PORT) \
+		$(JPNB_TRANSPORT) \
+		$(JPNB_BROWSER) \
+		$(JPNB_DIR) \
+		$(JPNB_PASSWD) 
 
 jpnb-stop: ##@@python stop notebook server
 jpnb-stop:
@@ -211,7 +225,7 @@ jpnb-passwd:
 
 
 ak__PYTHON_PACKAGES += nbconvert nbcx
-.ipynb.md: $(pip_install_stamp)
+.ipynb.md: 
 	$(__py_init) $(PYTHON) -m jupyter nbconvert --to markdown $<
 
 
