@@ -60,6 +60,9 @@ endif
 
 
 
+# /////////////////////////////////////////////////
+# //  PIP  ////////////////////////////////////////
+# /////////////////////////////////////////////////
 
 ak__DIRECTORIES += $(PYTHON_USERBASE)
 
@@ -89,6 +92,11 @@ ak__pre_pip_install  := $(pre_pip_install)
 # targets executed after pip-install
 ak__post_pip_install := $(post_pip_install)
 
+pip-upgrade: ##@@python upgrade pip package version
+pip-upgrade: $(ak__pre_pip_install) ak__get_pip | $(PYTHON_USERBASE)
+	@ $(PIP) install $(Q) --upgrade --user \
+	 pip setuptools wheel
+
 pip-install: $(ak__pre_pip_install) ak__get_pip | $(PYTHON_USERBASE)
 	@ $(PIP) install $(Q) --upgrade --user \
 	 $(addprefix -r ,$(ac__PYTHON_REQUIREMENTS)) \
@@ -100,6 +108,11 @@ pip-%: ak__get_pip | $(PYTHON_USERBASE)
 	 $(addprefix -r ,$(ac__PYTHON_REQUIREMENTS)) \
 	 $(ak__PYTHON_PACKAGES)
 
+# install prerequisites only once
+pip_install_stamp = .pip-install.stamp
+$(pip_install_stamp): $(srcdir)/Makefile.in $(ac__PYTHON_REQUIREMENTS)
+	$(MAKE) $(AM_MAKEFLAGS) pip-install && touch $@
+
 export REMOTE_DEBUG_HOST        ?= localhost
 export REMOTE_DEBUG_GDB_PORT    ?= 3000
 export REMOTE_DEBUG_PYTHON_PORT ?= 3001
@@ -107,39 +120,24 @@ export REMOTE_DEBUG_PYTHON_PORT ?= 3001
 ak__PYTHON_PACKAGES += setuptools python-language-server[all]
 ak__PYTHON_PACKAGES += ptvsd
 
+ak__PYTHON_scripts = $(PYTHON_SCRIPTS) $(foreach x,$(filter %_PYTHON,$(.VARIABLES)),$($x)) 
 
 PYTHON_GDB   ?= gdbserver $(REMOTE_DEBUG_HOST):$(REMOTE_DEBUG_GDB_PORT)
 PYTHON_PTVSD ?= -m ptvsd --host $(REMOTE_DEBUG_HOST) --port $(REMOTE_DEBUG_PYTHON_PORT) --wait
-
-# # PYTHON_PACKAGES = debugpy
-# debugpy: ##@mdsplus debug test program
-# debugpy:
-#         @ gdbserver localhost:5677 python $(srcdir)/mds_test.py
-# 
-# # @ gdbserver localhost:5677 python -m debugpy --listen 5678 --wait-for-client $(srcdir)/mds_test.py
-# 
-# debug_py: ##@mdsplus debug test only py
-# debug_py:
-#         @ python -m debugpy --listen 5678 --wait-for-client $(srcdir)/mds_test.py
-# 
-# debug_ptvsd: ##@mdsplus debug test only py
-# debug_ptvsd: PYTHON_PACKAGES = ptvsd
-# debug_ptvsd: pip-install
-#         python -m ptvsd --host 0.0.0.0 --port $(or ${PORT},3000) --wait $(srcdir)/mds_test.py
 
 ipysh.py: $(top_srcdir)/conf/kconfig/scripts/ipysh.py
 	$(LN_S) $< $@
 
 ipython: ##@python ipython shell
-ipython: ipysh.py
+ipython: $(pip_install_stamp) ipysh.py 
 	$(__py_init) $(PYTHON) -c "from IPython import start_ipython; import ipysh; start_ipython();"
 
 py-run: ##@python run first script entry of $(NAME)_PYTHON variable of target $NAME
-py-run: $(if $(NAME),$(addprefix $(srcdir)/,$($(NAME)_PYTHON)))
+py-run: $(if $(NAME),$(addprefix $(srcdir)/,$($(NAME)_PYTHON))) $(NAME) $(ak__PYTHON_scripts) $(pip_install_stamp)
 	$(__py_init) $(PYTHON) $<
 
 py-ptvsd: ##@python run first script entry of $(NAME)_PYTHON under python debug
-py-ptvsd: $(if $(NAME),$(addprefix $(srcdir)/,$($(NAME)_PYTHON)))
+py-ptvsd: $(if $(NAME),$(addprefix $(srcdir)/,$($(NAME)_PYTHON))) $(NAME) $(ak__PYTHON_scripts) $(pip_install_stamp)
 	$(__py_init) $(PYTHON) $(PYTHON_PTVSD) $<
 
 # TODO:
@@ -182,7 +180,7 @@ jpnb-start: JPNB_PASSWD    := $(if $(JPNB_PASSWD),--NotebookApp.token=$(JPNB_PAS
 ak__DIRECTORIES += .logs
 
 jpnb-start: ##@@python start notebook server
-jpnb-start: | .logs
+jpnb-start: $(pip_install_stamp) | .logs
 	@ $(__py_init) $(PYTHON) -m jupyter notebook \
 		--port-retries=0 \
 		--NotebookApp.disable_check_xsrf=True \
@@ -213,7 +211,7 @@ jpnb-passwd:
 
 
 ak__PYTHON_PACKAGES += nbconvert nbcx
-.ipynb.md:
+.ipynb.md: $(pip_install_stamp)
 	$(__py_init) $(PYTHON) -m jupyter nbconvert --to markdown $<
 
 
