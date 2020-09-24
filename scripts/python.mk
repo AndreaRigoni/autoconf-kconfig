@@ -125,7 +125,7 @@ ak__PYTHON_scripts = $(PYTHON_SCRIPTS) $(foreach x,$(filter %_PYTHON,$(.VARIABLE
 PYTHON_GDB   ?= gdbserver $(REMOTE_DEBUG_HOST):$(REMOTE_DEBUG_GDB_PORT)
 PYTHON_PTVSD ?= -m ptvsd --host $(REMOTE_DEBUG_HOST) --port $(REMOTE_DEBUG_PYTHON_PORT) --wait
 
-ipysh.py: $(top_srcdir)/conf/kconfig/scripts/ipysh.py
+$(srcdir)/ipysh.py ipysh.py: $(top_srcdir)/conf/kconfig/scripts/ipysh.py
 	-@cp $< $@ 
 
 ipython: ##@python ipython shell
