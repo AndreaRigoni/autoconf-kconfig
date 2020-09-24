@@ -320,8 +320,8 @@ ak__DIRECTORIES += $(IDE_CODE_LOCAL_DIR)
 $(IDE_CODE_LOCAL_DIR)/bin/code: | $(DOWNLOAD_DIR) $(IDE_CODE_LOCAL_DIR) 
 	- curl -SL $(IDE_CODE_DOWNLOAD_URL) > $(DOWNLOAD_DIR)/vs_code_local.tar.gz; \
 	$(call dl__download_tar,$(DOWNLOAD_DIR)/vs_code_local.tar.gz,$(IDE_CODE_LOCAL_DIR)); \
-	[ -f $@          ] && patch $@ < $(abs_top_srcdir)/conf/patch/vs_code_libxcb.patch; \
-	[ -f $@-insiders ] && patch $@-insiders < $(abs_top_srcdir)/conf/patch/vs_code_insiders_libxcb.patch; \
+	[ -f $@          ] && patch $@ < $(kconfig_dir)/patch/vs_code_libxcb.patch; \
+	[ -f $@-insiders ] && patch $@-insiders < $(kconfig_dir)/patch/vs_code_insiders_libxcb.patch; \
 	[ -f $@-insiders ] && ln -s $@-insiders $@; 
 
 edit-code: ##@@ide start visual studio code editor

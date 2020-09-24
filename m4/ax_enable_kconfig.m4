@@ -102,6 +102,10 @@ AC_DEFUN([AX_KCONFIG_PRINTUPDATES],[
 # ----------
 # [kconfig-subdir]
 AC_DEFUN([AX_KCONFIG],[
+  
+  # export kconfig variable to point scpript dir
+  AC_SUBST([kconfig_dir],[$1])  
+  
   AS_VAR_SET([subdirs_SAVE],[$subdirs])
   AS_VAR_SET([subdirs],[$1])
   _AC_OUTPUT_SUBDIRS
