@@ -150,20 +150,15 @@ export JUPYTERLAB_DIR = $(PYTHON_USERBASE)/share/jupyter
 export JUPYTER_PATH   = $(PYTHON_USERBASE)/share/jupyter
 
 ak__PYTHON_PACKAGES += jupyter jupyter-client jupyterlab
-# ak__PYTHON_PACKAGES += jupyter_contrib_nbextensions \
-#                        jupyter_nbextensions_configurator \
-# 					   six
+ak__PYTHON_PACKAGES += jupyter_contrib_nbextensions \
+                       jupyter_nbextensions_configurator \
+					   six
 
 # post install nbextensions ( used for nbconvert )
-# ak__post_pip_install += jpnb-install-nbextensions
-# jpnb-install-nbextensions:
-# 	$(__py_init) $(PYTHON) -m jupyter contrib nbextension install --user;
-# 	$(foreach x,$(JPNB_EXTENSIONS), )
-
-
-jpnb-start:  ##@jupyter start notebook server
-jpnb-stop:   ##@jupyter stop notebook server
-jpnb-passwd: ##@jupyter set new custom passwd
+ak__post_pip_install += jpnb-install-nbextensions
+jpnb-install-nbextensions:
+	$(__py_init) $(PYTHON) -m jupyter contrib nbextension install --user; \
+	$(foreach x,$(JPNB_EXTENSIONS), $(__py_init) $(PYTHON) -m jupyter enable $x)
 
 
 jp%-start: JPNB_CONFIG    := $(if $(JPNB_CONFIG),--config=$(JPNB_CONFIG))
@@ -177,9 +172,15 @@ jp%-start: JPNB_PASSWD    := $(or $(JPNB_PASSWD),$(PASSWORD))
 jp%-start: JPNB_PASSWD    := $(if $(JPNB_PASSWD),--NotebookApp.token=$(JPNB_PASSWD))
 
 
-ak__DIRECTORIES += .logs
 
-jpnb-start: ##@@python start notebook server
+jpnb-start:  ##@python start jupyter notebook server
+jpnb-stop:   ##@python stop notebook server
+jplab-build: ##@python configure jupyter lab environment
+jplab-start: ##@python start jupyter lab server
+jpnb-passwd: ##@python set new custom passwd
+
+
+ak__DIRECTORIES += .logs
 jpnb-start: $(srcdir)/ipysh.py | .logs
 	@ $(__py_init) $(PYTHON) -m jupyter notebook \
 		--port-retries=0 \
@@ -194,10 +195,10 @@ jpnb-start: $(srcdir)/ipysh.py | .logs
 		>> .logs/notebook.log 2>&1 &
 
 
-jplab-build: $(srcdir)/ipysh.py | .logs
+jplab-build: $(srcdir)/ipysh.py
 	@ $(__py_init) $(PYTHON) -m jupyter lab build
 
-jplab-start: $(srcdir)/ipysh.py | .logs
+jplab-start: $(srcdir)/ipysh.py
 	@ $(__py_init) $(PYTHON) -m jupyter lab \
 		--port-retries=0 \
 		--NotebookApp.disable_check_xsrf=True \
@@ -206,15 +207,13 @@ jplab-start: $(srcdir)/ipysh.py | .logs
 		$(JPNB_PORT) \
 		$(JPNB_TRANSPORT) \
 		$(JPNB_BROWSER) \
-		$(JPNB_DIR) \
-		$(JPNB_PASSWD) 
+		$(JPNB_PASSWD) $(srcdir)
 
-jpnb-stop: ##@@python stop notebook server
+
 jpnb-stop:
 	$(__py_init) $(PYTHON) -m jupyter notebook stop
 
 
-jpnb-passwd: ##@@python set new custom passwd
 jpnb-passwd:
 	$(__py_init) $(PYTHON) -m jupyter notebook password
 
