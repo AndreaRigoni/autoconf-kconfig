@@ -33,15 +33,15 @@ class Bootstrap_support():
 
 
     @staticmethod
-    def debug(wait=False):
+    def debug(wait=False, port=3000):
         try:
             import ptvsd
             # Allow other computers to attach to ptvsd at this IP address and port.
-            ptvsd.enable_attach(address=('*', 3000), redirect_output=True)
+            ptvsd.enable_attach(address=('*', port), redirect_output=True)
             # Pause the program until a remote debugger is attached
             if wait:
                 ptvsd.wait_for_attach()
-            print('debug active on *:3000')
+            print('debug active on *:%d'%port)
         except:
             print('unable to set vs debugger')
 
@@ -52,41 +52,8 @@ class Bootstrap_support():
 
 
 
-# import tensorflow as tf
-# from tensorflow.python.client import timeline
-#
-# a = tf.random_normal([2000, 5000])
-# b = tf.random_normal([5000, 1000])
-# res = tf.matmul(a, b)
-
-# with tf.Session() as sess:
-#     # add additional options to trace the session execution
-#     options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-#     run_metadata = tf.RunMetadata()
-#     sess.run(res, options=options, run_metadata=run_metadata)
-
-#     # Create the Timeline object, and write it to a json file
-#     fetched_timeline = timeline.Timeline(run_metadata.step_stats)
-#     chrome_trace = fetched_timeline.generate_chrome_trace_format()
-#     with open('timeline_01.json', 'w') as f:
-#         f.write(chrome_trace)
-
-
-
-# pr = cProfile.Profile()
-# pr.enable()
-# # ... do something ...
-# pr.disable()
-# s = StringIO.StringIO()
-# sortby = 'cumulative'
-# ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-# ps.print_stats()
-# print s.getvalue()
-
-
 abs_srcdir   = os.environ.get('abs_srcdir')
 abs_builddir = os.environ.get('abs_builddir')
-
 
 # trigger autoreload functionality
 Bootstrap_support.autoreload()
