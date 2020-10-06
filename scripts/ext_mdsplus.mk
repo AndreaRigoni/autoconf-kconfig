@@ -20,18 +20,20 @@
 
 ext_DIR ?= $(abs_top_builddir)/ext
 
-MDSPLUS_DIR   ?= $(ext_DIR)/mdsplus
-MDS_SRCDIR    ?= $(MDSPLUS_DIR)
-MDS_BUILDDIR  := $(MDSPLUS_DIR)
-MDS_LIBDIR    := $(MDS_BUILDDIR)/lib$(MDS_LIBSUFFIX)
-MDS_BINDIR    := $(MDS_BUILDDIR)/bin$(MDS_LIBSUFFIX)
 
-MDSCPPFLAGS  := -I${MDS_BUILDDIR}/include -I${MDS_SRCDIR}/include
-MDSLDFLAGS   := -L${MDS_LIBDIR} \
+MDSPLUS_DIR   = $(ext_DIR)/mdsplus
+
+MDS_SRCDIR    = $(MDSPLUS_DIR)
+MDS_BUILDDIR  = $(MDSPLUS_DIR)
+MDS_LIBDIR    = $(MDS_BUILDDIR)/lib$(MDS_LIBSUFFIX)
+MDS_BINDIR    = $(MDS_BUILDDIR)/bin$(MDS_LIBSUFFIX)
+
+MDSCPPFLAGS  = -I${MDS_BUILDDIR}/include -I${MDS_SRCDIR}/include
+MDSLDFLAGS   = -L${MDS_LIBDIR} \
 			   -lMdsObjectsCppShr -lMdsShr -lTreeShr -lTdiShr -lMdsIpShr \
 			   -lpthread -lm
 
-MDS_CLASSPATH := $(addprefix $(MDS_BUILDDIR)/,\
+MDS_CLASSPATH = $(addprefix $(MDS_BUILDDIR)/,\
 				javascope/jScope.jar \
 				javascope/WaveDisaply.jar \
 				mdsobjects/java/mdsobjects.jar \
@@ -52,7 +54,12 @@ ext-mdsplus:
 if MDSPLUS_DOWNLOAD
 	@ $(MAKE) -C $(ext_DIR) $@ && \
 	  cd $(MDSPLUS_DIR)/python/MDSplus && \
-	  python setup.py install --user 
+	  $(PYTHON) setup.py install --user 
 endif
 
+mdsplus-%: ##@ext external mdsplus compilation
+mdsplus-%:
+if MDSPLUS_DOWNLOAD
+	@ $(MAKE) -C $(MDS_BUILDDIR) $*
+endif
 
