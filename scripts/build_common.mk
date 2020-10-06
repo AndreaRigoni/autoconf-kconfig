@@ -316,6 +316,10 @@ ak__DIRECTORIES += $(ak__VS_CODE_PATH)
 
 if IDE_CODE_LOCAL ## IDE custom folder
 
+edit-code: ##@@ide start visual studio code editor
+edit-code: ##@@vs_code start visual studio code editor
+edit-code-ext: ##@@vs_code list visual studio extensions
+edit-code-extinstall: ##@@vs_code install all visual studio extensions in $IDE_CODE_EXTENSIONS
 ak__DIRECTORIES += $(IDE_CODE_LOCAL_DIR)
 $(IDE_CODE_LOCAL_DIR)/bin/code: | $(DOWNLOAD_DIR) $(IDE_CODE_LOCAL_DIR) 
 	- curl -SL $(IDE_CODE_DOWNLOAD_URL) > $(DOWNLOAD_DIR)/vs_code_local.tar.gz; \
@@ -324,19 +328,15 @@ $(IDE_CODE_LOCAL_DIR)/bin/code: | $(DOWNLOAD_DIR) $(IDE_CODE_LOCAL_DIR)
 	[ -f $@-insiders ] && patch $@-insiders < $(kconfig_dir)/patch/vs_code_insiders_libxcb.patch; \
 	[ -f $@-insiders ] && ln -s $@-insiders $@; 
 
-edit-code: ##@@ide start visual studio code editor
-edit-code: ##@@vs_code start visual studio code editor
 edit-code: $(IDE_CODE_LOCAL_DIR)/bin/code
 	$(IDE_CODE_LOCAL_DIR)/bin/code \
 	 -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) \
 	 $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) 
 
-edit-code-ext: ##@@vs_code list visual studio extensions
 edit-code-ext: $(IDE_CODE_LOCAL_DIR)/bin/code
 	@ $(IDE_CODE_LOCAL_DIR)/bin/code --user-data-dir $(ak__VS_CODE_PATH) \
 	  $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) --list-extensions
 
-edit-code-extinstall: ##@@vs_code install all visual studio extensions in $IDE_CODE_EXTENSIONS
 edit-code-extinstall: $(IDE_CODE_LOCAL_DIR)/bin/code
 	@ $(foreach x,$(ak__VS_CODE_EXTENSIONS),$(IDE_CODE_LOCAL_DIR)/bin/code \
 	  --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) \
@@ -344,6 +344,10 @@ edit-code-extinstall: $(IDE_CODE_LOCAL_DIR)/bin/code
 
 else ## IDE from system
 
+edit-code: ##@@ide start visual studio code editor
+edit-code: ##@@vs_code start visual studio code editor
+edit-code-ext: ##@@vs_code list visual studio extensions
+edit-code-extinstall: ##@@vs_code install all visual studio extensions in $IDE_CODE_EXTENSIONS
 edit-code: | $(ak__VS_CODE_PATH)
 	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) \
 	 $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) \
@@ -400,5 +404,6 @@ shell:
 print-env-: ##@@miscellaneous print-env-% print env variable
 print-env-%:
 	@ $(if $($*),$(info $*="$($*)"),$(info $* not set)):;
+
 
 
