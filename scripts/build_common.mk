@@ -247,7 +247,7 @@ apm-install: $(ATOM_PACKAGES_PATH)
 
 ak__DIRECTORIES += $(ATOM_HOME)
 edit-atom: ##@@ide start atom
-edit-atom: | apm-install pip-install
+edit-atom: | apm-install
 	@ atom $(foreach d,$(ATOM_PROJECT_PATH),-a $d )
 
 
