@@ -140,6 +140,10 @@ py-ptvsd: ##@python run first script entry of $(NAME)_PYTHON under python debug
 py-ptvsd: $(if $(NAME),$(addprefix $(srcdir)/,$($(NAME)_PYTHON))) $(NAME) $(ak__PYTHON_scripts) $(pip_install_stamp)
 	@ $(__py_init) $(PYTHON) $(PYTHON_PTVSD) $<
 
+py-gdb-ptvsd: ##@python run first script entry of $(NAME)_PYTHON under python debug and gdb
+py-gdb-ptvsd: $(if $(NAME),$(addprefix $(srcdir)/,$($(NAME)_PYTHON))) $(NAME) $(ak__PYTHON_scripts) $(pip_install_stamp)
+	@ $(__py_init) $(PYTHON_GDB) $(PYTHON) $(PYTHON_PTVSD) $<
+
 # TODO:
 # add dbg server un top
 SUFFIXES = .ipynb .md
