@@ -23,6 +23,67 @@
 # //  JUPYTER       ////////////////////////////////////////////////////////// #
 # //////////////////////////////////////////////////////////////////////////// #
 
+menuconfig  ENABLE_PYTHON
+  bool "Python script support"
+  ---help---
+  This enables the python execution in Makefile targets
+
+if ENABLE_PYTHON
+
+  config PYTHON_VERSION
+	string  "Python version of $PYTHON ( ex: 2.7 3.8 )"
+	---help---
+	  The requested python version is checked and the $PYTHON variable
+	  is set within the Makefile to be used for scripts in targets.
+	  Leave this entry blank to pick from the system defatult.
+
+  config PYTHON_PIP_URL
+	string "Python pip URL"
+	default "https://bootstrap.pypa.io/get-pip.py"
+	---help---
+	  Download pip if needed from this URL
+
+  choice PYTHON_ENV_SYSTEM
+	prompt "Python packaging system"
+	config PYTHON_ENV_SYSTEM_USER
+		bool "user"
+	config PYTHON_ENV_SYSTEM_CONDA
+		bool "conda"
+	config PYTHON_ENV_SYSTEM_VENV
+		bool "venv"
+  endchoice
+
+  config PYTHON_CONDA_DIR
+	string "Conda directory to be activated"
+	default "${HOME}/miniconda3"
+	depends on PYTHON_ENV_SYSTEM_CONDA
+
+  config PYTHON_CONDA_ENV
+	string "Conda env to be activated"
+	default ""
+	depends on PYTHON_ENV_SYSTEM_CONDA
+
+  config PYTHON_VENV_ACTIVATE_SCRIPT
+	string "venv activate script"
+	default ""
+	depends on PYTHON_ENV_SYSTEM_VENV
+
+
+  config PYTHON_DEVEL
+	bool "Enable Python development (use python under C code)"
+	default n
+	---help---
+	  Activate AC_PYTHON_DEVEL script to check against python dev libraries
+
+  config PYTHON_GETPIP_URL
+	string "If Pyhon pip is missing retrieve if from get-pip.py script here"
+	default "https://bootstrap.pypa.io/get-pip.py"
+	---help---
+	  If pip is missing in your python environment install it from this link
+
+endif # ENABLE_PYTHON
+
+
 menuconfig  ENABLE_JUPYTER_NOTEBOOK
 	 bool "Enable Jupyter notebook"
 	 default n

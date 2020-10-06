@@ -60,11 +60,11 @@ if EXT_MDSPLUS
 		string "Base path for mdsplus install (or build directory)"
 		default "/usr/local/mdsplus"
 
+	endif
+
 	config MDS_SRCDIR
 		string "Base path for mdsplus source directory (if any)"
 		default "/opt/mdsplus" if !MDSPLUS_DOWNLOAD
-
-	endif
 
 endif # EXT_LIBJIT
 

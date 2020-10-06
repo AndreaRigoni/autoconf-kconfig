@@ -18,11 +18,8 @@
 ##
 ## ////////////////////////////////////////////////////////////////////////// //
 
-# COLORS 
-# SH_GREEN  ?= $(shell tput -Txterm setaf 2)
-# SH_WHITE  ?= $(shell tput -Txterm setaf 7)
-# SH_YELLOW ?= $(shell tput -Txterm setaf 3)
-# SH_RESET  ?= $(shell tput -Txterm sgr0)
+
+
 
 
 MAKE_PROCESS  ?= $(shell grep -c ^processor /proc/cpuinfo)
@@ -211,69 +208,6 @@ edit: ##@miscellaneous start editor define in $IDE
 edit: $(edit_DEPS) edit-$(IDE)
 endif
 
-## ////////////////////////////////////////////////////////////////////////////////
-## //  PYTHON  ////////////////////////////////////////////////////////////////////
-## ////////////////////////////////////////////////////////////////////////////////
-
-PYTHON_USERBASE         = $(abs_top_builddir)/conf/python/site-packages
-ak__PYTHON_PACKAGES     = $(PYTHON_PACKAGES)
-ac__PYTHON_REQUIREMENTS = $(PYTHON_REQUIREMENTS)
-
-export PYTHONUSERBASE = $(PYTHON_USERBASE)
-export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
-export PYTHON_VERSION
-export PYTHONDONTWRITEBYTECODE=1
-
-get_pip_URL = https://bootstrap.pypa.io/get-pip.py
-
-ak__DIRECTORIES += $(PYTHON_USERBASE)
-# if HAVE_PIP
-# ak__get_pip:
-# else
-# ak__get_pip:
-# 	$(MAKE) $(AM_MAKEFLAGS) download NAME=get-pip DOWNLOAD_DIR=$(DOWNLOAD_DIR); \
-# 	python $(DOWNLOAD_DIR)/get-pip.py --user; 
-# endif
-
-# using python call fixes pip: https://github.com/pypa/pip/issues/7205
-PIP = python -m pip
-
-pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
-pip-install: Q=$(if $(AK_V_IF),-q)
-pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
-pip-%: | $(PYTHON_USERBASE)
-	@ $(PIP) $* $(Q) --upgrade --user \
-	 $(addprefix -r ,$(ac__PYTHON_REQUIREMENTS)) \
-	 $(ak__PYTHON_PACKAGES)
-
-
-export REMOTE_DEBUG_HOST        ?= localhost
-export REMOTE_DEBUG_GDB_PORT    ?= 3000
-export REMOTE_DEBUG_PYTHON_PORT ?= 3001
-
-ak__PYTHON_PACKAGES += ptvsd
-
-PYTHON_GDB   = gdbserver $(REMOTE_DEBUG_HOST):$(REMOTE_DEBUG_GDB_PORT)
-PYTHON_PTVSD = -m ptvsd --host $(REMOTE_DEBUG_HOST) --port $(REMOTE_DEBUG_PYTHON_PORT) --wait
-# PYTHON = $(if $(PYTHON_DEBUG),$(PYTHON_GDB)) python $(if $(PYTHON_DEBUG),$(PYTHON_PTVSD))
-PYTHON = python $(if $(PYTHON_DEBUG),$(PYTHON_PTVSD))
-
-# # PYTHON_PACKAGES = debugpy
-# debugpy: ##@mdsplus debug test program
-# debugpy:
-#         @ gdbserver localhost:5677 python $(srcdir)/mds_test.py
-# 
-# # @ gdbserver localhost:5677 python -m debugpy --listen 5678 --wait-for-client $(srcdir)/mds_test.py
-# 
-# debug_py: ##@mdsplus debug test only py
-# debug_py:
-#         @ python -m debugpy --listen 5678 --wait-for-client $(srcdir)/mds_test.py
-# 
-# debug_ptvsd: ##@mdsplus debug test only py
-# debug_ptvsd: PYTHON_PACKAGES = ptvsd
-# debug_ptvsd: pip-install
-#         python -m ptvsd --host 0.0.0.0 --port $(or ${PORT},3000) --wait $(srcdir)/mds_test.py
-
 
 
 
@@ -294,7 +228,7 @@ ak__ATOM_PACKAGES += project-manager \
 				     autocomplete-clang goto \
 				     build build-make
 
-ak__PYTHON_PACKAGES += setuptools python-language-server[all]
+#ak__PYTHON_PACKAGES += setuptools python-language-server[all]
 
 
 export ATOM_HOME
@@ -313,7 +247,7 @@ apm-install: $(ATOM_PACKAGES_PATH)
 
 ak__DIRECTORIES += $(ATOM_HOME)
 edit-atom: ##@@ide start atom
-edit-atom: | apm-install pip-install
+edit-atom: | apm-install
 	@ atom $(foreach d,$(ATOM_PROJECT_PATH),-a $d )
 
 
@@ -365,11 +299,69 @@ edit_DEPS += qws
 ak__VS_CODE_PATH          = $(or $(VS_CODE_PATH),$(abs_top_builddir)/conf/ide/vs_code)
 ak__VS_CODE_ARGS          = $(VS_CODE_ARGS)
 ak__VS_CODE_PROJECT_PATH  = $(or $(VS_CODE_PROJECT_PATH),$(top_srcdir))
+ak__VS_CODE_EXTENSIONS    = ms-vscode.cpptools \
+							ms-python.python \
+							maelvalais.autoconf \
+							$(VS_CODE_EXTENSIONS)
+
+if IDE_CODE_LOCAL_EXTENSIONS
+ak__VS_CODE_EXTENSIONS_PATH = --extensions-dir=$(IDE_CODE_LOCAL_EXTENSIONS_PATH)
+endif
+
 ak__DIRECTORIES += $(ak__VS_CODE_PATH)
+
 ## export ELECTRON_FORCE_WINDOW_MENU_BAR = 1
+
+
+
+if IDE_CODE_LOCAL ## IDE custom folder
+
 edit-code: ##@@ide start visual studio code editor
+edit-code: ##@@vs_code start visual studio code editor
+edit-code-ext: ##@@vs_code list visual studio extensions
+edit-code-extinstall: ##@@vs_code install all visual studio extensions in $IDE_CODE_EXTENSIONS
+ak__DIRECTORIES += $(IDE_CODE_LOCAL_DIR)
+$(IDE_CODE_LOCAL_DIR)/bin/code: | $(DOWNLOAD_DIR) $(IDE_CODE_LOCAL_DIR) 
+	- curl -SL $(IDE_CODE_DOWNLOAD_URL) > $(DOWNLOAD_DIR)/vs_code_local.tar.gz; \
+	$(call dl__download_tar,$(DOWNLOAD_DIR)/vs_code_local.tar.gz,$(IDE_CODE_LOCAL_DIR)); \
+	[ -f $@          ] && patch $@ < $(kconfig_dir)/patch/vs_code_libxcb.patch; \
+	[ -f $@-insiders ] && patch $@-insiders < $(kconfig_dir)/patch/vs_code_insiders_libxcb.patch; \
+	[ -f $@-insiders ] && ln -s $@-insiders $@; 
+
+edit-code: $(IDE_CODE_LOCAL_DIR)/bin/code
+	$(IDE_CODE_LOCAL_DIR)/bin/code \
+	 -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) \
+	 $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) 
+
+edit-code-ext: $(IDE_CODE_LOCAL_DIR)/bin/code
+	@ $(IDE_CODE_LOCAL_DIR)/bin/code --user-data-dir $(ak__VS_CODE_PATH) \
+	  $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) --list-extensions
+
+edit-code-extinstall: $(IDE_CODE_LOCAL_DIR)/bin/code
+	@ $(foreach x,$(ak__VS_CODE_EXTENSIONS),$(IDE_CODE_LOCAL_DIR)/bin/code \
+	  --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) \
+	  $(ak__VS_CODE_EXTENSIONS_PATH) --install-extension $x;)
+
+else ## IDE from system
+
+edit-code: ##@@ide start visual studio code editor
+edit-code: ##@@vs_code start visual studio code editor
+edit-code-ext: ##@@vs_code list visual studio extensions
+edit-code-extinstall: ##@@vs_code install all visual studio extensions in $IDE_CODE_EXTENSIONS
 edit-code: | $(ak__VS_CODE_PATH)
-	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) 
+	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) \
+	 $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) \
+	 --enable-proposed-api ms-vscode-remote.remote-ssh
+
+edit-code-ext:
+	@ code --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_EXTENSIONS_PATH) \
+	 $(ak__VS_CODE_ARGS) --list-extensions
+
+edit-code-extinstall:
+	@ $(foreach x,$(ak__VS_CODE_EXTENSIONS),code --user-data-dir $(ak__VS_CODE_PATH) \
+	 $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) --install-extension $x;)
+
+endif
 
 
 # ////////////////////////////////////////////////////////////////////////////////
@@ -388,7 +380,7 @@ ak__cdr_code_server_DIR = $(top_builddir)/conf/ide/code-server
 edit-code-server: ##@@ide start cdr vs code server installed in conf/code-server
 edit-code-server: ak__cdr-code-server
 	$(ak__cdr_code_server_DIR)/code-server --host $(ak__CODE_SERVER_HOST) --port $(ak__CODE_SERVER_PORT) --auth $(ak__CODE_SERVER_AUTH) \
-	--user-data-dir $(ak__VS_CODE_PATH) $(top_srcdir)
+	--user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_EXTENSIONS_PATH) $(top_srcdir)
 
 
 
@@ -412,5 +404,6 @@ shell:
 print-env-: ##@@miscellaneous print-env-% print env variable
 print-env-%:
 	@ $(if $($*),$(info $*="$($*)"),$(info $* not set)):;
+
 
 
