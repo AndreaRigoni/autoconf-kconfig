@@ -55,6 +55,18 @@ ak__uniq ?= $(if $1,$(firstword $1) $(call ak__uniq,$(filter-out $(firstword $1)
 # ---------------
 ak__flt ?= $(subst -,_,$(subst ' ',_,$(subst .,_,$1)))
 
+
+# A literal space.
+ak__empty :=
+ak__space := $(ak__empty) $(ak__empty)
+
+# Joins elements of the list in arg 2 with the given separator.
+#   1. Element separator.
+#   2. The list.
+ak__join_with = $(subst $(ak__space),$1,$(strip $2))
+
+
+
 ## ////////////////////////////////////////////////////////////////////////// ##
 ## ///  DOWNLOAD  /////////////////////////////////////////////////////////// ##
 ## ////////////////////////////////////////////////////////////////////////// ##
