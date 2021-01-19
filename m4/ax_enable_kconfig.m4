@@ -218,7 +218,7 @@ AC_DEFUN([AX_KCONFIG],[
 	  while [[ "${REQUIRE_RECONFIGURE}" = "yes" ]]; do
 	  AS_ECHO([""])
 	  AS_ECHO(["Reconfigure requested..."])
-	  $SHELL -c "srctree=${srcdir} ../configure ${ac_configure_args}" <&AS_ORIGINAL_STDIN_FD
+	  $SHELL -c "srctree=${srcdir} ${srcdir}/configure ${ac_configure_args}" <&AS_ORIGINAL_STDIN_FD
 	  exit
 	  done
 	])
