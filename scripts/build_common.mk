@@ -293,11 +293,11 @@ edit-qtcreator: | $(ak__QTCREATOR_SETTINGS_PATH)
 %.qws: %.template.qws
 	 @ $(call __ax_pl_envsubst,$<,$@);
 
-qws: QWS_FILES_TEMPLATES = $(shell find $(top_srcdir)/conf/ide/QtProject/qtcreator/ -name '*.qws.template' 3>/dev/null)
-qws: QWS_FILES = $(QWS_FILES_TEMPLATES:.qws.template=.qws)
-qws: abs_top_srcdir := $(abs_top_srcdir)
-qws: $(QWS_FILES)
-edit_DEPS += qws
+edit-qtcreator_qws_files: QWS_FILES_TEMPLATES = $(shell find $(top_srcdir)/conf/ide/QtProject/qtcreator/ -name '*.qws.template' 3>/dev/null)
+edit-qtcreator_qws_files: QWS_FILES = $(QWS_FILES_TEMPLATES:.qws.template=.qws)
+edit-qtcreator_qws_files: abs_top_srcdir := $(abs_top_srcdir)
+edit-qtcreator_qws_files: $(QWS_FILES)
+edit_DEPS += edit-qtcreator_qws_files
 
 ## ////////////////////////////////////////////////////////////////////////////////
 ## //  VS CODE  ///////////////////////////////////////////////////////////////////
