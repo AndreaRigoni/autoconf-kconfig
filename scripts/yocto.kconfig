@@ -46,7 +46,7 @@ if ENABLE_YOCTO
   config YOCTO_URL
 	string  "Yocto download repository"
 	default "http://downloads.yoctoproject.org/releases/yocto/yocto-2.2/poky-morty-16.0.0.tar.bz2" if YOCTO_DLMETHOD_TAR
-	default "git://git.yoctoproject.org/poky.git" if YOCTO_DLMETHOD_GIT
+	default "https://git.yoctoproject.org/git/poky.git" if YOCTO_DLMETHOD_GIT
 
   config YOCTO_GIT_BRANCH
 	string  "Yocto version"

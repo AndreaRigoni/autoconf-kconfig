@@ -32,20 +32,39 @@ menuconfig  EXT_MDSPLUS
 
 if EXT_MDSPLUS
 
-  config EXT_MDSPLUS_URL
-	 string "url path for mdsplus source repository"
-	 default "https://github.com/mdsplus/mdsplus.git"
+  	config MDSPLUS_DOWNLOAD
+		bool "Download and build mdsplus from remote repo"
+		default n
 
-  config EXT_MDSPLUS_BRANCH
-	 string "Branch"
-	 default "alpha"
+	if MDSPLUS_DOWNLOAD
 
-  config EXT_MDSPLUS_CONFIGURE_ARGS
-     string "conf args"
-     default "--disable-java"
-     --- help ---
-      arguments for the mdsplus configuration
+		config EXT_MDSPLUS_URL
+			string "url path for mdsplus source repository"
+			default "https://github.com/mdsplus/mdsplus.git"
 
+		config EXT_MDSPLUS_BRANCH
+			string "Branch"
+			default "alpha"
+
+		config EXT_MDSPLUS_CONFIGURE_ARGS
+			string "conf args"
+			default "--disable-java"
+			--- help ---
+			arguments for the mdsplus configuration
+
+	endif
+
+	if !MDSPLUS_DOWNLOAD
+
+	config MDSPLUS_DIR
+		string "Base path for mdsplus install (or build directory)"
+		default "/usr/local/mdsplus"
+
+	endif
+
+	config MDS_SRCDIR
+		string "Base path for mdsplus source directory (if any)"
+		default "/opt/mdsplus" if !MDSPLUS_DOWNLOAD
 
 endif # EXT_LIBJIT
 

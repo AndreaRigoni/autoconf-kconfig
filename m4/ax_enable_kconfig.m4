@@ -57,7 +57,6 @@ m4_sinclude(conf/kscripts/$1)
 #
 AC_DEFUN([AX_KCONFIG_RECONFIGURE],[
  AS_VAR_IF([REQUIRE_RECONFIGURE],[yes],[
-  AS_ECHO([" TOUCHING .CONFIG "])
   touch .config
   ])
 ])
@@ -103,6 +102,10 @@ AC_DEFUN([AX_KCONFIG_PRINTUPDATES],[
 # ----------
 # [kconfig-subdir]
 AC_DEFUN([AX_KCONFIG],[
+  
+  # export kconfig variable to point scpript dir
+  AC_SUBST([kconfig_dir],[$1])  
+  
   AS_VAR_SET([subdirs_SAVE],[$subdirs])
   AS_VAR_SET([subdirs],[$1])
   _AC_OUTPUT_SUBDIRS
@@ -164,7 +167,7 @@ AC_DEFUN([AX_KCONFIG],[
 
   AC_ARG_ENABLE([kconfig],
     [AS_HELP_STRING([--enable-kconfig=flavor],
-      [Enable fancy configure with flavor in (conf | nconf) [[default=nconf]]])
+      [Enable fancy configure with flavor in (conf | nconf) [default=nconf]])
     ],
     [AS_VAR_IF([enableval],[yes],
 	       [AS_VAR_SET([enable_kconfig],[nconf])],
@@ -215,7 +218,7 @@ AC_DEFUN([AX_KCONFIG],[
 	  while [[ "${REQUIRE_RECONFIGURE}" = "yes" ]]; do
 	  AS_ECHO([""])
 	  AS_ECHO(["Reconfigure requested..."])
-	  $SHELL -c "srctree=${srcdir} ../configure ${ac_configure_args}" <&AS_ORIGINAL_STDIN_FD
+	  $SHELL -c "srctree=${srcdir} ${srcdir}/configure ${ac_configure_args}" <&AS_ORIGINAL_STDIN_FD
 	  exit
 	  done
 	])
@@ -277,16 +280,133 @@ AC_DEFUN([AX_KCONFIG_CONDITIONAL],[
 ])
 
 
+##          ##
+## OVERLOAD ##
+##          ##
+##
+## REDEFINE HELP_STRING with fixed indent_columns and wrap_columns values
+##  NOTE:  optional values for those arguments are not available during
+##         configure as the help diversion has been already filled up.
+##
+## TODO: find a way to redirect a diversion on the help output
+## m4_define([_m4_divert(HELP_CONFIG_VAR)],       108)
+## m4_define([_m4_divert(HELP_CONFIG_VAR_END)],   109)
+##
+m4_defun([AX_HELP_STRING],m4_defn([AS_HELP_STRING]))
+m4_defun([AS_HELP_STRING],[AX_HELP_STRING([$1],[$2],[40],[120])])
+
+
+## Not working yet :-(
+##
+AC_DEFUN([AX_HELP_SECTION],m4_define([__help_domain__],$1))
+AC_DEFUN([AX_HELP_SECTION_END],m4_define([__help_domain__], ))
+
+
+##          ##
+## OVERLOAD ##
+##          ##
+# AC_ARG_ENABLE(FEATURE, HELP-STRING, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
+# ------------------------------------------------------------------------
+AC_DEFUN([AC_ARG_ENABLE],
+  [AC_PROVIDE_IFELSE([AC_PRESERVE_HELP_ORDER],
+  [],
+  [m4_divert_once([HELP_ENABLE], [[
+
+
+/////////////////////////////////////////////////////////////////
+//  ENABLE CONFIGURATION FEATURES   /////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+  ,--------------------------------------------------------------------------------.
+  | Optional configuration features:                                               |
+  |   --disable-option-checking  ignore unrecognized --enable/--with options       |
+  |   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no) |
+  |   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]                            |
+  `--------------------------------------------------------------------------------'
+
+  ]])])dnl
+  m4_divert_once([HELP_ENABLE], [$2])dnl
+  _AC_ENABLE_IF([enable], [$1], [$3], [$4])dnl
+  ])# AC_ARG_ENABLE
+
+
+##          ##
+## OVERLOAD ##
+##          ##
+# AC_ARG_WITH(PACKAGE, HELP-STRING, ACTION-IF-TRUE, [ACTION-IF-FALSE])
+# --------------------------------------------------------------------
+AC_DEFUN([AC_ARG_WITH],
+  [AC_PROVIDE_IFELSE([AC_PRESERVE_HELP_ORDER],
+  [],
+  [m4_divert_once([HELP_WITH], [[
+
+
+/////////////////////////////////////////////////////////////////
+//  CONFIGURATION PARAMETERS OR PACKAGES   //////////////////////
+/////////////////////////////////////////////////////////////////
+
+  ,----------------------------------------------------------------------.
+  | Configuration parameters or optional package                          |
+  |   --with-PARAMETER[=ARG]  use PACKAGE [ARG=yes]                       |
+  |   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]                       |
+  |   --without-PACKAGE       do not use PACKAGE (or --with-PACKAGE=no)   |
+  `-----------------------------------------------------------------------'
+
+  ]])])
+  m4_divert_once([HELP_WITH], [$2])dnl
+  _AC_ENABLE_IF([with], [$1], [$3], [$4])dnl
+  ])# AC_ARG_WITH
+
+
+
+##          ##
+## OVERLOAD ##
+##          ##
+# AC_ARG_VAR(VARNAME, DOCUMENTATION)
+# ----------------------------------
+# Register VARNAME as a precious variable, and document it in
+# `configure --help' (but only once).
+AC_DEFUN([AC_ARG_VAR],
+  [m4_divert_once([HELP_VAR], [[
+
+/////////////////////////////////////////////////////////////////
+//  ENV VARIABLES THAT CHANGE RECONFIGURE   /////////////////////
+/////////////////////////////////////////////////////////////////
+
+  | Some  configure influential environment variables:  use these  variables to  override the 
+  | choices made by `configure' or to help it to find libraries and programs with nonstandard 
+  | names/locations.
+
+  ]])dnl
+  m4_expand_once([m4_divert_text([HELP_VAR],[AS_HELP_STRING([$1], [$2])])],[$0($1)])dnl
+  AC_SUBST([$1])dnl
+  _AC_ARG_VAR_PRECIOUS([$1])dnl
+  ])# AC_ARG_VAR
+
+
 # AX_KCONFIG_VAR_WITH(FEATURE, HELP)
 # ------------------------------------------------------------------------
 AC_DEFUN([AX_KCONFIG_VAR_WITH],[
-  m4_pushdef([_var_],m4_bpatsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^with_],[]))
-  #AS_VAR_SET_IF([$1],,[AS_VAR_SET([$1],${[CONFIG_$1]})]
-		      #[AX_KCONFIG_EXPAND_YN([$1])])
+  m4_pushdef([_var_],m4_bpatsubst(m4_tolower(m4_translit([$1],[_-],[__])),[^with_],[]))dnl
+  m4_pushdef([_VAR_],m4_bpatsubst(m4_toupper(m4_translit([$1],[_-],[__])),[^with_],[]))dnl
+
   AS_VAR_SET_IF([$1],,[AS_VAR_SET_IF([CONFIG_$1],
 				     [AS_VAR_SET([$1],${[CONFIG_$1]})]
 				     [AX_KCONFIG_EXPAND_YN([$1])])])
 
+  m4_divert_once([HELP_VAR_END], [[
+
+/////////////////////////////////////////////////////////////////
+//  KCONFIG SPECIFIC VARIABLES  /////////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+  | All variables reported  in the following are used  to set kconfig variables stored in the 
+  | build directory .config file that provide a cache for the related configure variable that
+  | is eventually substituted in Makefile.
+
+  ]])dnl
+  m4_divert_text([HELP_VAR_END],[AS_HELP_STRING([_VAR_], [$2])])dnl
+ 
   AC_ARG_WITH(_var_,
 	      [AS_HELP_STRING(--with-[]m4_translit(_var_,[_],[-]),[$2])],
 	      [AS_VAR_SET([$1],${with_[]_var_})])
@@ -294,6 +414,26 @@ AC_DEFUN([AX_KCONFIG_VAR_WITH],[
   m4_append_uniq([_AX_KCONF_VARS],[$1],[
   ])
   m4_append_uniq([_AX_KCONF_OPTS],with_[]_var_:[$1],[
+  ])
+
+  AS_VAR_SET_IF([$1],[AS_VAR_SET([CONFIG_$1],${[$1]})]
+		     [AX_KCONFIG_COMPRESS_YN([CONFIG_$1])]
+		     [export CONFIG_$1])
+
+  m4_popdef([_VAR_])
+  m4_popdef([_var_])
+])
+
+
+# AX_KCONFIG_VAR(VAR, HELP)
+# ------------------------------------------------------------------------
+AC_DEFUN([AX_KCONFIG_VAR],[
+  m4_pushdef([_var_],m4_bpatsubst(m4_toupper(m4_translit([$1],[_-],[__])),[^with_],[]))
+  AS_VAR_SET_IF([$1],,[AS_VAR_SET_IF([CONFIG_$1],
+				     [AS_VAR_SET([$1],${[CONFIG_$1]})]
+				     [AX_KCONFIG_EXPAND_YN([$1])])])
+  #AC_ARG_VAR(_var_, [$2])
+  m4_append_uniq([_AX_KCONF_VARS],[$1],[
   ])
 
   AS_VAR_SET_IF([$1],[AS_VAR_SET([CONFIG_$1],${[$1]})]
@@ -363,6 +503,14 @@ AC_DEFUN([AX_KCONFIG_CHOICE],[
   m4_if($#,0, ,m4_eval($# > 3),[1],[$0($1,m4_shift3($@))], )
 ])
 
+# AX_KCONFIG_ENABLE_CHOICE(VERBATIM_VAL, HELP_STRING,
+#                          ENABLE_VAL1, VAL1, ENABLE_VAL2, VAL2, ...)
+# ------------------------------------------------------------------------
+AC_DEFUN([AX_KCONFIG_ENABLE_CHOICE],[
+  AX_KCONFIG_VAR_ENABLE([$1],[$2])
+  AX_KCONFIG_CHOICE($1,m4_shift2($@))
+])
+
 # AX_KCONFIG_WITH_CHOICE(VERBATIM_VAL, HELP_STRING,
 #                        ENABLE_VAL1, VAL1, ENABLE_VAL2, VAL2, ...)
 # ------------------------------------------------------------------------
@@ -370,6 +518,7 @@ AC_DEFUN([AX_KCONFIG_WITH_CHOICE],[
   AX_KCONFIG_VAR_WITH([$1],[$2])
   AX_KCONFIG_CHOICE($1,m4_shift2($@))
 ])
+
 
 
 # AX_KCONFIG_MODULES([modules_group_name], MOD1, HELP1, MOD2, HELP2, ...)

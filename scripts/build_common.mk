@@ -19,10 +19,22 @@
 ## ////////////////////////////////////////////////////////////////////////// //
 
 
+
+
+
 MAKE_PROCESS  ?= $(shell grep -c ^processor /proc/cpuinfo)
 DOWNLOAD_DIR  ?= $(top_builddir)/downloads
 ak__DOWNLOADS  = $(DOWNLOADS)
 DOWNLOADS     ?= $(ak__DOWNLOADS)
+
+AM_DEFAULT_VERBOSITY = $(VERBOSE_LEVEL)
+
+# VERBOSITY VARIABLE that is usable in Makefile if clause
+# See Automake AM_V_P for comparison in bash if clauses
+AK_V_IF    = $(ak__v_IF_$(V))
+ak__v_IF_  = $(ak__v_IF_$(AM_DEFAULT_VERBOSITY))
+ak__v_IF_0 = mark 
+ak__v_IF_1 =
 
 # PERL ENV SUBST
 # --------------
@@ -42,6 +54,18 @@ ak__uniq ?= $(if $1,$(firstword $1) $(call ak__uniq,$(filter-out $(firstword $1)
 # FLAT NAME SUBST
 # ---------------
 ak__flt ?= $(subst -,_,$(subst ' ',_,$(subst .,_,$1)))
+
+
+# A literal space.
+ak__empty :=
+ak__space := $(ak__empty) $(ak__empty)
+
+# Joins elements of the list in arg 2 with the given separator.
+#   1. Element separator.
+#   2. The list.
+ak__join_with = $(subst $(ak__space),$1,$(strip $2))
+
+
 
 ## ////////////////////////////////////////////////////////////////////////// ##
 ## ///  DOWNLOAD  /////////////////////////////////////////////////////////// ##
@@ -81,14 +105,14 @@ define dl__dir =
 _fname = $(subst -,_,$(subst ' ',_,$(subst .,_,$1)))
 $(if $(${_fname}_DIR),
 $(${_fname}_DIR): $$(${_fname}_DEPS)
-	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$1
+	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$1 DOWNLOAD_DIR=$(DOWNLOAD_DIR)
 )
 endef
 $(foreach x,$(ak__DOWNLOADS),$(eval $(call dl__dir,$x)))
 
 # $(ak__DOWNLOADS): _flt = $(subst -,_,$(subst ' ',_,$(subst .,_,$1)))
-$(ak__DOWNLOADS):
-	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$@
+$(ak__DOWNLOADS): 
+	@ $(MAKE) $(AM_MAKEFLAGS) download NAME=$@ DOWNLOAD_DIR=$(DOWNLOAD_DIR)
 
 .PHONY: download
 download: ##@@miscellaneous download target in $NAME and $DOWNLOAD_URL
@@ -97,7 +121,7 @@ download: URL     = $(or $($(FNAME)_URL),$(DOWNLOAD_URL))
 download: DIR     = $(or $($(FNAME)_DIR),$(NAME))
 download: BRANCH  = $(or $($(FNAME)_BRANCH),$(BRANCH))
 download: $(or $($(FNAME)_DEPS), $(DOWNLOAD_DEPS))
-	@ $(foreach x,$(URL),\
+	@ $(foreach x,$(URL), $(info DOWNLOAD_DIR = $(DOWNLOAD_DIR))\
 		$(info Download: $x to $(DIR)) \
 		$(if $(filter $(dl__tar_ext),$x),$(call dl__download_tar,$x,$(DIR)), \
 		$(if $(filter $(dl__git_ext),$x),$(call dl__download_git,$x,$(DIR),$(BRANCH)), \
@@ -191,56 +215,37 @@ endif
 edit_DEPS =
 
 if IDESUPPORT
-IDE ?= qtcreator
+IDE ?= code
 edit: ##@miscellaneous start editor define in $IDE
 edit: $(edit_DEPS) edit-$(IDE)
 endif
 
-## ////////////////////////////////////////////////////////////////////////////////
-## //  PYTHON  ////////////////////////////////////////////////////////////////////
-## ////////////////////////////////////////////////////////////////////////////////
 
 
-PYTHON_USERBASE      = $(abs_top_builddir)/conf/python/site-packages
-ac__PYTHON_PACKAGES  = $(PYTHON_PACKAGES)
 
-export PYTHONUSERBASE = $(PYTHON_USERBASE)
-export PATH := $(PYTHON_USERBASE):$(PYTHON_USERBASE)/bin:$(PATH)
-
-# using python call fixes pip: https://github.com/pypa/pip/issues/7205
-PIP = python -m pip
-
-ak__DIRECTORIES += $(PYTHON_USERBASE)
-
-pip-install: ##@@python install prequired packages in $PYTHON_PACKAGES
-pip-install: Q=-q
-pip-list: ##@@python install prequired packages in $PYTHON_PACKAGES
-pip-%: | $(PYTHON_USERBASE)
-	@ $(PIP) $* $(Q) --upgrade --user $(ac__PYTHON_PACKAGES)
-
-## ////////////////////////////////////////////////////////////////////////////////
-## //  ATOM  //////////////////////////////////////////////////////////////////////
-## ////////////////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
+# //  ATOM  //////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
 
 
 ## ATOM_DEV_RESOURCE_PATH ?=
 ATOM_HOME         ?= $(abs_top_builddir)/conf/ide/atom
 ATOM_PROJECT_PATH ?= $(top_srcdir) $(builddir)
 
-ac__ATOM_PACKAGES  = $(ATOM_PACKAGES)
-ac__ATOM_PACKAGES += project-manager \
+ak__ATOM_PACKAGES  = $(ATOM_PACKAGES)
+ak__ATOM_PACKAGES += project-manager \
                      atom-ide-ui ide-python \
 				     teletype \
 				     refactor \
 				     autocomplete-clang goto \
 				     build build-make
 
-ac__PYTHON_PACKAGES += setuptools python-language-server[all]
+#ak__PYTHON_PACKAGES += setuptools python-language-server[all]
 
 
 export ATOM_HOME
 
-ATOM_PACKAGES_PATH = $(addprefix $(ATOM_HOME)/packages/,$(ac__ATOM_PACKAGES))
+ATOM_PACKAGES_PATH = $(addprefix $(ATOM_HOME)/packages/,$(ak__ATOM_PACKAGES))
 $(ATOM_PACKAGES_PATH):
 	@ apm install $(notdir $@)
 
@@ -254,22 +259,22 @@ apm-install: $(ATOM_PACKAGES_PATH)
 
 ak__DIRECTORIES += $(ATOM_HOME)
 edit-atom: ##@@ide start atom
-edit-atom: | apm-install pip-install
+edit-atom: | apm-install
 	@ atom $(foreach d,$(ATOM_PROJECT_PATH),-a $d )
 
 
-## ////////////////////////////////////////////////////////////////////////////////
-## //  EMACS  /////////////////////////////////////////////////////////////////////
-## ////////////////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
+# //  EMACS  /////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
 
 edit-emacs: ##@@ide start emacs
 edit-emacs:
 	@ emacs $(srcdir)
 
 
-## ////////////////////////////////////////////////////////////////////////////////
-## //  QTCREATOR  /////////////////////////////////////////////////////////////////
-## ////////////////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
+# //  QTCREATOR  /////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
 
 
 ak__QTCREATOR_SETTINGS_PATH = $(or $(QTCREATOR_SETTINGS_PATH),$(abs_top_builddir)/conf/ide)
@@ -282,9 +287,9 @@ edit-qtcreator: | $(ak__QTCREATOR_SETTINGS_PATH)
 					-theme $(QTCREATOR_THEME) -color $(QTCREATOR_COLOR)
 
 
-## ////////////////////////////////////////////////////////////////////////////////
-## //  QWS  ///////////////////////////////////////////////////////////////////////
-## ////////////////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
+# //  QWS  ///////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
 ##
 ## QWS are the qtcreator work spaces files.. they needs to be compiled with the
 ## absolute path so then a template is filled using the path discovered by
@@ -299,26 +304,86 @@ edit-qtcreator_qws_files: abs_top_srcdir := $(abs_top_srcdir)
 edit-qtcreator_qws_files: $(QWS_FILES)
 edit_DEPS += edit-qtcreator_qws_files
 
-## ////////////////////////////////////////////////////////////////////////////////
-## //  VS CODE  ///////////////////////////////////////////////////////////////////
-## ////////////////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
+# //  VS CODE  ///////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
 
 ak__VS_CODE_PATH          = $(or $(VS_CODE_PATH),$(abs_top_builddir)/conf/ide/vs_code)
+ak__VS_CODE_ARGS          = $(VS_CODE_ARGS)
 ak__VS_CODE_PROJECT_PATH  = $(or $(VS_CODE_PROJECT_PATH),$(top_srcdir))
+ak__VS_CODE_EXTENSIONS    = ms-vscode.cpptools \
+							ms-python.python \
+							maelvalais.autoconf \
+							$(VS_CODE_EXTENSIONS)
+
+if IDE_CODE_LOCAL_EXTENSIONS
+ak__VS_CODE_EXTENSIONS_PATH = --extensions-dir=$(IDE_CODE_LOCAL_EXTENSIONS_PATH)
+endif
+
 ak__DIRECTORIES += $(ak__VS_CODE_PATH)
+
+## export ELECTRON_FORCE_WINDOW_MENU_BAR = 1
+
+
+
+if IDE_CODE_LOCAL ## IDE custom folder
+
 edit-code: ##@@ide start visual studio code editor
+edit-code: ##@@vs_code start visual studio code editor
+edit-code-ext: ##@@vs_code list visual studio extensions
+edit-code-extinstall: ##@@vs_code install all visual studio extensions in $IDE_CODE_EXTENSIONS
+ak__DIRECTORIES += $(IDE_CODE_LOCAL_DIR)
+$(IDE_CODE_LOCAL_DIR)/bin/code: | $(DOWNLOAD_DIR) $(IDE_CODE_LOCAL_DIR) 
+	- curl -SL $(IDE_CODE_DOWNLOAD_URL) > $(DOWNLOAD_DIR)/vs_code_local.tar.gz; \
+	$(call dl__download_tar,$(DOWNLOAD_DIR)/vs_code_local.tar.gz,$(IDE_CODE_LOCAL_DIR)); \
+	[ -f $@          ] && patch $@ < $(kconfig_dir)/patch/vs_code_libxcb.patch; \
+	[ -f $@-insiders ] && patch $@-insiders < $(kconfig_dir)/patch/vs_code_insiders_libxcb.patch; \
+	[ -f $@-insiders ] && ln -s $@-insiders $@; 
+
+edit-code: $(IDE_CODE_LOCAL_DIR)/bin/code
+	$(IDE_CODE_LOCAL_DIR)/bin/code \
+	 -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) \
+	 $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) 
+
+edit-code-ext: $(IDE_CODE_LOCAL_DIR)/bin/code
+	@ $(IDE_CODE_LOCAL_DIR)/bin/code --user-data-dir $(ak__VS_CODE_PATH) \
+	  $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) --list-extensions
+
+edit-code-extinstall: $(IDE_CODE_LOCAL_DIR)/bin/code
+	@ $(foreach x,$(ak__VS_CODE_EXTENSIONS),$(IDE_CODE_LOCAL_DIR)/bin/code \
+	  --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_ARGS) \
+	  $(ak__VS_CODE_EXTENSIONS_PATH) --install-extension $x;)
+
+else ## IDE from system
+
+edit-code: ##@@ide start visual studio code editor
+edit-code: ##@@vs_code start visual studio code editor
+edit-code-ext: ##@@vs_code list visual studio extensions
+edit-code-extinstall: ##@@vs_code install all visual studio extensions in $IDE_CODE_EXTENSIONS
 edit-code: | $(ak__VS_CODE_PATH)
-	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH)
+	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) \
+	 $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) \
+	 --enable-proposed-api ms-vscode-remote.remote-ssh
+
+edit-code-ext:
+	@ code --user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_EXTENSIONS_PATH) \
+	 $(ak__VS_CODE_ARGS) --list-extensions
+
+edit-code-extinstall:
+	@ $(foreach x,$(ak__VS_CODE_EXTENSIONS),code --user-data-dir $(ak__VS_CODE_PATH) \
+	 $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) --install-extension $x;)
+
+endif
 
 
-## ////////////////////////////////////////////////////////////////////////////////
-## //  CDR CODE SERVER  ///////////////////////////////////////////////////////////
-## ////////////////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
+# //  CDR CODE SERVER  ///////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
 
 ak__CODE_SERVER_HOST = $(or $(CODE_SERVER_HOST),0.0.0.0)
 ak__CODE_SERVER_PORT = $(or $(CODE_SERVER_PORT),8080)
 ak__CODE_SERVER_AUTH = $(or $(CODE_SEVER_AUTH),none)
-ak__CODE_SERVER_URL  = $(or $(CODE_SERVER_URL),https://github.com/cdr/code-server/releases/download/2.1692-vsc1.39.2/code-server2.1692-vsc1.39.2-linux-x86_64.tar.gz)
+ak__CODE_SERVER_URL  = $(or $(CODE_SERVER_URL),https://github.com/cdr/code-server/releases/download/3.4.1/code-server-3.4.1-linux-x86_64.tar.gz)
 ak__DOWNLOADS += ak__cdr-code-server
 ak__cdr-code-server: 
 ak__cdr_code_server_URL = $(ak__CODE_SERVER_URL)
@@ -327,14 +392,30 @@ ak__cdr_code_server_DIR = $(top_builddir)/conf/ide/code-server
 edit-code-server: ##@@ide start cdr vs code server installed in conf/code-server
 edit-code-server: ak__cdr-code-server
 	$(ak__cdr_code_server_DIR)/code-server --host $(ak__CODE_SERVER_HOST) --port $(ak__CODE_SERVER_PORT) --auth $(ak__CODE_SERVER_AUTH) \
-	--user-data-dir $(ak__VS_CODE_PATH) $(top_srcdir)
+	--user-data-dir $(ak__VS_CODE_PATH) $(ak__VS_CODE_EXTENSIONS_PATH) $(top_srcdir)
 
 
 
 
 
-print-env-: ##@@miscellaneous print env variable
+# /////////////////////////////////////////////////////////////////////////////
+# // RECONFIGURE  /////////////////////////////////////////////////////////////
+# /////////////////////////////////////////////////////////////////////////////
+
+.PHONY: reconfigure
+reconfigure: ##@miscellaneous re-run configure with last passed arguments
+	@ \
+	$(info \n\n -- Reconfiguring build directory: -----------") \
+	cd '$(abs_top_builddir)' && ./config.status --recheck
+
+
+shell: ##@miscellaneous start a $(SHELL) using make context
+shell:
+	$(SHELL)
+
+print-env-: ##@@miscellaneous print-env-% print env variable
 print-env-%:
 	@ $(if $($*),$(info $*="$($*)"),$(info $* not set)):;
+
 
 

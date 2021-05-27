@@ -19,17 +19,13 @@
 ## ////////////////////////////////////////////////////////////////////////// //
 
 
-################################################################################
-# Yocto download
-################################################################################
-
 if !YOCTO_DOCKERBUILD
 NODOCKERBUILD += yocto%
 endif
 
 if ENABLE_YOCTO
 yocto: ##@yocto download and prepare yocto poky build environment
-YOCTO_DIR ?= $(builddir)/yocto
+YOCTO_DIR ?= $(abs_top_builddir)/yocto
 
 DOWNLOADS += yocto
 yocto_DIR    := $(YOCTO_DIR)
@@ -38,7 +34,7 @@ yocto_BRANCH := $(YOCTO_GIT_BRANCH)
 
 YOCTO_BITBAKE_BINDIR = $(YOCTO_DIR)/bitbake/bin
 
-YOCTO_BUILD = $(YOCTO_DIR)/build
+YOCTO_BUILD = $(abs_builddir)/yocto-build
 YOCTO_PYBIN_PATH = $(YOCTO_BUILD)/python-bin
 
 $(YOCTO_PYBIN_PATH):
@@ -54,14 +50,45 @@ YOCTO_PY2_LINKS =  \
    $(YOCTO_PYBIN_PATH)/python \
    $(YOCTO_PYBIN_PATH)/python-config
 
-yocto-py2-link: ##@yocto build links for python2
-yocto-py2-link: |$(YOCTO_DIR) $(YOCTO_PY2_LINKS)
+ak__DIRECTORIES += $(YOCTO_BUILD)
 
-yocto-shell: ##@yocto enter oe-init-build-env
+yocto-py2-link: ##@@yocto build links for python2
+yocto-py2-link: | $(YOCTO_BUILD) $(YOCTO_PY2_LINKS)
+
+
+export abs_top_builddir abs_top_srcdir
+
+ak__DOCKER_TARGETS += yocto-%
+yocto-%: export BDIR = $(YOCTO_BUILD)
+# yocto-%: DOCKER_CONTAINER ?= yocto-builder
+# yocto-%: DOCKER_IMAGE     ?= crops/yocto:ubuntu-18.04-builder
+yocto-%: export LANG=en_US.UTF-8
+
+
+yocto-shell: ##@yocto enter shell
 yocto-shell: PATH := $(abs_top_builddir)/$(YOCTO_PYBIN_PATH):$(abs_top_builddir)/$(YOCTO_BITBAKE_BINDIR):$(PATH)
-yocto-shell: PS1 := \\u@\h:yocto \\W]\\$$
+yocto-shell: DOCKER_PS1 = \\u@\h:yocto \\W]\\$$
 yocto-shell: yocto-py2-link
-	@ cd $(YOCTO_DIR); source ./oe-init-build-env; \
-	  bash
+	@ cd $(YOCTO_DIR); . ./oe-init-build-env; bash;
+
+yocto-image-minimal: ##@yocto image minimal
+yocto-build-minimal: PATH := $(abs_top_builddir)/$(YOCTO_PYBIN_PATH):$(abs_top_builddir)/$(YOCTO_BITBAKE_BINDIR):$(PATH)
+yocto-image-minimal: yocto-py2-link
+	@ cd $(YOCTO_DIR); . ./oe-init-build-env; bitbake core-image-minimal;
+
+yocto-bash:
+	bash
+#bash --rcfile <(echo PS1="$(PS1) ")
+
+
+##
+## EXTERNAL TOOLCHAIN 
+##
+DOWNLOADS += meta-external-toolchain
+meta-external-toolchain: ##@@yocto external toolchain layer download
+meta_external_toolchain_URL = https://git.yoctoproject.org/git/meta-external-toolchain.git
+meta_external_toolchain_BRANCH = master
+meta_external_toolchain_DIR = yocto/meta-external-toolchain
+
 
 endif

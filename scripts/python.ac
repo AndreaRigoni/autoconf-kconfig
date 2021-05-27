@@ -1,0 +1,129 @@
+## ////////////////////////////////////////////////////////////////////////// //
+##
+## This file is part of the autoconf-bootstrap project.
+## Copyright 2018 Andrea Rigoni Garola <andrea.rigoni@igi.cnr.it>.
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+##
+## ////////////////////////////////////////////////////////////////////////// //
+
+
+# ////////////////////////////////////////////////////////////////////////////////
+# //  PYTHON  ////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
+
+
+AX_KCONFIG_VAR_WITH([PYTHON_VERSION],[The installed Python version to use, 
+for example '2.3'. This string will be appended to the Python interpreter canonical name.])
+
+AC_MSG_NOTICE([ ---- PYTHON ${PYTHON_VERSION} ---- ])
+
+# this is needed because we might use PYTHON_VERSION in the Makefile
+AC_SUBST([PYTHON_VERSION]) 
+
+# Those does not select the correct pytho version... but the most recent one
+# sse at https://www.gnu.org/software/automake/manual/html_node/Python.html
+#
+# AM_PATH_PYTHON([${PYTHON_VERSION}])
+# AM_PATH_PYTHON([${PYTHON_VERSION}],, [:])
+
+
+
+AX_KCONFIG_CHOICE([PYTHON_ENV_SYSTEM],
+  [PYTHON_ENV_SYSTEM_USER],["user"],
+  [PYTHON_ENV_SYSTEM_CONDA],["conda"],
+  [PYTHON_ENV_SYSTEM_VENV],["venv"])
+
+AC_SUBST([PYTHON_ENV_SYSTEM])
+
+AX_KCONFIG_VAR_WITH([PYTHON_CONDA_DIR],[conda dir])
+AC_SUBST([PYTHON_CONDA_DIR])
+
+AX_KCONFIG_VAR_WITH([PYTHON_CONDA_ENV],[conda env])
+AC_SUBST([PYTHON_CONDA_ENV])
+
+# activate selected conda env to correctly look for python version
+AM_COND_IF([PYTHON_ENV_SYSTEM_CONDA],[
+  eval "$(${PYTHON_CONDA_DIR}/bin/conda shell.bash hook)";
+  conda activate ${PYTHON_CONDA_ENV};
+])
+
+AC_PATH_PROG([PYTHON],[python[]${PYTHON_VERSION}])
+AM_CONDITIONAL([HAVE_PYTHON],[test -n "${ac_cv_path_PYTHON}"])
+AC_SUBST([PYTHON])
+
+# AC_PATH_PROG([PIP],[pip[]${PYTHON_VERSION}],[])
+# AM_CONDITIONAL([HAVE_PIP],[test -n "${ac_cv_path_PIP}"])
+AX_KCONFIG_VAR_WITH([PYTHON_GETPIP_URL],[python get-pip.py download url])
+AC_SUBST([PYTHON_GETPIP_URL])
+
+
+AX_KCONFIG_VAR_WITH([PYTHON_VENV_ACTIVATE_SCRIPT],[venv activate script])
+AC_SUBST([PYTHON_VENV_ACTIVATE_SCRIPT])
+
+
+
+## EMBED PYTHON IN C CODE
+
+# AX_PYTHON_DEVEL
+AX_KCONFIG_VAR_ENABLE([PYTHON_DEVEL],[enable python devel])
+AM_CONDITIONAL([PYTHON_DEVEL],[test x${PYTHON_DEVEL} = xyes])
+AM_COND_IF([PYTHON_DEVEL],[AX_PYTHON_DEVEL])
+
+##
+## conditional for src build
+## TODO: make this a m4 script
+## 
+## AS_VAR_SET([abs_srcdir],[$(cd ${srcdir}; pwd)])
+## AS_VAR_SET([abs_builddir],[$(cd ${builddir}; pwd)])
+## AM_CONDITIONAL([SRCDIR_BUILD],[test "x${abs_srcdir}" == "x${abs_builddir}"])
+
+
+
+
+# ////////////////////////////////////////////////////////////////////////////////
+# //  JUPYTER  ///////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////
+
+
+AX_KCONFIG_VAR_ENABLE([ENABLE_JUPYTER_NOTEBOOK],["Jupyter config file"])
+AC_CHECK_PROG([ENABLE_JUPYTER_NOTEBOOK],[jupyter-notebook],,[no])
+AM_CONDITIONAL([ENABLE_JUPYTER_NOTEBOOK],[test x"${ENABLE_JUPYTER_NOTEBOOK}" = x"yes"])
+
+
+AX_KCONFIG_VAR_WITH([JPNB_CONFIG],["Jupyter config file"])
+AC_SUBST([JPNB_CONFIG])
+
+AX_KCONFIG_VAR_WITH([JPNB_DIR],["Jupyter working directory"])
+AC_SUBST([JPNB_DIR])
+
+AX_KCONFIG_VAR_WITH([JPNB_PASSWD],["Jupyter password"])
+AC_SUBST([JPNB_PASSWD])
+
+AX_KCONFIG_VAR_WITH([JPNB_IP],["Jupyter server ip"])
+AC_SUBST([JPNB_IP])
+
+AX_KCONFIG_VAR_WITH([JPNB_PORT],["Jupyter server port"])
+AC_SUBST([JPNB_PORT])
+
+AX_KCONFIG_VAR_WITH([JPNB_BROWSER],["Jupyter custom browser command"])
+AC_SUBST([JPNB_BROWSER])
+
+
+# AX_KCONFIG_CHOICE([CODE_SERVER_AUTH],
+#   [CODE_SERVER_AUTH_NONE],["none"],
+#   [CODE_SERVER_AUTH_PASSWORD],["password"])
+# AC_SUBST([CODE_SERVER_AUTH])
+
+
