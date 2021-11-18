@@ -7,8 +7,19 @@
 SCRIPTNAME=$(basename "$0")
 SCRIPT_DIR=$(dirname "$0")
 
+# LOG generic
 log() {
  >&2 echo " |$_err $1"
+}
+
+# LOG INFO
+log_info() {
+ >&2 echo "[INFO] $1"
+}
+
+# LOG ERROR
+log_error() {
+ >&2 echo "[ERROR] $1"
 }
 
 print_help() {
@@ -25,12 +36,14 @@ Usage: $SCRIPTNAME [options] [commands]
 EOF
 }
 
+
+# assertion check
 assert () {                                               
   E_PARAM_ERR=98
   E_ASSERT_FAILED=99
 
-  if [ -z "$1" ]; then                
-    return $E_PARAM_ERR 
+  if [ -z "$1" ]; then
+    return $E_PARAM_ERR
   fi
 
   if [ ! $1 ]; then
@@ -74,7 +87,6 @@ while [[ "$1" == -* ]] ; do
 			;;
 	esac
 done
-
 if [ $# -lt 1 ] ; then
 	echo "Incorrect parameters. Use --help for usage instructions."
 	exit 1
@@ -83,7 +95,7 @@ fi
 # if no DOCKER_CONTAINER revert to normal shell 
 # (this is needed for shell command within make for example,
 #  but those command are not executed in container though )
-[ ${DOCKER_CONTAINER} ] || { echo "CMD=${CMD}"; ${SHELL:-/bin/sh} -c $@; exit; }
+[ ${DOCKER_CONTAINER} ] || { ${SHELL:-/bin/sh} -c $@; exit; }
 
 
 ## ////////////////////////////////////////////////////////////////////////////////
@@ -108,6 +120,7 @@ DOCKER_SHELL=${DOCKER_SHELL:-/bin/sh}
 
 
 # CONSTRUCTED VARIABLES
+# interactive console ( if we are running an interactive console set INT variable )
 [ -t 7 -o -t 0 ] && INT=-ti || unset INT
 user_entry=$(awk -F: "{if (\$1 == "${USER}") {print \$0} }" /etc/passwd)
 user_id=$(id -u)
@@ -156,7 +169,6 @@ read_config() {
 }
 
 
-
 # dk_test_status [cnt_name] [status]
 # status =  created, restarting, running, paused, exited
 dk_test_status() {
@@ -174,45 +186,45 @@ dk_get_status() {
 	$(dk_test_status $1 restarting) && _ans="restarting"
 	$(dk_test_status $1 paused) && _ans="paused"
 	$(dk_test_status $1 exited) && _ans="exited"
-  [ -n "$2" ] && eval $2="$_ans"
+  [ "$2" ] && eval $2="$_ans"
 }
 
 # dk_get_image_id [image] [ans]
 # return image id from name either in _ans or $2
 dk_get_image_id() {
   _ans=$(docker images -a | awk -v _img=$1 '{if ($1 ":" $2 == _img) {print $3}}' )
- [ -n "$2" ] && eval $2="$_ans"
+ [ $2 ] && eval $2="$_ans"
 }
 
 # dk_get_container_id [cnt_name] [ans]
 # return container id from name either in _ans or $2
 dk_get_container_id() {
   unset _ans
-  [ -n "$1" ] && _ans=$(docker ps -a -f name=$1 -q)
-  [ -n "$_ans" ] || _ans=$(docker ps -a -f id=$1 -q)
-	[ -n "$2" ] && eval $2="$_ans"
+  [ $1 ] && _ans=$(docker ps -a -f name=$1 -q) #|| { log_error "container argument missing"; exit 1; }
+  [ $_ans ] || _ans=$(docker ps -a -f id=$1 -q)
+  [ $2 ] && eval $2="$_ans"
 }
 
 # dk_get_container_image [cnt_name] [ans]
 # return container image
 dk_get_container_image() {
   _ans=$(docker inspect --format='{{.Config.Image}}' $1)
-	[ -n "$2" ] && eval $2="$_ans"
+	[ $2 ] && eval $2="$_ans"
 }
 
 # dk_image_exist [image]
 # test if image exists
 dk_image_exist() {
   _ans=$(docker images -a -q $1 )
-  [ -n "$_ans" ] && return 0 || return 1
+  [ $_ans ] && return 0 || return 1
 }
 
 # build image from URL (either local directory or web page content)
 # the image name can be a local name or any overlapping name that will 
 # overload the that name for the local repository 
 build() {
-	[ -n "${DOCKER_IMAGE}" ] || DOCKER_IMAGE="${DOCKER_CONTAINER}_build"
-	if [ -n "${DOCKER_DOCKERFILE}" ]; then
+	[ ${DOCKER_IMAGE} ] || DOCKER_IMAGE="${DOCKER_CONTAINER}_build"
+	if [ ${DOCKER_DOCKERFILE} ]; then
 	  DOCKER_BUILD_ARGS="${DOCKER_BUILD_ARGS} -f ${DOCKER_DOCKERFILE}"
 	fi
 	echo docker build ${DOCKER_BUILD_ARGS} -t ${DOCKER_IMAGE} ${DOCKER_URL}
@@ -222,7 +234,7 @@ build() {
 
 push() {	
 	dk_get_container_image ${DOCKER_CONTAINER}
-	if [ -n $_ans ]; then
+	if [ $_ans ]; then
 	  if [ ${DOCKER_REGISTRY} ]; then
 	    docker tag $_ans ${DOCKER_REGISTRY}/$_ans
 			docker push ${DOCKER_REGISTRY}/$_ans
@@ -242,7 +254,7 @@ execute()  {
   # xhost local:andrea > /dev/null
   log "Docker: Entering container ${DOCKER_CONTAINER} ";
   quoted_args="$(printf " %q" "$@")"
-  if [ -n "${MAKESHELL}" ]; then
+  if [ ${MAKESHELL} ]; then
     ${MAKESHELL} ${quoted_args};
   else
     docker exec ${INT} --user ${USER} ${DOCKER_CONTAINER} /bin/bash -l -c \
@@ -380,7 +392,7 @@ stop()  {
 # CLEAN
 clean() {
 	dk_get_container_id ${DOCKER_CONTAINER_ID}
-	if [ -n "${_ans}" ]; then
+	if [ ${_ans} ]; then
 	  stop
 	fi
 	file_name=${DOCKER_SCRIPTPATH}/${DOCKER_CONTAINER_PREFIX}.sh
@@ -414,20 +426,20 @@ shell() {
 ##    .##.....##.##.....##.##....##.##.....##..##..##...###.##......
 ##    .##.....##.##.....##..######..##.....##.####.##....##.########
 
-if [ -n ${MACHINE_NAME} ]; then
-  ## ENV
-  ## NEEDS: abs_top_builddir abs_top_srcdir
-  : ${abs_top_srcdir:? "error abs_top_srcdir not defined"}
-  : ${abs_top_builddir:? "error abs_top_builddir not defined"}
-  : ${DOCKER_MACHINE_SORAGE_PATH=${abs_top_builddir}/conf/.docker}
+# if [ -n ${MACHINE_NAME} ]; then
+#   ## ENV
+#   ## NEEDS: abs_top_builddir abs_top_srcdir
+#   : ${abs_top_srcdir:? "error abs_top_srcdir not defined"}
+#   : ${abs_top_builddir:? "error abs_top_builddir not defined"}
+#   : ${DOCKER_MACHINE_SORAGE_PATH=${abs_top_builddir}/conf/.docker}
 
-  clean_dir () {
-  	cd $1 && pwd
-  }
+#   clean_dir () {
+#   	cd $1 && pwd
+#   }
   
-  abs_top_srcdir=$(clean_dir ${abs_top_srcdir}; )
-  abs_top_builddir=$(clean_dir ${abs_top_builddir}; )
-fi
+#   abs_top_srcdir=$(clean_dir ${abs_top_srcdir}; )
+#   abs_top_builddir=$(clean_dir ${abs_top_builddir}; )
+# fi
 
 machine() {
 	: ${MACHINE_NAME:? "error no MACHINE_NAME defined"}
