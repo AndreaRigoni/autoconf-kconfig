@@ -110,12 +110,6 @@ menu  "General build options"
 	  Select a proper directory in which the VS code has been downloaded,
 	  or a target directory in which perform the download.
 
-  config IDE_CODE_DOWNLOAD_URL
-	string "VS Code local download URL"
-	default "https://go.microsoft.com/fwlink/?LinkID=620884"
-	depends on IDE_CODE_LOCAL
-	---help---
-	  If code install is not found in at the provided path, try to download is from this URL
 
 
   ## REMOTE IDE SUPPORT ##
