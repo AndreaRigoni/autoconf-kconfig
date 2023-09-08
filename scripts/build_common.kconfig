@@ -116,7 +116,7 @@ menu  "General build options"
 
   config REMOTE_IDESUPPORT
   bool "Remote development ide"
-  default y
+  default n
   ---help---
 	Select and use a preconfigured project with a remote ide
 	for now only available as code-server service
@@ -147,26 +147,22 @@ menu  "General build options"
   endchoice
 
 
+#   ## CUSTOM MAKE BUILD (NOT WORKING YET) ##
 
+#   config BUILD_CUSTOM_GNUMAKE
+# 	bool "Build custom make binary"
+# 	---help---
+# 	  Build a custom make executable to have a uptodate version
 
+#   config BUILD_CUSTOM_GNUMAKE_URL
+# 	string "Custom GNU Make URL"
+# 	depends on BUILD_CUSTOM_GNUMAKE
+# 	default "https://git.savannah.gnu.org/git/make.git"
 
-
-  ## CUSTOM MAKE BUILD (NOT WORKING YET) ##
-
-  config BUILD_CUSTOM_GNUMAKE
-	bool "Build custom make binary"
-	---help---
-	  Build a custom make executable to have a uptodate version
-
-  config BUILD_CUSTOM_GNUMAKE_URL
-	string "Custom GNU Make URL"
-	depends on BUILD_CUSTOM_GNUMAKE
-	default "https://git.savannah.gnu.org/git/make.git"
-
-  config BUILD_CUSTOM_GNUMAKE_DIR
-	string "Build Custom GNU Make build directory"
-	depends on BUILD_CUSTOM_GNUMAKE
-	default "${builddir}/conf/GnuMake"
+#   config BUILD_CUSTOM_GNUMAKE_DIR
+# 	string "Build Custom GNU Make build directory"
+# 	depends on BUILD_CUSTOM_GNUMAKE
+# 	default "${builddir}/conf/GnuMake"
 
 
 endmenu

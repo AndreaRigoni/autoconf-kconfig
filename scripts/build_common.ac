@@ -121,19 +121,16 @@ AX_KCONFIG_VAR_WITH([IDE_CODE_LOCAL_DIR],[VS code local dir])
 AC_SUBST([IDE_CODE_LOCAL_DIR])
 
 
-
-
 ## CUSTOM GNUMAKE #
-
-AX_KCONFIG_VAR_ENABLE([BUILD_CUSTOM_GNUMAKE],[Build custom make binary])
-AM_CONDITIONAL([BUILD_CUSTOM_GNUMAKE],[test x"${BUILD_CUSTOM_GNUMAKE}" = x"yes"])
-
-AX_KCONFIG_VAR_WITH([BUILD_CUSTOM_GNUMAKE_URL],[Build custom gnumake url])
-AC_SUBST([BUILD_CUSTOM_GNUMAKE_URL])
-
-AX_KCONFIG_VAR_WITH([BUILD_CUSTOM_GNUMAKE_DIR],[Build custom gnumake directory])
-AC_SUBST([BUILD_CUSTOM_GNUMAKE_DIR])
-
+#
+# AX_KCONFIG_VAR_ENABLE([BUILD_CUSTOM_GNUMAKE],[Build custom make binary])
+# AM_CONDITIONAL([BUILD_CUSTOM_GNUMAKE],[test x"${BUILD_CUSTOM_GNUMAKE}" = x"yes"])
+#
+# AX_KCONFIG_VAR_WITH([BUILD_CUSTOM_GNUMAKE_URL],[Build custom gnumake url])
+# AC_SUBST([BUILD_CUSTOM_GNUMAKE_URL])
+# 
+# AX_KCONFIG_VAR_WITH([BUILD_CUSTOM_GNUMAKE_DIR],[Build custom gnumake directory])
+# AC_SUBST([BUILD_CUSTOM_GNUMAKE_DIR])
 
 
 # ////////////////////////////////////////////////////////////////////////////////
