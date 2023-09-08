@@ -1,2 +1,2 @@
-SUBDIRS = kconfig
+SUBDIRS = kconfig tests/dk
 CLEANFILES = compile.log

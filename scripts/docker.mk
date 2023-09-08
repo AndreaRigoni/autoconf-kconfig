@@ -51,18 +51,6 @@ export top_builddir
 export abs_top_srcdir
 export abs_top_builddir
 
-export DOCKER_CONTAINER
-export DOCKER_IMAGE
-export DOCKER_URL
-export DOCKER_DOCKERFILE
-export DOCKER_SHARES
-export DOCKER_MOUNTS
-export DOCKER_PORTS
-export DOCKER_NETWORKS
-export DOCKER_DEVICES
-export DOCKER_SHELL = /bin/sh
-export DOCKER_REGISTRY
-export DOCKER_ENTRYPOINT
 
 ak__DOCKER_TARGETS = $(DOCKER_TARGETS)
 
@@ -78,6 +66,22 @@ NODOCKERBUILD += ${ak__DOCKER_TARGETS} #this is needed for build with docker
 # DSHELL_ARGS = -v
 
 if ENABLE_DOCKER_TARGETS
+
+$(ak__DOCKER_TARGETS): export DOCKER_CONTAINER
+$(ak__DOCKER_TARGETS): export DOCKER_IMAGE
+$(ak__DOCKER_TARGETS): export DOCKER_URL
+$(ak__DOCKER_TARGETS): export DOCKER_DOCKERFILE
+$(ak__DOCKER_TARGETS): export DOCKER_SHARES
+$(ak__DOCKER_TARGETS): export DOCKER_MOUNTS
+$(ak__DOCKER_TARGETS): export DOCKER_PORTS
+$(ak__DOCKER_TARGETS): export DOCKER_NETWORKS
+$(ak__DOCKER_TARGETS): export DOCKER_DEVICES
+$(ak__DOCKER_TARGETS): export DOCKER_SHELL = /bin/sh
+$(ak__DOCKER_TARGETS): export DOCKER_REGISTRY
+$(ak__DOCKER_TARGETS): export DOCKER_ENTRYPOINT
+
+
+
 $(ak__DOCKER_TARGETS): override SHELL = $(DSHELL)
 $(NO_DOCKER_TARGETS):  override SHELL = /bin/sh
 $(NO_DOCKER_TARGETS):  override HAVE_DOCKER = no

@@ -65,6 +65,7 @@ AC_CONFIG_COMMANDS([compile-kconfig],
 AC_CONFIG_FILES( 
                  Makefile
                  kconfig/Makefile
+                 tests/dk/Makefile
                )
 AC_OUTPUT
 

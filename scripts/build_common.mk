@@ -189,23 +189,23 @@ ak__DIST_COMMON = \
 ## //  CUSTOM MAKE  ///////////////////////////////////////////////////////////////
 ## ////////////////////////////////////////////////////////////////////////////////
 
-if BUILD_CUSTOM_GNUMAKE
+# if BUILD_CUSTOM_GNUMAKE
 
-ak__DOWNLOADS += gnu-make
-gnu_make_URL   = http://ftp.gnu.org/gnu/make/make-4.1.tar.gz
-gnu_make_DIR   = $(BUILD_CUSTOM_GNUMAKE_DIR)
+# ak__DOWNLOADS += gnu-make
+# gnu_make_URL   = http://ftp.gnu.org/gnu/make/make-4.1.tar.gz
+# gnu_make_DIR   = $(BUILD_CUSTOM_GNUMAKE_DIR)
 
-$(BUILD_CUSTOM_GNUMAKE_DIR)/Makefile: | gnu-make
-	@ cd $(dir $@) && ./configure
+# $(BUILD_CUSTOM_GNUMAKE_DIR)/Makefile: | gnu-make
+# 	@ cd $(dir $@) && ./configure
 
-$(BUILD_CUSTOM_GNUMAKE_DIR)/make: MAKE = make
-$(BUILD_CUSTOM_GNUMAKE_DIR)/make: $(BUILD_CUSTOM_GNUMAKE_DIR)/Makefile
-	@ make -C $(dir $@) all
+# $(BUILD_CUSTOM_GNUMAKE_DIR)/make: MAKE = make
+# $(BUILD_CUSTOM_GNUMAKE_DIR)/make: $(BUILD_CUSTOM_GNUMAKE_DIR)/Makefile
+# 	@ make -C $(dir $@) all
 
-_    = $(BUILD_CUSTOM_GNUMAKE_DIR)/make
-MAKE = $(BUILD_CUSTOM_GNUMAKE_DIR)/make
+# _    = $(BUILD_CUSTOM_GNUMAKE_DIR)/make
+# MAKE = $(BUILD_CUSTOM_GNUMAKE_DIR)/make
 
-endif
+# endif
 
 
 ## ////////////////////////////////////////////////////////////////////////////////
@@ -286,10 +286,6 @@ edit-qtcreator: | $(ak__QTCREATOR_SETTINGS_PATH)
 	@ qtcreator -settingspath $(ak__QTCREATOR_SETTINGS_PATH) \
 					-theme $(QTCREATOR_THEME) -color $(QTCREATOR_COLOR)
 
-
-# ////////////////////////////////////////////////////////////////////////////////
-# //  QWS  ///////////////////////////////////////////////////////////////////////
-# ////////////////////////////////////////////////////////////////////////////////
 ##
 ## QWS are the qtcreator work spaces files.. they needs to be compiled with the
 ## absolute path so then a template is filled using the path discovered by
@@ -303,6 +299,8 @@ edit-qtcreator_qws_files: QWS_FILES = $(QWS_FILES_TEMPLATES:.qws.template=.qws)
 edit-qtcreator_qws_files: abs_top_srcdir := $(abs_top_srcdir)
 edit-qtcreator_qws_files: $(QWS_FILES)
 edit_DEPS += edit-qtcreator_qws_files
+
+
 
 # ////////////////////////////////////////////////////////////////////////////////
 # //  VS CODE  ///////////////////////////////////////////////////////////////////
@@ -331,14 +329,14 @@ if IDE_CODE_LOCAL ## IDE custom folder
 edit-code: ##@@ide start visual studio code editor
 edit-code: ##@@vs_code start visual studio code editor
 edit-code-ext: ##@@vs_code list visual studio extensions
-edit-code-extinstall: ##@@vs_code install all visual studio extensions in $IDE_CODE_EXTENSIONS
-ak__DIRECTORIES += $(IDE_CODE_LOCAL_DIR)
-$(IDE_CODE_LOCAL_DIR)/bin/code: | $(DOWNLOAD_DIR) $(IDE_CODE_LOCAL_DIR) 
-	- curl -SL $(IDE_CODE_DOWNLOAD_URL) > $(DOWNLOAD_DIR)/vs_code_local.tar.gz; \
-	$(call dl__download_tar,$(DOWNLOAD_DIR)/vs_code_local.tar.gz,$(IDE_CODE_LOCAL_DIR)); \
-	[ -f $@          ] && patch $@ < $(kconfig_dir)/patch/vs_code_libxcb.patch; \
-	[ -f $@-insiders ] && patch $@-insiders < $(kconfig_dir)/patch/vs_code_insiders_libxcb.patch; \
-	[ -f $@-insiders ] && ln -s $@-insiders $@; 
+edit-code-extinstall: ##@@vs_code install all visual studio extensions in $VS_CODE_EXTENSIONS
+# ak__DIRECTORIES += $(IDE_CODE_LOCAL_DIR)
+# $(IDE_CODE_LOCAL_DIR)/bin/code: | $(DOWNLOAD_DIR) $(IDE_CODE_LOCAL_DIR) 
+# 	- curl -SL $(IDE_CODE_DOWNLOAD_URL) > $(DOWNLOAD_DIR)/vs_code_local.tar.gz; \
+# 	$(call dl__download_tar,$(DOWNLOAD_DIR)/vs_code_local.tar.gz,$(IDE_CODE_LOCAL_DIR)); \
+# 	[ -f $@          ] && patch $@ < $(kconfig_dir)/patch/vs_code_libxcb.patch; \
+# 	[ -f $@-insiders ] && patch $@-insiders < $(kconfig_dir)/patch/vs_code_insiders_libxcb.patch; \
+# 	[ -f $@-insiders ] && ln -s $@-insiders $@; 
 
 edit-code: $(IDE_CODE_LOCAL_DIR)/bin/code
 	$(IDE_CODE_LOCAL_DIR)/bin/code \
@@ -359,7 +357,7 @@ else ## IDE from system
 edit-code: ##@@ide start visual studio code editor
 edit-code: ##@@vs_code start visual studio code editor
 edit-code-ext: ##@@vs_code list visual studio extensions
-edit-code-extinstall: ##@@vs_code install all visual studio extensions in $IDE_CODE_EXTENSIONS
+edit-code-extinstall: ##@@vs_code install all visual studio extensions in $VS_CODE_EXTENSIONS
 edit-code: | $(ak__VS_CODE_PATH)
 	@ code -n $(ak__VS_CODE_PROJECT_PATH)  --user-data-dir $(ak__VS_CODE_PATH) \
 	 $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_EXTENSIONS_PATH) $(ak__VS_CODE_ARGS) \
@@ -383,7 +381,7 @@ endif
 ak__CODE_SERVER_HOST = $(or $(CODE_SERVER_HOST),0.0.0.0)
 ak__CODE_SERVER_PORT = $(or $(CODE_SERVER_PORT),8080)
 ak__CODE_SERVER_AUTH = $(or $(CODE_SEVER_AUTH),none)
-ak__CODE_SERVER_URL  = $(or $(CODE_SERVER_URL),https://github.com/cdr/code-server/releases/download/3.4.1/code-server-3.4.1-linux-x86_64.tar.gz)
+ak__CODE_SERVER_URL  = $(or $(CODE_SERVER_URL),https://github.com/coder/code-server/releases/download/v4.14.1/code-server-4.14.1-linux-amd64.tar.gz)
 ak__DOWNLOADS += ak__cdr-code-server
 ak__cdr-code-server: 
 ak__cdr_code_server_URL = $(ak__CODE_SERVER_URL)
