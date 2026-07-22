@@ -97,6 +97,12 @@ define dl__download_generic
  $(LN_S) $$_f $2;
 endef
 
+define dl__download_file
+ $(info "Downloading file: $1") \
+ $(MKDIR_P) $(dir $2); \
+ test -f $2 || curl -SL $1 > $2;
+endef
+
 
 dl__tar_ext = %.tar %.tar.gz %.tar.xz %.tar.bz %.tar.bz2
 dl__git_ext = git://% %.git
@@ -120,9 +126,11 @@ download: FNAME   = $(subst -,_,$(subst ' ',_,$(subst .,_,$(NAME))))
 download: URL     = $(or $($(FNAME)_URL),$(DOWNLOAD_URL))
 download: DIR     = $(or $($(FNAME)_DIR),$(NAME))
 download: BRANCH  = $(or $($(FNAME)_BRANCH),$(BRANCH))
+download: FORCE_GENERIC = $(filter %$(NAME),$($(FNAME)_DIR))
 download: $(or $($(FNAME)_DEPS), $(DOWNLOAD_DEPS))
 	@ $(foreach x,$(URL), $(info DOWNLOAD_DIR = $(DOWNLOAD_DIR))\
 		$(info Download: $x to $(DIR)) \
+		$(if $(FORCE_GENERIC),$(call dl__download_file,$x,$(DIR)), \
 		$(if $(filter $(dl__tar_ext),$x),$(call dl__download_tar,$x,$(DIR)), \
 		$(if $(filter $(dl__git_ext),$x),$(call dl__download_git,$x,$(DIR),$(BRANCH)), \
 		$(call dl__download_generic,$x,$(DIR)) ) ) \
