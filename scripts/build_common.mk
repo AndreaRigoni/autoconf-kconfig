@@ -31,8 +31,8 @@ AM_DEFAULT_VERBOSITY = $(VERBOSE_LEVEL)
 
 # VERBOSITY VARIABLE that is usable in Makefile if clause
 # See Automake AM_V_P for comparison in bash if clauses
-AK_V_IF    = $(ak__v_IF_$(V))
-ak__v_IF_  = $(ak__v_IF_$(AM_DEFAULT_VERBOSITY))
+AK_V_IF    := $(ak__v_IF_$(V))
+ak__v_IF_  := $(ak__v_IF_$(AM_DEFAULT_VERBOSITY))
 ak__v_IF_0 = mark 
 ak__v_IF_1 =
 
